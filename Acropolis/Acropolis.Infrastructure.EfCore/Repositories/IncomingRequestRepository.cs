@@ -1,4 +1,5 @@
-﻿using Acropolis.Domain.Messenger;
+﻿using Acropolis.Domain.Exceptions;
+using Acropolis.Domain.Messenger;
 using Acropolis.Domain.Repositories;
 using Acropolis.Infrastructure.EfCore.Messenger;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +21,16 @@ internal class IncomingRequestRepository : IIncomingRequestRepostiory
     {
         using var context = CreateDbContext();
         context.Add(request);
+        await context.SaveChangesAsync();
+    }
+
+    public async Task MarkAsProcessed(Guid id)
+    {
+        using var context = CreateDbContext();
+        var request = await context.IncomingRequests.FindAsync(id) 
+            ?? throw new NotFoundException(typeof(IncomingRequest).Name, id.ToString());
+
+        request.MarkAsProcessed(DateTimeOffset.UtcNow);
         await context.SaveChangesAsync();
     }
 }

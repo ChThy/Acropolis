@@ -1,5 +1,4 @@
-﻿using Acropolis.Application.Events;
-using Acropolis.Domain.Messenger;
+﻿using Acropolis.Domain.Messenger;
 using Acropolis.Domain.Repositories;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -71,7 +70,7 @@ public sealed class MessageReceiver : BackgroundService
 
     private async Task PublishEvent(IncomingRequest incomingRequest, Update update, CancellationToken cancellationToken)
     {
-        var @event = new RequestReceived(
+        var @event = new Application.Events.RequestReceived(
             incomingRequest.Id,
             incomingRequest.User.ExternalId,
             incomingRequest.User.Name,

@@ -5,4 +5,4 @@ public record RequestReceived(Guid Id,
     string UserName,
     string Source,
     DateTimeOffset Timestamp,
-    Request Request);
+    Request Request) : Message;
