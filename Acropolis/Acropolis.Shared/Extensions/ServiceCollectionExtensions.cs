@@ -1,7 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Acropolis.Infrastructure.Extensions;
+namespace Acropolis.Shared.Extensions;
+
 public static class ServiceCollectionExtensions
 {
     public static IServiceCollection RegisterOptions<TOptions>(this IServiceCollection services, IConfiguration configuration, string name)

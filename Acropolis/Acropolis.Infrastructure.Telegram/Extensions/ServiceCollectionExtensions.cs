@@ -1,9 +1,10 @@
-﻿using Acropolis.Infrastructure.Extensions;
+﻿using Acropolis.Shared.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot;
 
 namespace Acropolis.Infrastructure.Telegram.Extensions;
+
 public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddTelegramMessenger(this IServiceCollection services, IConfiguration configuration)

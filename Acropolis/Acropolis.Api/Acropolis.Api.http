@@ -1,0 +1,10 @@
+﻿@Acropolis.Api_HostAddress = https://localhost:7003
+
+GET {{Acropolis.Api_HostAddress}}/youtube-download?url=https://www.youtube.com/watch?v=1zEIuTPho34&list=RDhEdmzn41tTU&index=28&ab_channel=Simon
+
+###
+
+POST {{Acropolis.Api_HostAddress}}/send-message?message=hello
+
+
+###

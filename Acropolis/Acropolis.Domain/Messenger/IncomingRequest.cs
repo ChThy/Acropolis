@@ -9,6 +9,6 @@ public record IncomingRequest
     public DateTimeOffset? ProcessedOn { get; init; }
     public string RawContent { get; init; } = null!;
 
-    public static IncomingRequest Create(User user, string source, string rawContent)
-        => new() { User = user, Source = source, RawContent = rawContent };
+    public static IncomingRequest Create(Guid id, DateTimeOffset timestamp, User user, string source, string rawContent)
+        => new() { Id = id, Timestamp = timestamp, User = user, Source = source, RawContent = rawContent };
 }

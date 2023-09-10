@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Acropolis.Infrastructure.EfCore.Messenger.Configurations;
+
 public sealed class IncomingRequestConfiguration : IEntityTypeConfiguration<IncomingRequest>
 {
     public void Configure(EntityTypeBuilder<IncomingRequest> builder)

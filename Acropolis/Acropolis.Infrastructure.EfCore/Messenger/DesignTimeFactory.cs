@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Design;
 
 namespace Acropolis.Infrastructure.EfCore.Messenger;
+
 internal class DesignTimeFactory : IDesignTimeDbContextFactory<MessengerDbContext>
 {
     public MessengerDbContext CreateDbContext(string[] args)

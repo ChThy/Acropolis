@@ -1,7 +1,13 @@
 
 using Acropolis.Api.HostedServices;
+using Acropolis.Application;
+using Acropolis.Application.Extensions;
+using Acropolis.Application.Mediator;
+using Acropolis.Application.Messenger;
+using Acropolis.Application.YoutubeDownloader;
 using Acropolis.Infrastructure.EfCore.Extensions;
 using Acropolis.Infrastructure.Telegram.Extensions;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Acropolis.Api;
 
@@ -14,6 +20,8 @@ public class Program
 
         builder.Services.AddPersistence(builder.Configuration);
         builder.Services.AddTelegramMessenger(builder.Configuration);
+
+        builder.Services.AddApplicationServices(builder.Configuration);
 
         builder.Services.AddAuthorization();
 
@@ -29,6 +37,17 @@ public class Program
         app.UseHttpsRedirection();
 
         app.UseAuthorization();
+
+        app.MapGet("youtube-download", async ([FromServices] IMediator mediator, string url) =>
+        {
+            var command = new DownloadYoutubeVideo(url);
+            var result = await mediator.Send(command);
+        });
+
+        app.MapPost("send-message", async ([FromServices] IMediator mediator, string message, string target) =>
+        {
+            await mediator.Send(new SendMessage(message, target));
+        });
 
         app.Run();
     }

@@ -3,17 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34004.107
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acropolis.Api", "..\Acropolis\Acropolis.Api\Acropolis.Api.csproj", "{F9B55897-0209-4DDA-9497-326EA62B4EC0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acropolis.Api", "Acropolis.Api\Acropolis.Api.csproj", "{F9B55897-0209-4DDA-9497-326EA62B4EC0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acropolis.Infrastructure", "..\Acropolis\Acropolis.Infrastructure\Acropolis.Infrastructure.csproj", "{40D89123-5838-4104-88EC-D5852FA60191}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acropolis.Infrastructure", "Acropolis.Infrastructure\Acropolis.Infrastructure.csproj", "{40D89123-5838-4104-88EC-D5852FA60191}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acropolis.Domain", "..\Acropolis\Acropolis.Domain\Acropolis.Domain.csproj", "{985A8780-1598-46CB-9D85-B93F1256B1A0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acropolis.Domain", "Acropolis.Domain\Acropolis.Domain.csproj", "{985A8780-1598-46CB-9D85-B93F1256B1A0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acropolis.Infrastructure.Telegram", "..\Acropolis\Acropolis.Infrastructure.Telegram\Acropolis.Infrastructure.Telegram.csproj", "{B40F5045-764D-475A-8079-7098679490E1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acropolis.Infrastructure.Telegram", "Acropolis.Infrastructure.Telegram\Acropolis.Infrastructure.Telegram.csproj", "{B40F5045-764D-475A-8079-7098679490E1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acropolis.Application", "..\Acropolis\Acropolis.Application\Acropolis.Application.csproj", "{D3C53E7E-5F09-420A-8519-D8152759AA03}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acropolis.Application", "Acropolis.Application\Acropolis.Application.csproj", "{D3C53E7E-5F09-420A-8519-D8152759AA03}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acropolis.Infrastructure.EfCore", "..\Acropolis\Acropolis.Infrastructure.EfCore\Acropolis.Infrastructure.EfCore.csproj", "{7B2E3930-9D55-498F-BD50-9232578EE6BA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acropolis.Infrastructure.EfCore", "Acropolis.Infrastructure.EfCore\Acropolis.Infrastructure.EfCore.csproj", "{7B2E3930-9D55-498F-BD50-9232578EE6BA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acropolis.Shared", "Acropolis.Shared\Acropolis.Shared.csproj", "{82974701-3305-4B95-B58F-7D82DD8A4C7E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{7B2E3930-9D55-498F-BD50-9232578EE6BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7B2E3930-9D55-498F-BD50-9232578EE6BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7B2E3930-9D55-498F-BD50-9232578EE6BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82974701-3305-4B95-B58F-7D82DD8A4C7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82974701-3305-4B95-B58F-7D82DD8A4C7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82974701-3305-4B95-B58F-7D82DD8A4C7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82974701-3305-4B95-B58F-7D82DD8A4C7E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
