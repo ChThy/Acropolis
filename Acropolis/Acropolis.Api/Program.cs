@@ -37,18 +37,7 @@ public class Program
         app.UseHttpsRedirection();
 
         app.UseAuthorization();
-
-        app.MapGet("youtube-download", async ([FromServices] IMediator mediator, string url) =>
-        {
-            var command = new DownloadYoutubeVideo(url);
-            await mediator.Send(command);
-        });
-
-        app.MapPost("send-message", async ([FromServices] IMediator mediator, string message, string target) =>
-        {
-            await mediator.Send(new SendMessage(message, target));
-        });
-
+                
         app.Run();
     }
 }

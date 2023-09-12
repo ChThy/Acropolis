@@ -16,7 +16,7 @@ public static class ServiceCollectionExtensions
             options.UseSqlite(configuration.GetConnectionString("MessengerDatabase"));
         });
 
-        services.AddSingleton<IIncomingRequestRepostiory, IncomingRequestRepository>();
+        services.AddSingleton<IIncomingRequestRepostory, IncomingRequestRepository>();
 
         return services;
     }

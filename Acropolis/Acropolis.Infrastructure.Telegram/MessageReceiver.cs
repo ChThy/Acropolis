@@ -15,7 +15,7 @@ namespace Acropolis.Infrastructure.Telegram;
 public sealed class MessageReceiver : BackgroundService
 {
     private readonly TelegramBotClient TelegramClient;
-    private readonly IIncomingRequestRepostiory repostiory;
+    private readonly IIncomingRequestRepostory repostiory;
     private readonly IMessagePublisher publisher;
     private readonly TelegramOptions options;
     private readonly ILogger<MessageReceiver> logger;
@@ -32,7 +32,7 @@ public sealed class MessageReceiver : BackgroundService
 
     public MessageReceiver(
         TelegramBotClient telegramClient,
-        IIncomingRequestRepostiory repostiory,
+        IIncomingRequestRepostory repostiory,
         IMessagePublisher publisher,
         IOptions<TelegramOptions> options,
         ILogger<MessageReceiver> logger)

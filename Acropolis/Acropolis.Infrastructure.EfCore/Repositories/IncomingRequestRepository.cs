@@ -3,10 +3,11 @@ using Acropolis.Domain.Messenger;
 using Acropolis.Domain.Repositories;
 using Acropolis.Infrastructure.EfCore.Messenger;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel;
 
 namespace Acropolis.Infrastructure.EfCore.Repositories;
 
-internal class IncomingRequestRepository : IIncomingRequestRepostiory
+internal class IncomingRequestRepository : IIncomingRequestRepostory
 {
     private readonly IDbContextFactory<MessengerDbContext> dbContextFactory;
 

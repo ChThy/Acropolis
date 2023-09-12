@@ -2,7 +2,7 @@
 
 namespace Acropolis.Domain.Repositories;
 
-public interface IIncomingRequestRepostiory
+public interface IIncomingRequestRepostory
 {
     Task Add(IncomingRequest request);
     Task MarkAsProcessed(Guid id);

@@ -14,11 +14,9 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.RegisterOptions<YoutubeSettings>(configuration, YoutubeSettings.Name);
-
-        services.AddTransient<IMediator, Mediator.Mediator>();
-        services.AddCommandHandlers();
-
-        services.AddMessageBus();
+        
+        services.AddMediator();
+        services.AddInMemoryMessageBus();
 
         services.AddScoped<IRequestCommandTranslator, YoutubeRequestTranslator>();
         services.AddHttpClient<IYoutubeService, YoutubeService>((sp, client) =>
@@ -29,13 +27,20 @@ public static class ServiceCollectionExtensions
 
         return services;
     }
-
-    private static IServiceCollection AddMessageBus(this IServiceCollection services)
+        
+    private static IServiceCollection AddInMemoryMessageBus(this IServiceCollection services)
     {
         services.AddSingleton<InMemoryMessageBus>();
         services.AddSingleton<IMessagePublisher, InMemoryMessageBus>(sp => sp.GetRequiredService<InMemoryMessageBus>());
         services.AddSingleton<IMessageSubscriber, InMemoryMessageBus>(sp => sp.GetRequiredService<InMemoryMessageBus>());
 
+        return services;
+    }
+
+    private static IServiceCollection AddMediator(this IServiceCollection services)
+    {
+        services.AddTransient<IMediator, Mediator.Mediator>();
+        services.AddCommandHandlers();
         return services;
     }
 
