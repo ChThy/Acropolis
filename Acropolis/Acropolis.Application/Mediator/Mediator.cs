@@ -13,8 +13,44 @@ public class Mediator : IMediator
         this.serviceProvider = serviceProvider;
     }
 
+    public async ValueTask<object?> Send(object command, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(command, nameof(command));
+
+        var handlerWrapper = commandHandlerWrappers.GetOrAdd(command.GetType(), static commandType =>
+        {
+            Type handlerWrapperType;
+
+            var commandInterfaceType = commandType.GetInterfaces().FirstOrDefault(e => e ==  typeof(ICommand));
+            if (commandInterfaceType is not null) 
+            {
+                handlerWrapperType = typeof(CommandHandlerWrapper<>).MakeGenericType(commandType);
+            }
+            else
+            {
+                commandInterfaceType = commandType.GetInterfaces().FirstOrDefault(e => e.IsGenericType && e.GetGenericTypeDefinition() == typeof(ICommand<>));
+                if (commandInterfaceType is null ) 
+                {
+                    throw new InvalidOperationException($"Could not create command handler wrapper for {commandType}");
+                }
+
+                var responseType = commandInterfaceType.GetGenericArguments()[0];
+                handlerWrapperType = typeof(ResultCommandHandlerWrapper<,>).MakeGenericType(commandType, responseType);
+
+            }
+
+            var handlerWrapper = Activator.CreateInstance(handlerWrapperType) as IHandlerWrapper 
+                ?? throw new InvalidOperationException($"Could not create command handler wrapper for {commandType}");
+            return handlerWrapper;
+
+        });
+        return await handlerWrapper.Handle(serviceProvider, command, cancellationToken);
+    }
+
     public async ValueTask Send(ICommand command, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(command, nameof(command));
+
         var handlerWrapper = (CommandHandlerWrapper)commandHandlerWrappers.GetOrAdd(command.GetType(), static commandType =>
         {
             var handlerWrapperType = typeof(CommandHandlerWrapper<>).MakeGenericType(commandType);
@@ -27,6 +63,8 @@ public class Mediator : IMediator
 
     public async ValueTask<TResult> Send<TResult>(ICommand<TResult> command, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(command, nameof(command));
+
         var handlerWrapper = (ResultCommandHandlerWrapper<TResult>)commandHandlerWrappers.GetOrAdd(command.GetType(), static commandType =>
         {
             var handlerWrapperType = typeof(ResultCommandHandlerWrapper<,>).MakeGenericType(commandType, typeof(TResult));
@@ -35,7 +73,6 @@ public class Mediator : IMediator
             return handlerWrapper;
         });
 
-        var result = await handlerWrapper.Handle(serviceProvider, command, cancellationToken);
-        return result;
-    }
+        return await handlerWrapper.Handle(serviceProvider, command, cancellationToken);
+    }    
 }

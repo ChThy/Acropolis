@@ -2,12 +2,19 @@
 
 namespace Acropolis.Application.YoutubeDownloader;
 
-public record DownloadYoutubeVideo(string Url) : ICommand<bool>;
+public record DownloadYoutubeVideo(string Url) : ICommand;
 
-public class DownloadYoutubeVideoHandler : ICommandHandler<DownloadYoutubeVideo, bool>
+public class DownloadYoutubeVideoHandler : ICommandHandler<DownloadYoutubeVideo>
 {
-    public ValueTask<bool> Handle(DownloadYoutubeVideo command, CancellationToken cancellationToken = default)
+    private readonly IYoutubeService youtubeService;
+
+    public DownloadYoutubeVideoHandler(IYoutubeService youtubeService)
     {
-        return ValueTask.FromResult(true);
+        this.youtubeService = youtubeService;
+    }
+
+    public async ValueTask Handle(DownloadYoutubeVideo command, CancellationToken cancellationToken = default)
+    {
+        await youtubeService.Download(command.Url);
     }
 }

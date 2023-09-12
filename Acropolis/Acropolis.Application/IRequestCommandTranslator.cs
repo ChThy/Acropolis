@@ -6,5 +6,5 @@ public interface IRequestCommandTranslator
 {
     bool CanHandle(string request, Dictionary<string, string>? param = null);
 
-    ICommandBase Command(string request, Dictionary<string, string>? param = null);
+    ICommandBase CreateCommand(string request, Dictionary<string, string>? param = null);
 }

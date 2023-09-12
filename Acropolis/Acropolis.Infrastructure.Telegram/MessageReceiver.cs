@@ -1,4 +1,5 @@
-﻿using Acropolis.Domain.Messenger;
+﻿using Acropolis.Application.Events.Infrastructure;
+using Acropolis.Domain.Messenger;
 using Acropolis.Domain.Repositories;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -15,6 +16,7 @@ public sealed class MessageReceiver : BackgroundService
 {
     private readonly TelegramBotClient TelegramClient;
     private readonly IIncomingRequestRepostiory repostiory;
+    private readonly IMessagePublisher publisher;
     private readonly TelegramOptions options;
     private readonly ILogger<MessageReceiver> logger;
 
@@ -29,13 +31,15 @@ public sealed class MessageReceiver : BackgroundService
     };
 
     public MessageReceiver(
-        TelegramBotClient client,
+        TelegramBotClient telegramClient,
         IIncomingRequestRepostiory repostiory,
+        IMessagePublisher publisher,
         IOptions<TelegramOptions> options,
         ILogger<MessageReceiver> logger)
     {
-        this.TelegramClient = client;
+        this.TelegramClient = telegramClient;
         this.repostiory = repostiory;
+        this.publisher = publisher;
         this.options = options.Value;
         this.logger = logger;
     }
@@ -78,7 +82,7 @@ public sealed class MessageReceiver : BackgroundService
             incomingRequest.Timestamp,
             new(ExtractMessage(update), ExtractParams(update)));
 
-        //TODO publish event
+        await publisher.Publish(@event);
     }
 
     private static string ExtractMessage(Update update)
@@ -115,7 +119,7 @@ public sealed class MessageReceiver : BackgroundService
     }
 
     private static Dictionary<string, string> ChannelPostParams(Message channelPost)
-    {   
+    {
         // No user info available in ChannelPosts
         return new Dictionary<string, string>
         {
@@ -136,7 +140,7 @@ public sealed class MessageReceiver : BackgroundService
             ["UserName"] = GetUserName(callbackQuery.From.FirstName, callbackQuery.From.LastName),
             ["IsBot"] = callbackQuery.From.IsBot.ToString()
         };
-    }       
+    }
 
     private static string GetUserName(string? firstName, string? lastName) => $"{firstName} {lastName}".Trim();
 

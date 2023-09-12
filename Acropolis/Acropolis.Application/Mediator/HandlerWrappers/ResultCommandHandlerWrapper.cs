@@ -5,6 +5,8 @@ namespace Acropolis.Application.Mediator.HandlerWrappers;
 internal abstract class ResultCommandHandlerWrapper<TResult> : IHandlerWrapper
 {
     public abstract ValueTask<TResult> Handle(IServiceProvider serviceProvider, ICommand<TResult> command, CancellationToken cancellationToken = default);
+    public async ValueTask<object?> Handle(IServiceProvider serviceProvider, object command, CancellationToken cancellationToken = default)
+        => await Handle(serviceProvider, (ICommand<TResult>)command, cancellationToken);
 }
 
 internal class ResultCommandHandlerWrapper<TCommand, TResult> : ResultCommandHandlerWrapper<TResult>

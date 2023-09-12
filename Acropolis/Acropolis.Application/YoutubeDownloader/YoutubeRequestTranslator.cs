@@ -16,12 +16,21 @@ public class YoutubeRequestTranslator : IRequestCommandTranslator
     {
         if (request is null)
             return false;
-        return youtubeSettings.ValidUrls.Any(e =>
+        return IsRetryRequest(request) || youtubeSettings.ValidUrls.Any(e =>
             request.StartsWith(e, StringComparison.InvariantCultureIgnoreCase));
     }
 
-    public ICommandBase Command(string request, Dictionary<string, string>? param = null)
+    private static bool IsRetryRequest(string request) => request.Equals("retry", StringComparison.OrdinalIgnoreCase);
+
+    public ICommandBase CreateCommand(string request, Dictionary<string, string>? param = null)
     {
-        return new DownloadYoutubeVideo(request);
+        if (IsRetryRequest(request))
+        {
+            return new RetryFailedDownloads();
+        }
+        else
+        {
+            return new DownloadYoutubeVideo(request);
+        }
     }
 }

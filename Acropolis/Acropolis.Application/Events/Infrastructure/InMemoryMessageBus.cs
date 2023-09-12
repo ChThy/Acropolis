@@ -21,7 +21,12 @@ public class InMemoryMessageBus : IMessagePublisher, IMessageSubscriber, IDispos
         return channel.Writer.WriteAsync(message);
     }
 
-    public async Task ProcessMessages()
+    public async Task Consume()
+    {
+        await ProcessMessages();
+    }
+
+    private async Task ProcessMessages()
     {
         await foreach (var message in channel.Reader.ReadAllAsync())
         {

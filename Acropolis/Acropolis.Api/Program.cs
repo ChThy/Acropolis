@@ -1,6 +1,5 @@
 
 using Acropolis.Api.HostedServices;
-using Acropolis.Application;
 using Acropolis.Application.Extensions;
 using Acropolis.Application.Mediator;
 using Acropolis.Application.Messenger;
@@ -17,6 +16,7 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.Services.AddHostedService<DatabaseMigrator>();
+        builder.Services.AddHostedService<MessageConsumer>();        
 
         builder.Services.AddPersistence(builder.Configuration);
         builder.Services.AddTelegramMessenger(builder.Configuration);
@@ -41,7 +41,7 @@ public class Program
         app.MapGet("youtube-download", async ([FromServices] IMediator mediator, string url) =>
         {
             var command = new DownloadYoutubeVideo(url);
-            var result = await mediator.Send(command);
+            await mediator.Send(command);
         });
 
         app.MapPost("send-message", async ([FromServices] IMediator mediator, string message, string target) =>

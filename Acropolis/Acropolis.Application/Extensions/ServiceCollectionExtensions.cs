@@ -1,4 +1,6 @@
-﻿using Acropolis.Application.Mediator;
+﻿using Acropolis.Application.Events.Infrastructure;
+using Acropolis.Application.Mediator;
+using Acropolis.Application.YoutubeDownloader;
 using Acropolis.Shared.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,10 +18,28 @@ public static class ServiceCollectionExtensions
         services.AddTransient<IMediator, Mediator.Mediator>();
         services.AddCommandHandlers();
 
+        services.AddMessageBus();
+
+        services.AddScoped<IRequestCommandTranslator, YoutubeRequestTranslator>();
+        services.AddHttpClient<IYoutubeService, YoutubeService>((sp, client) =>
+        {
+            var options = sp.GetOptions<YoutubeSettings>();
+            client.BaseAddress = new Uri(options.YoutubeDownloaderEndpoint);
+        });
+
         return services;
     }
 
-    public static IServiceCollection AddCommandHandlers(this IServiceCollection services)
+    private static IServiceCollection AddMessageBus(this IServiceCollection services)
+    {
+        services.AddSingleton<InMemoryMessageBus>();
+        services.AddSingleton<IMessagePublisher, InMemoryMessageBus>(sp => sp.GetRequiredService<InMemoryMessageBus>());
+        services.AddSingleton<IMessageSubscriber, InMemoryMessageBus>(sp => sp.GetRequiredService<InMemoryMessageBus>());
+
+        return services;
+    }
+
+    private static IServiceCollection AddCommandHandlers(this IServiceCollection services)
     {
         services.RegisterScopedOpenGenerics(typeof(ICommandHandler<>));
         services.RegisterScopedOpenGenerics(typeof(ICommandHandler<,>));
