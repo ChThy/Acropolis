@@ -13,9 +13,9 @@ internal class ResultCommandHandlerWrapper<TCommand, TResult> : ResultCommandHan
     where TCommand : ICommand<TResult>
 {
     public override ValueTask<TResult> Handle(IServiceProvider serviceProvider, ICommand<TResult> command, CancellationToken cancellationToken = default)
-        => ResultCommandHandlerWrapper<TCommand, TResult>.Handle(serviceProvider, (TCommand)command, cancellationToken);
+        => Handle(serviceProvider, (TCommand)command, cancellationToken);
 
-    public static async ValueTask<TResult> Handle(IServiceProvider serviceProvider, TCommand command, CancellationToken cancellationToken = default)
+    public async ValueTask<TResult> Handle(IServiceProvider serviceProvider, TCommand command, CancellationToken cancellationToken = default)
     {
         var handler = serviceProvider.GetRequiredService<ICommandHandler<TCommand, TResult>>();
         var result = await handler.Handle(command, cancellationToken);

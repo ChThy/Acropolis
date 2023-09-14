@@ -21,9 +21,9 @@ internal abstract class CommandHandlerWrapper : IHandlerWrapper
 internal class CommandHandlerWrapper<TCommand> : CommandHandlerWrapper where TCommand : ICommand
 {
     public override ValueTask Handle(IServiceProvider serviceProvider, ICommand command, CancellationToken cancellationToken = default)
-        => CommandHandlerWrapper<TCommand>.Handle(serviceProvider, (TCommand)command, cancellationToken);
+        => Handle(serviceProvider, (TCommand)command, cancellationToken);
 
-    public static async ValueTask Handle(IServiceProvider serviceProvider, TCommand command, CancellationToken cancellationToken = default)
+    public async ValueTask Handle(IServiceProvider serviceProvider, TCommand command, CancellationToken cancellationToken = default)
     {
         var handler = serviceProvider.GetRequiredService<ICommandHandler<TCommand>>();
         await handler.Handle(command, cancellationToken);
