@@ -4,4 +4,5 @@ public class ScrapeSettings
     public const string Name = "ScrapeSettings";
     public string ScraperEndpoint { get; set; } = null!;
     public string[] ResourceTypes { get; set; } = Array.Empty<string>();
+    public string[] IgnoredHosts { get; set;} = Array.Empty<string>();
 }

@@ -4,9 +4,12 @@ using Acropolis.Application.Extensions;
 using Acropolis.Application.Mediator;
 using Acropolis.Application.Messenger;
 using Acropolis.Application.YoutubeDownloader;
+using Acropolis.Domain.Repositories;
 using Acropolis.Infrastructure.EfCore.Extensions;
+using Acropolis.Infrastructure.EfCore.Messenger;
 using Acropolis.Infrastructure.Telegram.Extensions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Acropolis.Api;
 
@@ -37,6 +40,12 @@ public class Program
         app.UseHttpsRedirection();
 
         app.UseAuthorization();
+
+        app.MapGet("incoming-requests", async ([FromServices] MessengerDbContext context) =>
+        {
+            var result = await context.IncomingRequests.ToListAsync();
+            return Results.Ok(result);
+        });
                 
         app.Run();
     }

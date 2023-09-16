@@ -56,7 +56,7 @@ public class MessageConsumer : BackgroundService
 
     private async ValueTask AskClarification(IMediator mediator, RequestReceived requestReceived)
     {
-        var command = new SendMessage("What to with this?", new Dictionary<string, string>
+        var command = new SendMessage("What to do with this?", new Dictionary<string, string>
         {
             ["OriginalMessage"] = requestReceived.Request.Message,
             ["ChatId"] = requestReceived.Request.Params["ChatId"],

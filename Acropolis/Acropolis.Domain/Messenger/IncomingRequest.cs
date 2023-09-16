@@ -17,6 +17,10 @@ public record IncomingRequest
 
     public void AcceptedByExternalSystem(Guid externalId, DateTimeOffset timestamp)
     {
+        if (ExternalId is not null)
+        {
+            throw new InvalidOperationException($"IncomingRequest {Id} has already and ExternalId: {ExternalId}. Provided externalId: {externalId}");
+        }
         ExternalId = externalId;
         MarkAsProcessed(timestamp);
     }

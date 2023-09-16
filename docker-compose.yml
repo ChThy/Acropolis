@@ -28,7 +28,7 @@ services:
       - "./local/scraper/data:/app/data"
   
   youtubedownloader: 
-    image: ghcr.io/chthy/youtubedownloader:0.1.0-25
+    image: ghcr.io/chthy/youtubedownloader:0.1.0-26
     ports:
       - "8002:80"
     environment:
