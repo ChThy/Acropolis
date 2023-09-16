@@ -1,4 +1,5 @@
-﻿using Acropolis.Application.Mediator;
+﻿using Acropolis.Application.Events;
+using Acropolis.Application.Mediator;
 using Microsoft.Extensions.Options;
 
 namespace Acropolis.Application.YoutubeDownloader;
@@ -12,25 +13,27 @@ public class YoutubeRequestTranslator : IRequestCommandTranslator
         youtubeSettings = options.Value;
     }
 
-    public bool CanHandle(string request, Dictionary<string, string>? param = null)
+    public bool CanHandle(RequestReceived request)
     {
-        if (request is null)
+        string? message = request?.Request?.Message;
+        if (message is null)
             return false;
-        return IsRetryRequest(request) || youtubeSettings.ValidUrls.Any(e =>
-            request.StartsWith(e, StringComparison.InvariantCultureIgnoreCase));
+        return IsRetryRequest(message) || youtubeSettings.ValidUrls.Any(e =>
+            message.StartsWith(e, StringComparison.InvariantCultureIgnoreCase));
     }
 
     private static bool IsRetryRequest(string request) => request.Equals("retry", StringComparison.OrdinalIgnoreCase);
 
-    public ICommandBase CreateCommand(string request, Dictionary<string, string>? param = null)
+    public ICommandBase CreateCommand(RequestReceived request)
     {
-        if (IsRetryRequest(request))
+        string message = request.Request.Message!;
+        if (IsRetryRequest(message))
         {
-            return new RetryFailedDownloads();
+            return new RetryFailedDownloadsCommand(request.Id);
         }
         else
         {
-            return new DownloadYoutubeVideo(request);
+            return new DownloadYoutubeVideoCommand(request.Id, message);
         }
     }
 }

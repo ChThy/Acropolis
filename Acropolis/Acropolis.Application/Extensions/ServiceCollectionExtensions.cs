@@ -1,6 +1,8 @@
 ﻿using Acropolis.Application.Events.Infrastructure;
 using Acropolis.Application.Mediator;
+using Acropolis.Application.PageScraper;
 using Acropolis.Application.YoutubeDownloader;
+using Acropolis.Shared;
 using Acropolis.Shared.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,11 +15,11 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.RegisterOptions<YoutubeSettings>(configuration, YoutubeSettings.Name);
-        
+
         services.AddMediator();
         services.AddInMemoryMessageBus();
 
+        services.RegisterOptions<YoutubeSettings>(configuration, YoutubeSettings.Name);
         services.AddScoped<IRequestCommandTranslator, YoutubeRequestTranslator>();
         services.AddHttpClient<IYoutubeService, YoutubeService>((sp, client) =>
         {
@@ -25,9 +27,17 @@ public static class ServiceCollectionExtensions
             client.BaseAddress = new Uri(options.YoutubeDownloaderEndpoint);
         });
 
+        services.RegisterOptions<ScrapeSettings>(configuration, ScrapeSettings.Name);
+        services.AddScoped<IRequestCommandTranslator, ScrapeRequestTranslator>();
+        services.AddHttpClient<IScrapeService, ScrapeService>((sp, client) =>
+        {
+            var options = sp.GetOptions<ScrapeSettings>();
+            client.BaseAddress = new Uri(options.ScraperEndpoint);
+        });
+
         return services;
     }
-        
+
     private static IServiceCollection AddInMemoryMessageBus(this IServiceCollection services)
     {
         services.AddSingleton<InMemoryMessageBus>();

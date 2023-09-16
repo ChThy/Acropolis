@@ -10,12 +10,13 @@ services:
       - ConnectionStrings__MessengerDatabase=Data Source=data/Acropolis_Messenger.db;cache=shared
       - Telegram__UserToken=${TELEGRAM_TOKEN}
       - Telegram__ChatId=${TELEGRAM_CHAT_ID}
-      - YoutubeSettings__YoutubeDownloaderEndpoint=http://youtubedownloader/
+      - YoutubeSettings__YoutubeDownloaderEndpoint=http://youtubedownloader:8080/
+      - ScrapeSettings__ScraperEndpoint=http://scraper:8080/
     volumes:
       - "./local/acropolis/data:/app/data"
 
   scraper:
-    image: ghcr.io/chthy/scraper:0.1.0-4
+    image: ghcr.io/chthy/scraper:0.1.0-8
     ports:
       - "8001:8080"
     cap_add:
@@ -27,12 +28,12 @@ services:
       - "./local/scraper/data:/app/data"
   
   youtubedownloader: 
-    image: ghcr.io/chthy/youtubedownloader:0.1.0-20
+    image: ghcr.io/chthy/youtubedownloader:0.1.0-25
     ports:
       - "8002:80"
     environment:
       - ConnectionStrings__database=Data Source=data/YoutubeDownloader.db;cache=shared
-      - TelegramSettings__Enabled=false
+      - TelegramSettings__Enabled=false      
     volumes:
       - "./local/youtubedownloader/downloads:/app/downloads"
       - "./local/youtubedownloader/data:/app/data"

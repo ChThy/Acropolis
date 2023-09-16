@@ -12,6 +12,9 @@ public sealed class IncomingRequestConfiguration : IEntityTypeConfiguration<Inco
         builder.Property(e => e.Id)
             .ValueGeneratedNever();
 
+        builder.HasIndex(e => e.ExternalId);
+            
+
         builder.HasIndex(e => e.Source);
         builder.HasIndex(e => e.Timestamp);
         builder.HasIndex(e => e.ProcessedOn);

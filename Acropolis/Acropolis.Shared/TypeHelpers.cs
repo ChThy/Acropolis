@@ -1,4 +1,4 @@
-﻿namespace Acropolis.Application.Extensions;
+﻿namespace Acropolis.Shared;
 
 public static class TypeHelpers
 {

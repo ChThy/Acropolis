@@ -14,26 +14,30 @@ public class YoutubeService : IYoutubeService
         this.logger = logger;
     }
 
-    public async ValueTask Download(string url)
+    public async ValueTask<Guid> Download(string url)
     {
         try
         {
-
             var response = await httpClient.PostAsJsonAsync("download", url);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                logger.LogWarning(await response.Content.ReadAsStringAsync());
-            }
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<Guid>();
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to download");
+            throw;
         }
     }
 
     public async ValueTask RetryFailedDownloads()
     {
-        await httpClient.PostAsJsonAsync<object>("retry-failed", new());
+        try
+        {
+            await httpClient.PostAsJsonAsync<object>("retry-failed", new());
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to download");
+        }
     }
 }

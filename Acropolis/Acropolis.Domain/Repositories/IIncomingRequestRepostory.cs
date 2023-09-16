@@ -5,5 +5,5 @@ namespace Acropolis.Domain.Repositories;
 public interface IIncomingRequestRepostory
 {
     Task Add(IncomingRequest request);
-    Task MarkAsProcessed(Guid id);
+    Task Update(Guid id, Action<IncomingRequest> update);
 }

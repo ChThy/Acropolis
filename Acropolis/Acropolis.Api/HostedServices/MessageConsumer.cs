@@ -43,7 +43,7 @@ public class MessageConsumer : BackgroundService
         using var scope = serviceScopeFactory.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
         var requestTranslators = scope.ServiceProvider.GetServices<IRequestCommandTranslator>().ToArray();
-        var applicableTranslators = requestTranslators.Where(e => e.CanHandle(requestReceived.Request.Message, requestReceived.Request.Params)).ToArray();
+        var applicableTranslators = requestTranslators.Where(e => e.CanHandle(requestReceived)).ToArray();
 
         if (applicableTranslators.Length == 0)
         {
@@ -63,18 +63,14 @@ public class MessageConsumer : BackgroundService
             ["ReplyToMessageId"] = requestReceived.Request.Params["MessageId"]
         });
         await mediator.Send(command);
-
-        await incomingRequestRepostiory.MarkAsProcessed(requestReceived.Id);
     }
 
     private async Task ProcessRequest(RequestReceived requestReceived, IRequestCommandTranslator[] applicableTranslators, IMediator mediator)
     {
         foreach (var requestTranslator in applicableTranslators)
         {
-            var command = requestTranslator.CreateCommand(requestReceived.Request.Message, requestReceived.Request.Params);
+            var command = requestTranslator.CreateCommand(requestReceived);
             await mediator.Send(command);
-
-            await incomingRequestRepostiory.MarkAsProcessed(requestReceived.Id);
         }
     }
 }

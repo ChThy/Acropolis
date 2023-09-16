@@ -25,13 +25,13 @@ internal class IncomingRequestRepository : IIncomingRequestRepostory
         await context.SaveChangesAsync();
     }
 
-    public async Task MarkAsProcessed(Guid id)
+    public async Task Update(Guid id, Action<IncomingRequest> update)
     {
         using var context = CreateDbContext();
         var request = await context.IncomingRequests.FindAsync(id) 
             ?? throw new NotFoundException(typeof(IncomingRequest).Name, id.ToString());
 
-        request.MarkAsProcessed(DateTimeOffset.UtcNow);
+        update(request);
         await context.SaveChangesAsync();
     }
 }

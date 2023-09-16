@@ -1,6 +1,6 @@
 ﻿namespace Acropolis.Application.YoutubeDownloader;
 public interface IYoutubeService
 {
-    ValueTask Download(string url);
+    ValueTask<Guid> Download(string url);
     ValueTask RetryFailedDownloads();
 }
