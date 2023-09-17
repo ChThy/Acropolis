@@ -76,8 +76,8 @@ jobs:
     - name: Build and push Docker image
       uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
       with:
-        context: ./Acropolis
-        file: ./Acropolis.Api/Dockerfile
+        context: ./Acropolis/
+        file: ./Acropolis/Acropolis.Api/Dockerfile
         build-args: |
           GithubUserName=${{ env.GithubUserName }}
           GithubPassword=${{ env.GithubPassword }}
