@@ -1,15 +1,13 @@
 
 using Acropolis.Api.HostedServices;
 using Acropolis.Application.Extensions;
-using Acropolis.Application.Mediator;
-using Acropolis.Application.Messenger;
-using Acropolis.Application.YoutubeDownloader;
-using Acropolis.Domain.Repositories;
+using Acropolis.Infrastructure.Dapr;
 using Acropolis.Infrastructure.EfCore.Extensions;
 using Acropolis.Infrastructure.EfCore.Messenger;
 using Acropolis.Infrastructure.Telegram.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Acropolis.Infrastructure.Dapr.Extensions;
 
 namespace Acropolis.Api;
 
@@ -19,10 +17,11 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.Services.AddHostedService<DatabaseMigrator>();
-        builder.Services.AddHostedService<MessageConsumer>();        
+        builder.Services.AddHostedService<MessageConsumer>();
 
         builder.Services.AddPersistence(builder.Configuration);
         builder.Services.AddTelegramMessenger(builder.Configuration);
+        builder.Services.AddDaprInfrastructure(builder.Configuration);
 
         builder.Services.AddApplicationServices(builder.Configuration);
 
@@ -39,6 +38,8 @@ public class Program
 
         app.UseHttpsRedirection();
 
+        app.UseEventSupscriptionEndpoints();
+
         app.UseAuthorization();
 
         app.MapGet("incoming-requests", async ([FromServices] MessengerDbContext context) =>
@@ -46,7 +47,7 @@ public class Program
             var result = await context.IncomingRequests.ToListAsync();
             return Results.Ok(result);
         });
-                
+
         app.Run();
     }
 }

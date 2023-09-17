@@ -17,7 +17,7 @@ public class SendMessageHandler : ICommandHandler<SendMessage>
         await telegramBotClient.SendTextMessageAsync(
             chatId: command.Params["ChatId"],
             text: command.Message,
-            replyToMessageId: int.Parse(command.Params["ReplyToMessageId"]),
+            replyToMessageId: int.Parse(command.Params["MessageId"]),
             cancellationToken: cancellationToken);
     }
 }

@@ -60,7 +60,7 @@ public class MessageConsumer : BackgroundService
         {
             ["OriginalMessage"] = requestReceived.Request.Message,
             ["ChatId"] = requestReceived.Request.Params["ChatId"],
-            ["ReplyToMessageId"] = requestReceived.Request.Params["MessageId"]
+            ["MessageId"] = requestReceived.Request.Params["MessageId"]
         });
         await mediator.Send(command);
     }

@@ -6,4 +6,5 @@ public interface IIncomingRequestRepostory
 {
     Task Add(IncomingRequest request);
     Task Update(Guid id, Action<IncomingRequest> update);
+    Task<IncomingRequest?> GetByExternalId(Guid externalId);
 }

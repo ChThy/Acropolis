@@ -12,30 +12,71 @@ services:
       - Telegram__ChatId=${TELEGRAM_CHAT_ID}
       - YoutubeSettings__YoutubeDownloaderEndpoint=http://youtubedownloader:8080/
       - ScrapeSettings__ScraperEndpoint=http://scraper:8080/
+      - DaprSettings__PubSubName=redis-pub-sub
+      - DaprSettings__ScraperTopicName=page-scraped
+      - DaprSettings__YoutubeDownloaderTopicName=youtube-video-downloaded
     volumes:
       - "./local/acropolis/data:/app/data"
 
+  acropolis-sidecar:
+    image: "daprio/daprd:edge"
+    command: ["./daprd",
+      "--app-id", "acropolis",
+      "--app-port", "8080",
+      "--dapr-http-port", "3500",
+      "--resources-path", "/components"]
+    volumes:
+      - "./local/dapr/components/:/components"
+    network_mode: "service:acropolis"
+
   scraper:
-    image: ghcr.io/chthy/scraper:0.1.0-8
+    image: ghcr.io/chthy/scraper:0.1.0-9
     ports:
       - "8001:8080"
     cap_add:
       - "SYS_ADMIN"
     environment:
       - ConnectionStrings__database=Data Source=data/Scraper.db;cache=shared
+      - DaprSettings__PubSubName=redis-pub-sub
+      - DaprSettings__TopicName=page-scraped
     volumes:
       - "./local/scraper/downloads:/app/downloads"
       - "./local/scraper/data:/app/data"
-  
+
+  scraper-sidecar:
+    image: "daprio/daprd:edge"
+    command: ["./daprd",
+      "--app-id", "scraper",
+      "--app-port", "8080",
+      "--dapr-http-port", "3500",
+      "--resources-path", "/components"]
+    volumes:
+      - "./local/dapr/components/:/components"
+    network_mode: "service:scraper"
+
   youtubedownloader: 
-    image: ghcr.io/chthy/youtubedownloader:0.1.0-26
+    image: ghcr.io/chthy/youtubedownloader:0.1.0-28
     ports:
-      - "8002:80"
+      - "8002:8080"
     environment:
       - ConnectionStrings__database=Data Source=data/YoutubeDownloader.db;cache=shared
-      - TelegramSettings__Enabled=false      
+      - DaprSettings__PubSubName=redis-pub-sub
+      - DaprSettings__TopicName=youtube-video-downloaded
     volumes:
       - "./local/youtubedownloader/downloads:/app/downloads"
       - "./local/youtubedownloader/data:/app/data"
 
+  youtubedownloader-sidecar:
+    image: "daprio/daprd:edge"
+    command: ["./daprd",
+      "--app-id", "youtubedownloader",
+      "--app-port", "8080",
+      "--dapr-http-port", "3500",
+      "--resources-path", "/components"]
+    volumes:
+      - "./local/dapr/components/:/components"
+    network_mode: "service:youtubedownloader"
+
+  redis:
+    image: "redis:alpine"
 # docker compose --env-file local.env up --build -d

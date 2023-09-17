@@ -2,4 +2,3 @@
 
 public interface IMessage { };
 public abstract record Message : IMessage { }
-

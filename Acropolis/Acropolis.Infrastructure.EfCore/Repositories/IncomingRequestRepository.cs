@@ -34,4 +34,11 @@ internal class IncomingRequestRepository : IIncomingRequestRepostory
         update(request);
         await context.SaveChangesAsync();
     }
+
+    public async Task<IncomingRequest?> GetByExternalId(Guid externalId)
+    {
+        using var context = CreateDbContext();
+        var incomingRequest = await context.IncomingRequests.FirstOrDefaultAsync(e => e.ExternalId == externalId);
+        return incomingRequest;
+    }
 }
