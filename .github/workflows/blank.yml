@@ -1,0 +1,86 @@
+name: Build and Publish Docker image
+
+on:
+  push:
+    branches: [ "main" ]
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+  
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  GithubUserName: ${{ secrets.EVENTSTORE_USERNAME }}
+  GithubPassword: ${{ secrets.EVENTSTORE_PASSWORD }}
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    - name: Install GitVersion
+      uses: gittools/actions/gitversion/setup@v0.9.13
+      with:
+          versionSpec: '5.x'
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Determine Version
+      id: gitversion
+      uses: gittools/actions/gitversion/execute@v0.9.13
+      with:
+        useConfigFile: false
+        configFilePath: ./.github/gitversion.yml
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: | 
+          8.0.x
+
+    - name: display directory
+      run: pwd
+      
+    - name: Install dependencies
+      working-directory: ./Acripolis
+      run: dotnet restore
+
+    - name: Build
+      working-directory: ./Acripolis
+      run: dotnet build --configuration Release --no-restore /p:Version=${{ steps.gitversion.outputs.FullSemVer }}
+    - name: Log in to the Container registry
+      uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Extract metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+    - name: Prepare tag
+      id: prepareTag
+      run: |
+        echo "IMAGE_TAG=${TAG,,}" >> ${GITHUB_ENV}
+      env:
+        TAG: "${{ env.REGISTRY }}/${{ github.repository }}:${{ steps.gitversion.outputs.SemVer }}-${{ steps.gitversion.outputs.BuildMetaData }}"
+    #- name: display tag
+      #run: echo "${IMAGE_TAG}"
+    - name: Build and push Docker image
+      uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+      with:
+        context: .
+        file: ./Scraper.Api/Dockerfile
+        build-args: |
+          GithubUserName=${{ env.GithubUserName }}
+          GithubPassword=${{ env.GithubPassword }}
+        push: true
+        tags: ${{ env.IMAGE_TAG }}
+        labels: ${{ steps.meta.outputs.labels }}
