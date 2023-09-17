@@ -48,11 +48,11 @@ jobs:
       run: pwd
       
     - name: Install dependencies
-      working-directory: ./Acripolis
+      working-directory: ./Acropolis
       run: dotnet restore
 
     - name: Build
-      working-directory: ./Acripolis
+      working-directory: ./Acropolis
       run: dotnet build --configuration Release --no-restore /p:Version=${{ steps.gitversion.outputs.FullSemVer }}
     - name: Log in to the Container registry
       uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
