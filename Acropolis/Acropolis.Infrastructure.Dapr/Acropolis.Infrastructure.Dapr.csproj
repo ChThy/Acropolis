@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+  	<FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapr.AspNetCore" Version="1.12.0-rc01" />
+    <PackageReference Include="Dapr.Client" Version="1.12.0-rc01" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Acropolis.Application\Acropolis.Application.csproj" />
+    <ProjectReference Include="..\Acropolis.Domain\Acropolis.Domain.csproj" />
+    <ProjectReference Include="..\Acropolis.Infrastructure\Acropolis.Infrastructure.csproj" />
+    <ProjectReference Include="..\Acropolis.Shared\Acropolis.Shared.csproj" />
+  </ItemGroup>
+
+</Project>
