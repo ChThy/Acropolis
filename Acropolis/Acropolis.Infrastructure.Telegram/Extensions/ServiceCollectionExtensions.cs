@@ -1,4 +1,5 @@
-﻿using Acropolis.Shared.Extensions;
+﻿using Acropolis.Domain;
+using Acropolis.Shared.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot;
@@ -17,6 +18,7 @@ public static class ServiceCollectionExtensions
         });
 
         services.AddHostedService<MessageReceiver>();
+        services.AddSingleton<IRequestProcessor, RequestProcessor>();
 
         return services;
     }

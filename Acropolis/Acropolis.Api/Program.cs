@@ -8,6 +8,7 @@ using Acropolis.Infrastructure.Telegram.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Acropolis.Infrastructure.Dapr.Extensions;
+using Acropolis.Domain;
 
 namespace Acropolis.Api;
 
@@ -46,6 +47,26 @@ public class Program
         {
             var result = await context.IncomingRequests.ToListAsync();
             return Results.Ok(result);
+        });
+
+        app.MapGet("unprocessed-requests", async ([FromServices] MessengerDbContext context) =>
+        {
+            var result = await context.IncomingRequests
+                .Where(e => e.ProcessedOn == null)
+                .ToListAsync();
+            return Results.Ok(result);
+        });
+
+        app.MapPost("reprocess-unprocessed", async ([FromServices] MessengerDbContext context, [FromServices] IRequestProcessor requestProcessor, CancellationToken cancel) =>
+        {
+            var result = await context.IncomingRequests
+                .Where(e => e.ProcessedOn == null)
+                .ToListAsync();
+
+            foreach (var request in result)
+            {
+                await requestProcessor.Process(request, cancel);
+            }
         });
 
         app.Run();
