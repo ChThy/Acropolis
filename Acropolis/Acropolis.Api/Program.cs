@@ -1,10 +1,13 @@
 
+using Acropolis.Api.Extensions;
 using Acropolis.Api.HostedServices;
+using Acropolis.Api.Models;
+using Acropolis.Application.Events;
 using Acropolis.Application.Extensions;
 using Acropolis.Domain;
 using Acropolis.Infrastructure.EfCore.Extensions;
 using Acropolis.Infrastructure.EfCore.Messenger;
-using Acropolis.Infrastructure.Telegram.Extensions;
+using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,11 +18,12 @@ public class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-        builder.Services.AddHostedService<DatabaseMigrator>();
+        //builder.Services.AddHostedService<DatabaseMigrator>();
 
-        builder.Services.AddPersistence(builder.Configuration);
+        //builder.Services.AddPersistence(builder.Configuration);
         //builder.Services.AddTelegramMessenger(builder.Configuration);
 
+        builder.Services.AddServices(builder.Configuration);
         builder.Services.AddApplicationServices(builder.Configuration);
 
         builder.Services.AddAuthorization();
@@ -61,6 +65,15 @@ public class Program
             {
                 await requestProcessor.Process(request, cancel);
             }
+        });
+
+        app.MapPost("videos/download", async (
+            [FromServices] IPublishEndpoint publishEndpoint,
+            [FromBody] DownloadVideoRequest request,
+            CancellationToken cancellationToken) =>
+        {
+            await publishEndpoint.Publish(new VideoDownloadRequested(request.Url, DateTimeOffset.Now), cancellationToken);
+            return Results.Accepted();
         });
 
         app.Run();
