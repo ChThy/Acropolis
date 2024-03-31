@@ -15,7 +15,7 @@ namespace Acropolis.Infrastructure.Telegram;
 public sealed class MessageReceiver : BackgroundService
 {
     private readonly TelegramBotClient TelegramClient;
-    private readonly IIncomingRequestRepostory repostiory;
+    private readonly IIncomingRequestRepostory repository;
     private readonly IRequestProcessor requestProcessor;
     private readonly TelegramOptions options;
     private readonly ILogger<MessageReceiver> logger;
@@ -38,7 +38,7 @@ public sealed class MessageReceiver : BackgroundService
         ILogger<MessageReceiver> logger)
     {
         this.TelegramClient = telegramClient;
-        this.repostiory = repostiory;
+        this.repository = repostiory;
         this.requestProcessor = requestProcessor;
         this.options = options.Value;
         this.logger = logger;
@@ -68,7 +68,7 @@ public sealed class MessageReceiver : BackgroundService
         var rawContent = JsonSerializer.Serialize(update);
         var incomingRequest = IncomingRequest.Create(Guid.NewGuid(), DateTimeOffset.UtcNow, Domain.User.System, $"TELEGRAM_{update.Id}", rawContent);
 
-        await repostiory.Add(incomingRequest);
+        await repository.Add(incomingRequest);
         await requestProcessor.Process(incomingRequest, cancellationToken);
     }
 

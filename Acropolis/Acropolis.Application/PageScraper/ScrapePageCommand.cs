@@ -1,5 +1,5 @@
-﻿using Acropolis.Application.Mediator;
+﻿using MediatR;
 
 namespace Acropolis.Application.PageScraper;
 
-public record ScrapePageCommand(Guid IncomingRequestId, string Url) : ICommand;
+public record ScrapePageCommand(Guid IncomingRequestId, string Url) : IRequest;

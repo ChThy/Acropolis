@@ -1,5 +1,5 @@
-﻿using Acropolis.Application.Mediator;
+﻿using MediatR;
 
 namespace Acropolis.Application.YoutubeDownloader;
 
-public record RetryFailedDownloadsCommand(Guid IncomingRequestId) : ICommand;
+public record RetryFailedDownloadsCommand(Guid IncomingRequestId) : IRequest;

@@ -1,14 +1,12 @@
 
 using Acropolis.Api.HostedServices;
 using Acropolis.Application.Extensions;
-using Acropolis.Infrastructure.Dapr;
+using Acropolis.Domain;
 using Acropolis.Infrastructure.EfCore.Extensions;
 using Acropolis.Infrastructure.EfCore.Messenger;
 using Acropolis.Infrastructure.Telegram.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Acropolis.Infrastructure.Dapr.Extensions;
-using Acropolis.Domain;
 
 namespace Acropolis.Api;
 
@@ -18,11 +16,9 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.Services.AddHostedService<DatabaseMigrator>();
-        builder.Services.AddHostedService<MessageConsumer>();
 
         builder.Services.AddPersistence(builder.Configuration);
-        builder.Services.AddTelegramMessenger(builder.Configuration);
-        builder.Services.AddDaprInfrastructure(builder.Configuration);
+        //builder.Services.AddTelegramMessenger(builder.Configuration);
 
         builder.Services.AddApplicationServices(builder.Configuration);
 
@@ -38,8 +34,6 @@ public class Program
         app.UseSwaggerUI();
 
         app.UseHttpsRedirection();
-
-        app.UseEventSupscriptionEndpoints();
 
         app.UseAuthorization();
 

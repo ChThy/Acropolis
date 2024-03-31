@@ -1,5 +1,5 @@
-﻿using Acropolis.Application.Mediator;
+﻿using MediatR;
 
 namespace Acropolis.Application.YoutubeDownloader;
 
-public record DownloadYoutubeVideoCommand(Guid IncomingRequestId, string Url) : ICommand;
+public record DownloadYoutubeVideoCommand(Guid IncomingRequestId, string Url) : IRequest;

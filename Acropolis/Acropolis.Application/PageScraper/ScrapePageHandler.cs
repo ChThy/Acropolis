@@ -1,9 +1,9 @@
-﻿using Acropolis.Application.Mediator;
-using Acropolis.Domain.Repositories;
+﻿using Acropolis.Domain.Repositories;
+using MediatR;
 
 namespace Acropolis.Application.PageScraper;
 
-public class ScrapePageHandler : ICommandHandler<ScrapePageCommand>
+public class ScrapePageHandler : IRequestHandler<ScrapePageCommand>
 {
     private readonly IScrapeService scrapeService;
     private readonly IIncomingRequestRepostory incomingRequestRepostory;
@@ -14,7 +14,7 @@ public class ScrapePageHandler : ICommandHandler<ScrapePageCommand>
         this.incomingRequestRepostory = incomingRequestRepostory;
     }
 
-    public async ValueTask Handle(ScrapePageCommand command, CancellationToken cancellationToken = default)
+    public async Task Handle(ScrapePageCommand command, CancellationToken cancellationToken = default)
     {
         var externalId = await scrapeService.Download(command.Url);
 

@@ -1,9 +1,9 @@
-﻿using Acropolis.Application.Mediator;
-using Acropolis.Domain.Repositories;
+﻿using Acropolis.Domain.Repositories;
+using MediatR;
 
 namespace Acropolis.Application.YoutubeDownloader;
 
-public class RetryFailedDownloadsHandler : ICommandHandler<RetryFailedDownloadsCommand>
+public class RetryFailedDownloadsHandler : IRequestHandler<RetryFailedDownloadsCommand>
 {
     private readonly IYoutubeService youtubeService;
     private readonly IIncomingRequestRepostory incomingRequestRepostory;
@@ -14,7 +14,7 @@ public class RetryFailedDownloadsHandler : ICommandHandler<RetryFailedDownloadsC
         this.incomingRequestRepostory = incomingRequestRepostory;
     }
 
-    public async ValueTask Handle(RetryFailedDownloadsCommand command, CancellationToken cancellationToken = default)
+    public async Task Handle(RetryFailedDownloadsCommand command, CancellationToken cancellationToken = default)
     {
         await youtubeService.RetryFailedDownloads();
         await incomingRequestRepostory.Update(command.IncomingRequestId, req => req.MarkAsProcessed(DateTimeOffset.UtcNow));

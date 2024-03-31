@@ -1,10 +1,10 @@
-﻿using Acropolis.Application.Mediator;
-using Acropolis.Domain.Repositories;
+﻿using Acropolis.Domain.Repositories;
+using MediatR;
 using Microsoft.Extensions.Logging;
 
 namespace Acropolis.Application.YoutubeDownloader;
 
-public class DownloadYoutubeVideoHandler : ICommandHandler<DownloadYoutubeVideoCommand>
+public class DownloadYoutubeVideoHandler : IRequestHandler<DownloadYoutubeVideoCommand>
 {
     private readonly IYoutubeService youtubeService;
     private readonly IIncomingRequestRepostory incomingRequestRepostory;
@@ -20,7 +20,7 @@ public class DownloadYoutubeVideoHandler : ICommandHandler<DownloadYoutubeVideoC
         this.logger = logger;
     }
 
-    public async ValueTask Handle(DownloadYoutubeVideoCommand command, CancellationToken cancellationToken = default)
+    public async Task Handle(DownloadYoutubeVideoCommand command, CancellationToken cancellationToken = default)
     {
         var externalId = await youtubeService.Download(command.Url);
         logger.LogDebug("Download video external Id: {id}", externalId);
