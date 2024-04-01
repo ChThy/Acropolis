@@ -31,6 +31,7 @@ public class VideoDownloadRequestedHandler(
 
         if (!IsYoutubeUrl(url))
         {
+            logger.LogWarning("Invalid Youtube URL: {url}", url);
             await context.Publish(new VideoDownloadFailed(url, timeProvider.GetLocalNow(), "Invalid Youtube URL."));
             return;
         }
@@ -41,9 +42,11 @@ public class VideoDownloadRequestedHandler(
             var (videoMetaData, videoStream) = await DownloadVideo(url, context.CancellationToken);
             videoStream.Dispose();
             await context.Publish(new VideoDownloaded(url, timeProvider.GetLocalNow(), videoMetaData));
+            logger.LogInformation("Video downloaded: {video}", videoMetaData);
         }
         catch (Exception ex)
         {
+            logger.LogError(ex, "Failed to download video: {url}", url);
             await context.Publish(new VideoDownloadFailed(url, timeProvider.GetLocalNow(), ex.Message));
         }
     }

@@ -16,7 +16,6 @@ public static class ServiceCollectionExtensions
         //});
 
 
-
         services.RegisterOptions<YoutubeSettings>(configuration, YoutubeSettings.Name);
         services.AddHttpClient<IYoutubeService, YoutubeService>((sp, client) =>
         {

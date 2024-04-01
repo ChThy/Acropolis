@@ -17,5 +17,11 @@ public class DownloadVideoStateMap : SagaClassMap<DownloadVideoState>
         {
             ob.Property(e => e.VideoId).IsRequired();
         });
+
+        entity.HasIndex(e => new { e.CorrelationId, e.Url })
+            .IsUnique();
+
+        entity.HasIndex(e => e.Url)
+            .IsUnique();
     }
 }
