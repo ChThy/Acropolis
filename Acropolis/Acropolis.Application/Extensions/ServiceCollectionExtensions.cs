@@ -1,8 +1,6 @@
 ﻿using Acropolis.Application.PageScraper;
-using Acropolis.Application.Sagas;
 using Acropolis.Application.YoutubeDownloader;
 using Acropolis.Shared.Extensions;
-using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,7 +15,7 @@ public static class ServiceCollectionExtensions
         //    config.RegisterServicesFromAssemblies(typeof(DownloadYoutubeVideoHandler).Assembly);
         //});
 
-       
+
 
         services.RegisterOptions<YoutubeSettings>(configuration, YoutubeSettings.Name);
         services.AddHttpClient<IYoutubeService, YoutubeService>((sp, client) =>

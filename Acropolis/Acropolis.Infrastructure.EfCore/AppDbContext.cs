@@ -8,6 +8,21 @@ public class AppDbContext : SagaDbContext
     {
     }
 
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.UseCollation("BINARY");
+    }
+
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        base.ConfigureConventions(configurationBuilder);
+        configurationBuilder.Properties<string>()
+            .UseCollation("BINARY");
+    }
+
     protected override IEnumerable<ISagaClassMap> Configurations
     {
         get { yield return new DownloadVideoStateMap(); }

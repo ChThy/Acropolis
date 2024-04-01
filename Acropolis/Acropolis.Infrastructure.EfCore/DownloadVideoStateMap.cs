@@ -10,6 +10,12 @@ public class DownloadVideoStateMap : SagaClassMap<DownloadVideoState>
     protected override void Configure(EntityTypeBuilder<DownloadVideoState> entity, ModelBuilder model)
     {
         entity.Property(e => e.CurrentState).HasMaxLength(64);
-        entity.Property(e => e.RowVersion).IsRowVersion();
+        entity.Property(e => e.RowVersion)
+            .HasDefaultValue(0)
+            .IsRowVersion();
+        entity.OwnsOne(e => e.VideoMetaData, ob =>
+        {
+            ob.Property(e => e.VideoId).IsRequired();
+        });
     }
 }

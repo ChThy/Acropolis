@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Messenger\Migrations\" />
+    <Folder Include="Migrations\" />
   </ItemGroup>
 
 </Project>

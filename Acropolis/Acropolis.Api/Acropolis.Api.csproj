@@ -19,6 +19,7 @@
     <ProjectReference Include="..\Acropolis.Domain\Acropolis.Domain.csproj" />
     <ProjectReference Include="..\Acropolis.Infrastructure.EfCore\Acropolis.Infrastructure.EfCore.csproj" />
     <ProjectReference Include="..\Acropolis.Infrastructure.Telegram\Acropolis.Infrastructure.Telegram.csproj" />
+    <ProjectReference Include="..\Acropolis.Infrastructure.YoutubeDownloader\Acropolis.Infrastructure.YoutubeDownloader.csproj" />
     <ProjectReference Include="..\Acropolis.Infrastructure\Acropolis.Infrastructure.csproj" />
   </ItemGroup>
 

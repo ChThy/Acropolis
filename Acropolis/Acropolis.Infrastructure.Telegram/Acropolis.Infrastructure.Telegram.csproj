@@ -12,7 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Acropolis.Infrastructure\Acropolis.Infrastructure.csproj" />
     <ProjectReference Include="..\Acropolis.Shared\Acropolis.Shared.csproj" />
   </ItemGroup>
 
