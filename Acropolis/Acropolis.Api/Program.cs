@@ -3,6 +3,7 @@ using Acropolis.Api.HostedServices;
 using Acropolis.Api.Models;
 using Acropolis.Application.Events;
 using Acropolis.Application.Extensions;
+using Acropolis.Infrastructure.Telegram.Extensions;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,7 +17,6 @@ public class Program
         builder.Services.AddHostedService<DatabaseMigrator>();
 
         //builder.Services.AddPersistence(builder.Configuration);
-        //builder.Services.AddTelegramMessenger(builder.Configuration);
 
         builder.Services.AddServices(builder.Configuration);
         builder.Services.AddApplicationServices(builder.Configuration);
@@ -37,11 +37,11 @@ public class Program
         app.UseAuthorization();
 
         app.MapPost("videos/download", async (
-            [FromServices] IPublishEndpoint publishEndpoint,
+            [FromServices] IBus bus,
             [FromBody] DownloadVideoRequest request,
             CancellationToken cancellationToken) =>
         {
-            await publishEndpoint.Publish(new VideoDownloadRequestReceived(request.Url, DateTimeOffset.Now),
+            await bus.Publish(new VideoDownloadRequestReceived(request.Url, DateTimeOffset.UtcNow),
                 ctx => ctx.CorrelationId = NewId.NextGuid(), cancellationToken);
             return Results.Accepted();
         });

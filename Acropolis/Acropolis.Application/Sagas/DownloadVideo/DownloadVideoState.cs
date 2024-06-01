@@ -1,7 +1,7 @@
 ﻿using Acropolis.Application.Models;
 using MassTransit;
 
-namespace Acropolis.Application.Sagas;
+namespace Acropolis.Application.Sagas.DownloadVideo;
 
 public class DownloadVideoState : SagaStateMachineInstance
 {

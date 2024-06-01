@@ -2,14 +2,9 @@
 using Acropolis.Application.Extensions.MassTransitExteions;
 using MassTransit;
 
-namespace Acropolis.Application.Sagas;
+namespace Acropolis.Application.Sagas.DownloadVideo;
 public class DownloadVideoSaga : MassTransitStateMachine<DownloadVideoState>
 {
-    //TODO:
-    // - clustered primary key
-    // - outbox pattern
-
-
     public DownloadVideoSaga()
     {
         InstanceState(e => e.CurrentState);
@@ -50,6 +45,7 @@ public class DownloadVideoSaga : MassTransitStateMachine<DownloadVideoState>
                     saga.ErrorMessage = message.ErrorMessage;
                     saga.DownloadedTimestamp = message.Timestamp;
                 })
+                .TransitionTo(DownloadFailed)
         );
 
         During(Downloaded,
@@ -80,7 +76,6 @@ public class DownloadVideoSaga : MassTransitStateMachine<DownloadVideoState>
     public Event<VideoDownloadRequestReceived> WhenVideoDownloadRequestReceived { get; private set; } = null!;
     public Event<VideoDownloaded> WhenVideoDownloaded { get; private set; } = null!;
     public Event<VideoDownloadFailed> WhenVideoDownloadFailed { get; private set; } = null!;
-
 
     public State DownloadRequested { get; private set; } = null!;
     public State Downloaded { get; private set; } = null!;

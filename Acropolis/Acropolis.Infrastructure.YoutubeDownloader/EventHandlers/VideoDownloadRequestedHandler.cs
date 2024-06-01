@@ -36,7 +36,6 @@ public class VideoDownloadRequestedHandler(
             return;
         }
 
-
         try
         {
             var (videoMetaData, videoStream) = await DownloadVideo(url, context.CancellationToken);

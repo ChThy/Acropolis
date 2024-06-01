@@ -1,8 +1,8 @@
 ﻿using Acropolis.Application.EventHandlers;
-using Acropolis.Application.Events;
-using Acropolis.Application.Sagas;
+using Acropolis.Application.Sagas.DownloadVideo;
 using Acropolis.Infrastructure.EfCore;
 using Acropolis.Infrastructure.Extensions;
+using Acropolis.Infrastructure.Telegram.Extensions;
 using Acropolis.Infrastructure.YoutubeDownloader.EventHandlers;
 using Acropolis.Infrastructure.YoutubeDownloader.Extensions;
 using MassTransit;
@@ -18,16 +18,15 @@ public static class ServiceCollectionExtensions
     {
         services.TryAddSingleton(TimeProvider.System);
         services.AddHttpClient();
-        
+
         services.AddDbContextFactory<AppDbContext>(options =>
         {
             options.UseSqlite("Data Source=Acropolis_Messenger.db;cache=shared");
         });
 
         services.AddInfrastructure(configuration);
+        services.AddTelegramMessenger(configuration);
         services.AddYoutubeDownloaderServices(configuration);
-
-
 
         services.AddMassTransit(x =>
         {
@@ -42,11 +41,17 @@ public static class ServiceCollectionExtensions
                 r.LockStatementProvider = new SqliteLockStatementProvider();
             });
 
-            //x.AddEntityFrameworkOutbox<AppDbContext>(o =>
-            //{
-            //    o.UseSqlite();
-            //    o.LockStatementProvider = new SqliteLockStatementProvider();
-            //});
+            x.AddEntityFrameworkOutbox<AppDbContext>(o =>
+            {
+                o.UseSqlite();
+                o.UseBusOutbox();
+                o.LockStatementProvider = new SqliteLockStatementProvider();
+            });
+
+            x.AddConfigureEndpointsCallback((ctx, name, cfg) =>
+            {
+                cfg.UseEntityFrameworkOutbox<AppDbContext>(ctx);
+            });
 
             x.UsingRabbitMq((context, config) =>
             {

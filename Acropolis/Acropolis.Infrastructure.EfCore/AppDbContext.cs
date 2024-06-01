@@ -1,19 +1,33 @@
-﻿using MassTransit.EntityFrameworkCoreIntegration;
+﻿using MassTransit;
+using MassTransit.EntityFrameworkCoreIntegration;
 using Microsoft.EntityFrameworkCore;
 
 namespace Acropolis.Infrastructure.EfCore;
+
 public class AppDbContext : SagaDbContext
 {
     public AppDbContext(DbContextOptions options) : base(options)
     {
     }
 
+    public DbSet<InboxState> InboxStates => Set<InboxState>();
+    public DbSet<OutboxState> OutboxStates => Set<OutboxState>();
+
+    protected override IEnumerable<ISagaClassMap> Configurations =>
+    [
+        new DownloadVideoStateMap(),
+        new ExternalMessageRequestStateMap()
+    ];
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        base.OnModelCreating(modelBuilder);
         modelBuilder.UseCollation("BINARY");
+
+        modelBuilder.AddInboxStateEntity();
+        modelBuilder.AddOutboxMessageEntity();
+        modelBuilder.AddOutboxStateEntity();
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
@@ -21,10 +35,5 @@ public class AppDbContext : SagaDbContext
         base.ConfigureConventions(configurationBuilder);
         configurationBuilder.Properties<string>()
             .UseCollation("BINARY");
-    }
-
-    protected override IEnumerable<ISagaClassMap> Configurations
-    {
-        get { yield return new DownloadVideoStateMap(); }
     }
 }

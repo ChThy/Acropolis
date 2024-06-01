@@ -10,7 +10,6 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddYoutubeDownloaderServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.RegisterOptions<YoutubeOptions>(configuration, YoutubeOptions.Name);
-
         services.AddScoped(sp => new YoutubeClient(sp.GetRequiredService<HttpClient>()));
 
         return services;

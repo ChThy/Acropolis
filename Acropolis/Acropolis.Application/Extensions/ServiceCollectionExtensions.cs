@@ -10,12 +10,6 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
-        //services.AddMediatR(config =>
-        //{
-        //    config.RegisterServicesFromAssemblies(typeof(DownloadYoutubeVideoHandler).Assembly);
-        //});
-
-
         services.RegisterOptions<YoutubeSettings>(configuration, YoutubeSettings.Name);
         services.AddHttpClient<IYoutubeService, YoutubeService>((sp, client) =>
         {

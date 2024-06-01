@@ -1,80 +1,79 @@
-﻿//using Acropolis.Domain;
-//using Acropolis.Domain.Messenger;
-//using Acropolis.Domain.Repositories;
-//using Microsoft.Extensions.Hosting;
-//using Microsoft.Extensions.Logging;
-//using Microsoft.Extensions.Options;
-//using System.Text.Json;
-//using Telegram.Bot;
-//using Telegram.Bot.Polling;
-//using Telegram.Bot.Types;
-//using Telegram.Bot.Types.Enums;
+﻿using Acropolis.Application.Events;
+using Acropolis.Infrastructure.Telegram.Extensions;
+using MassTransit;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Telegram.Bot;
+using Telegram.Bot.Polling;
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 
-//namespace Acropolis.Infrastructure.Telegram;
+namespace Acropolis.Infrastructure.Telegram;
 
-//public sealed class MessageReceiver : BackgroundService
-//{
-//    private readonly TelegramBotClient TelegramClient;
-//    private readonly IIncomingRequestRepostory repository;
-//    private readonly IRequestProcessor requestProcessor;
-//    private readonly TelegramOptions options;
-//    private readonly ILogger<MessageReceiver> logger;
+public sealed class MessageReceiver(
+    TelegramBotClient telegramClient,
+    IBus bus,
+    IOptions<TelegramOptions> options,
+    ILogger<MessageReceiver> logger)
+    : BackgroundService
+{
+    private readonly TelegramOptions options = options.Value;
+    private readonly IBus bus = bus;
 
-//    private readonly ReceiverOptions receiverOptions = new()
-//    {
-//        AllowedUpdates = new[]
-//        {
-//            UpdateType.Message,
-//            UpdateType.ChannelPost,
-//            UpdateType.CallbackQuery
-//        }
-//    };
+    private readonly ReceiverOptions receiverOptions = new()
+    {
+        AllowedUpdates = new[]
+        {
+            UpdateType.Message,
+            UpdateType.ChannelPost,
+            UpdateType.CallbackQuery
+        }
+    };
 
-//    public MessageReceiver(
-//        TelegramBotClient telegramClient,
-//        IIncomingRequestRepostory repostiory,
-//        IRequestProcessor requestProcessor,
-//        IOptions<TelegramOptions> options,
-//        ILogger<MessageReceiver> logger)
-//    {
-//        this.TelegramClient = telegramClient;
-//        this.repository = repostiory;
-//        this.requestProcessor = requestProcessor;
-//        this.options = options.Value;
-//        this.logger = logger;
-//    }
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        if (!options.Enabled)
+        {
+            logger.LogWarning("Telegram messaging is disabled. No messages will be received.");
+            return Task.CompletedTask;
+        }
 
-//    protected override Task ExecuteAsync(CancellationToken stoppingToken)
-//    {
-//        if (!options.Enabled)
-//        {
-//            logger.LogWarning("Telegram messaging is disabled. No messages will be received.");
-//            return Task.CompletedTask;
-//        }
+        telegramClient.StartReceiving(
+            ReceiveUpdates,
+            OnError,
+            receiverOptions,
+            stoppingToken);
 
-//        TelegramClient.StartReceiving(
-//            updateHandler: ReceiveUpdates,
-//            pollingErrorHandler: OnError,
-//            receiverOptions: receiverOptions,
-//            cancellationToken: stoppingToken);
+        logger.LogInformation("Started receiving Telegram messages.");
 
-//        logger.LogInformation("Started receiving Telegram messages.");
+        return Task.CompletedTask;
+    }
 
-//        return Task.CompletedTask;
-//    }
+    private async Task ReceiveUpdates(ITelegramBotClient client, Update update, CancellationToken cancellationToken)
+    {
+        var @event = new ExternalMessageRequestReceived(
+            Guid.NewGuid(),
+            Constants.TelegramChannel,
+            DateTimeOffset.UtcNow,
+            ExtractMessage(update),
+            update.ExtractParams());
 
-//    private async Task ReceiveUpdates(ITelegramBotClient client, Update update, CancellationToken cancellationToken)
-//    {
-//        var rawContent = JsonSerializer.Serialize(update);
-//        var incomingRequest = IncomingRequest.Create(Guid.NewGuid(), DateTimeOffset.UtcNow, Domain.User.System, $"TELEGRAM_{update.Id}", rawContent);
+        await bus.Publish(@event, cancellationToken);
+    }
 
-//        await repository.Add(incomingRequest);
-//        await requestProcessor.Process(incomingRequest, cancellationToken);
-//    }
+    private Task OnError(ITelegramBotClient client, Exception exception, CancellationToken cancellationToken)
+    {
+        logger.LogError(exception, "Error while receiving Telegram Updates!");
+        return Task.CompletedTask;
+    }
 
-//    private Task OnError(ITelegramBotClient client, Exception exception, CancellationToken cancellationToken)
-//    {
-//        logger.LogError(exception, "Error while receiving Telegram Updates!");
-//        return Task.CompletedTask;
-//    }
-//}
+    private static string ExtractMessage(Update update)
+    {
+        var message = update?.Message?.Text ??
+                      update?.ChannelPost?.Text ??
+                      update?.CallbackQuery?.Data ??
+                      "NOP";
+        return message;
+    }
+}

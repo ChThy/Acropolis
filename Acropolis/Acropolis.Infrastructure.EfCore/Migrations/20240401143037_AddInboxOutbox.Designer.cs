@@ -3,6 +3,7 @@ using System;
 using Acropolis.Infrastructure.EfCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,16 +11,18 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Acropolis.Infrastructure.EfCore.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240401143037_AddInboxOutbox")]
+    partial class AddInboxOutbox
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .UseCollation("BINARY")
                 .HasAnnotation("ProductVersion", "8.0.3");
 
-            modelBuilder.Entity("Acropolis.Application.Sagas.DownloadVideo.DownloadVideoState", b =>
+            modelBuilder.Entity("Acropolis.Application.Sagas.DownloadVideoState", b =>
                 {
                     b.Property<Guid>("CorrelationId")
                         .HasColumnType("TEXT");
@@ -63,49 +66,6 @@ namespace Acropolis.Infrastructure.EfCore.Migrations
                         .IsUnique();
 
                     b.ToTable("DownloadVideoState");
-                });
-
-            modelBuilder.Entity("Acropolis.Application.Sagas.ExternalMessageRequest.ExternalMessageRequestState", b =>
-                {
-                    b.Property<Guid>("CorrelationId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Channel")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .UseCollation("BINARY");
-
-                    b.Property<string>("CurrentState")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("TEXT")
-                        .UseCollation("BINARY");
-
-                    b.Property<string>("MessageBody")
-                        .HasColumnType("TEXT")
-                        .UseCollation("BINARY");
-
-                    b.Property<string>("MessageProps")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("OriginatingExternalMessageId")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .UseCollation("BINARY");
-
-                    b.Property<DateTimeOffset>("ReceivedOn")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("RowVersion")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(0);
-
-                    b.HasKey("CorrelationId");
-
-                    b.ToTable("ExternalMessageRequestState");
                 });
 
             modelBuilder.Entity("MassTransit.EntityFrameworkCoreIntegration.InboxState", b =>
@@ -279,7 +239,7 @@ namespace Acropolis.Infrastructure.EfCore.Migrations
                     b.ToTable("OutboxStates");
                 });
 
-            modelBuilder.Entity("Acropolis.Application.Sagas.DownloadVideo.DownloadVideoState", b =>
+            modelBuilder.Entity("Acropolis.Application.Sagas.DownloadVideoState", b =>
                 {
                     b.OwnsOne("Acropolis.Application.Models.VideoMetaData", "VideoMetaData", b1 =>
                         {

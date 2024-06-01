@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Acropolis.Application\Acropolis.Application.csproj" />
     <ProjectReference Include="..\Acropolis.Shared\Acropolis.Shared.csproj" />
   </ItemGroup>
 
