@@ -4,7 +4,7 @@ using Telegram.Bot;
 
 namespace Acropolis.Infrastructure.Telegram.Messenger;
 
-public class SendMessageHandler(TelegramBotClient telegramBotClient) : IConsumer<ExternalMessageReplyRequested>
+public class ExternalMessageReplyRequestedHandler(TelegramBotClient telegramBotClient) : IConsumer<ExternalMessageReplyRequested>
 {
     public async Task Consume(ConsumeContext<ExternalMessageReplyRequested> context)
     {

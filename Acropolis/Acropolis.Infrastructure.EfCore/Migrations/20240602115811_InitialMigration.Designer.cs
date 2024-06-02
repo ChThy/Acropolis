@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Acropolis.Infrastructure.EfCore.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240601175834_AddExternalMessageRequestState")]
-    partial class AddExternalMessageRequestState
+    [Migration("20240602115811_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -91,11 +91,6 @@ namespace Acropolis.Infrastructure.EfCore.Migrations
                     b.Property<string>("MessageProps")
                         .IsRequired()
                         .HasColumnType("TEXT");
-
-                    b.Property<string>("OriginatingExternalMessageId")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .UseCollation("BINARY");
 
                     b.Property<DateTimeOffset>("ReceivedOn")
                         .HasColumnType("TEXT");

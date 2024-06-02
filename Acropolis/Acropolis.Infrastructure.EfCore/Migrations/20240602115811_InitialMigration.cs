@@ -1,4 +1,6 @@
 ﻿using System;
+using Acropolis.Application.Sagas.DownloadVideo;
+using Acropolis.Application.Sagas.ExternalMessageRequest;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -6,11 +8,51 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Acropolis.Infrastructure.EfCore.Migrations
 {
     /// <inheritdoc />
-    public partial class AddInboxOutbox : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "DownloadVideoState",
+                columns: table => new
+                {
+                    CorrelationId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    RowVersion = table.Column<int>(type: "INTEGER", rowVersion: true, nullable: false, defaultValue: 0),
+                    CurrentState = table.Column<string>(type: "TEXT", maxLength: 64, nullable: false, collation: "BINARY"),
+                    Url = table.Column<string>(type: "TEXT", nullable: false, collation: "BINARY"),
+                    RequestedTimestamp = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
+                    DownloadedTimestamp = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
+                    VideoMetaData_VideoId = table.Column<string>(type: "TEXT", nullable: true, collation: "BINARY"),
+                    VideoMetaData_VideoTitle = table.Column<string>(type: "TEXT", nullable: true, collation: "BINARY"),
+                    VideoMetaData_Author = table.Column<string>(type: "TEXT", nullable: true, collation: "BINARY"),
+                    VideoMetaData_VideoUploadTimestamp = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
+                    VideoMetaData_StorageLocation = table.Column<string>(type: "TEXT", nullable: true, collation: "BINARY"),
+                    ErrorMessage = table.Column<string>(type: "TEXT", nullable: true, collation: "BINARY"),
+                    ErrorTimestamp = table.Column<DateTimeOffset>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DownloadVideoState", x => x.CorrelationId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ExternalMessageRequestState",
+                columns: table => new
+                {
+                    CorrelationId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    RowVersion = table.Column<int>(type: "INTEGER", rowVersion: true, nullable: false, defaultValue: 0),
+                    CurrentState = table.Column<string>(type: "TEXT", maxLength: 64, nullable: false, collation: "BINARY"),
+                    Channel = table.Column<string>(type: "TEXT", nullable: false, collation: "BINARY"),
+                    ReceivedOn = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
+                    MessageBody = table.Column<string>(type: "TEXT", nullable: true, collation: "BINARY"),
+                    MessageProps = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ExternalMessageRequestState", x => x.CorrelationId);
+                });
+
             migrationBuilder.CreateTable(
                 name: "InboxStates",
                 columns: table => new
@@ -83,6 +125,18 @@ namespace Acropolis.Infrastructure.EfCore.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_DownloadVideoState_CorrelationId_Url",
+                table: "DownloadVideoState",
+                columns: new[] { "CorrelationId", "Url" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DownloadVideoState_Url",
+                table: "DownloadVideoState",
+                column: "Url",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_InboxStates_Delivered",
                 table: "InboxStates",
                 column: "Delivered");
@@ -113,11 +167,23 @@ namespace Acropolis.Infrastructure.EfCore.Migrations
                 name: "IX_OutboxStates_Created",
                 table: "OutboxStates",
                 column: "Created");
+            
+            if (migrationBuilder.IsSqlite())
+            {
+                migrationBuilder.Sql(Triggers.GetCreateRowVersionTriggerSql(nameof(DownloadVideoState)));
+                migrationBuilder.Sql(Triggers.GetCreateRowVersionTriggerSql(nameof(ExternalMessageRequestState)));
+            }
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "DownloadVideoState");
+
+            migrationBuilder.DropTable(
+                name: "ExternalMessageRequestState");
+
             migrationBuilder.DropTable(
                 name: "InboxStates");
 

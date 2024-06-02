@@ -41,7 +41,7 @@ public class Program
             [FromBody] DownloadVideoRequest request,
             CancellationToken cancellationToken) =>
         {
-            await bus.Publish(new VideoDownloadRequestReceived(request.Url, DateTimeOffset.UtcNow),
+            await bus.Publish(new UrlRequestReceived(Guid.NewGuid(), request.Url, DateTimeOffset.UtcNow),
                 ctx => ctx.CorrelationId = NewId.NextGuid(), cancellationToken);
             return Results.Accepted();
         });

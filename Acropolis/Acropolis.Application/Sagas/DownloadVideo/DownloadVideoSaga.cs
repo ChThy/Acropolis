@@ -9,75 +9,115 @@ public class DownloadVideoSaga : MassTransitStateMachine<DownloadVideoState>
     {
         InstanceState(e => e.CurrentState);
         Initially(
-            When(WhenVideoDownloadRequestReceived)
-                .ThenAsync(async x =>
+            When(WhenUrlRequestReceived)
+                .ThenAsync(async ctx =>
                 {
-                    var (saga, message) = x.Destruct();
+                    var (saga, message) = ctx.Deconstruct();
 
                     saga.RequestedTimestamp = message.Timestamp;
                     saga.Url = message.Url;
 
-                    await x.Publish(new VideoDownloadRequested(saga.Url));
+                    await ctx.Publish(new VideoDownloadRequested(saga.Url));
                 })
                 .TransitionTo(DownloadRequested));
 
         During(DownloadRequested,
-            When(WhenVideoDownloadRequestReceived)
-                .ThenAsync(async x =>
+            When(WhenUrlRequestReceived)
+                .ThenAsync(async ctx =>
                 {
-                    var (saga, message) = x.Destruct();
+                    var (saga, message) = ctx.Deconstruct();
 
-                    await x.Publish(new VideoDownloadRequested(saga.Url));  //TODO: Redownload?
-                    await x.Publish(new VideoDownloadAlreadyRequested(saga.Url, saga.RequestedTimestamp));
+                    await ctx.Publish(new VideoDownloadRequested(saga.Url)); //TODO: Redownload?
+                    await ctx.Publish(new VideoDownloadAlreadyRequested(saga.Url, saga.RequestedTimestamp));
                 }),
             When(WhenVideoDownloaded)
-                .Then(x =>
+                .Then(ctx =>
                 {
-                    var (saga, message) = x.Destruct();
+                    var (saga, message) = ctx.Deconstruct();
                     saga.DownloadedTimestamp = message.Timestamp;
                     saga.VideoMetaData = message.VideoMetaData;
                 })
+                .Publish(ctx =>
+                {
+                    var (saga, message) = ctx.Deconstruct();
+                    return new UrlRequestReplyRequested(
+                        saga.CorrelationId,
+                        saga.Url,
+                        "Done");
+                })
                 .TransitionTo(Downloaded),
+            When(WhenVideoDownloadSkipped)
+                .TransitionTo(DownloadSkipped),
             When(WhenVideoDownloadFailed)
                 .Then(x =>
                 {
-                    var (saga, message) = x.Destruct();
+                    var (saga, message) = x.Deconstruct();
                     saga.ErrorMessage = message.ErrorMessage;
                     saga.DownloadedTimestamp = message.Timestamp;
+                })
+                .Publish(ctx =>
+                {
+                    var (saga, message) = ctx.Deconstruct();
+                    return new UrlRequestReplyRequested(
+                        saga.CorrelationId,
+                        saga.Url,
+                        "Download failed");
                 })
                 .TransitionTo(DownloadFailed)
         );
 
         During(Downloaded,
-            When(WhenVideoDownloadRequestReceived)
-                .ThenAsync(async x =>
+            When(WhenUrlRequestReceived)
+                .ThenAsync(async ctx =>
                 {
-                    var (saga, message) = x.Destruct();
-                    await x.Publish(new VideoAlreadyDownloaded(saga.Url, saga.DownloadedTimestamp!.Value, saga.VideoMetaData!));
+                    var (saga, message) = ctx.Deconstruct();
+                    await ctx.Publish(new VideoAlreadyDownloaded(saga.Url, saga.DownloadedTimestamp!.Value, saga.VideoMetaData!));
                 }),
             When(WhenVideoDownloaded)
                 .Then(x =>
                 {
-                    var (saga, message) = x.Destruct();
+                    var (saga, message) = x.Deconstruct();
 
                     saga.DownloadedTimestamp = message.Timestamp;
                     saga.VideoMetaData = message.VideoMetaData;
                 })
         );
+        
+        During(DownloadSkipped,
+            Ignore(WhenUrlRequestReceived));
+        During(DownloadFailed,
+            When(WhenUrlRequestReceived)
+                .Then(ctx =>
+                {
+                    var (saga, message) = ctx.Deconstruct();
+                    saga.ErrorTimestamp = null;
+                    saga.ErrorMessage = null;
+                })
+                .Publish(ctx =>
+                {
+                    var (saga, message) = ctx.Deconstruct();
+                    return new VideoDownloadRequested(saga.Url);
+                })
+                .TransitionTo(DownloadRequested)
+            );
 
-        Event(() => WhenVideoDownloadRequestReceived,
-            e => e.CorrelateBy(ctx => ctx.Url, saga => saga.Message.Url));
+        Event(() => WhenUrlRequestReceived,
+            e => e.CorrelateById(ctx => ctx.Message.RequestId));
         Event(() => WhenVideoDownloaded,
+            e => e.CorrelateBy(ctx => ctx.Url, saga => saga.Message.Url));
+        Event(() => WhenVideoDownloadSkipped,
             e => e.CorrelateBy(ctx => ctx.Url, saga => saga.Message.Url));
         Event(() => WhenVideoDownloadFailed,
             e => e.CorrelateBy(ctx => ctx.Url, saga => saga.Message.Url));
     }
 
-    public Event<VideoDownloadRequestReceived> WhenVideoDownloadRequestReceived { get; private set; } = null!;
+    public Event<UrlRequestReceived> WhenUrlRequestReceived { get; private set; } = null!;
     public Event<VideoDownloaded> WhenVideoDownloaded { get; private set; } = null!;
+    public Event<VideoDownloadSkipped> WhenVideoDownloadSkipped { get; private set; } = null!;
     public Event<VideoDownloadFailed> WhenVideoDownloadFailed { get; private set; } = null!;
 
     public State DownloadRequested { get; private set; } = null!;
     public State Downloaded { get; private set; } = null!;
     public State DownloadFailed { get; private set; } = null!;
+    public State DownloadSkipped { get; private set; } = null!;
 }

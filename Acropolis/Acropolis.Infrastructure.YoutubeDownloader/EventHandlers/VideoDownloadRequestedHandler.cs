@@ -32,7 +32,7 @@ public class VideoDownloadRequestedHandler(
         if (!IsYoutubeUrl(url))
         {
             logger.LogWarning("Invalid Youtube URL: {url}", url);
-            await context.Publish(new VideoDownloadFailed(url, timeProvider.GetLocalNow(), "Invalid Youtube URL."));
+            await context.Publish(new VideoDownloadSkipped(url, timeProvider.GetLocalNow(), "Not a Youtube URL."));
             return;
         }
 

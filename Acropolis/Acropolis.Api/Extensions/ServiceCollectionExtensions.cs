@@ -1,8 +1,10 @@
 ﻿using Acropolis.Application.EventHandlers;
 using Acropolis.Application.Sagas.DownloadVideo;
+using Acropolis.Application.Sagas.ExternalMessageRequest;
 using Acropolis.Infrastructure.EfCore;
 using Acropolis.Infrastructure.Extensions;
 using Acropolis.Infrastructure.Telegram.Extensions;
+using Acropolis.Infrastructure.Telegram.Messenger;
 using Acropolis.Infrastructure.YoutubeDownloader.EventHandlers;
 using Acropolis.Infrastructure.YoutubeDownloader.Extensions;
 using MassTransit;
@@ -30,10 +32,19 @@ public static class ServiceCollectionExtensions
 
         services.AddMassTransit(x =>
         {
-            x.AddConsumers(typeof(VideoDownloadAlreadyRequestedHandler).Assembly, typeof(VideoDownloadRequestedHandler).Assembly);
+            x.AddConsumers(typeof(VideoDownloadAlreadyRequestedHandler).Assembly, 
+                typeof(VideoDownloadRequestedHandler).Assembly,
+                typeof(ExternalMessageReplyRequestedHandler).Assembly);
             x.AddSagaStateMachines(typeof(DownloadVideoSaga).Assembly);
 
             x.AddSagaRepository<DownloadVideoState>().EntityFrameworkRepository(r =>
+            {
+                r.ConcurrencyMode = ConcurrencyMode.Optimistic;
+
+                r.ExistingDbContext<AppDbContext>();
+                r.LockStatementProvider = new SqliteLockStatementProvider();
+            });
+            x.AddSagaRepository<ExternalMessageRequestState>().EntityFrameworkRepository(r =>
             {
                 r.ConcurrencyMode = ConcurrencyMode.Optimistic;
 

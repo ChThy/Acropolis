@@ -9,7 +9,6 @@ public sealed class ExternalMessageRequestState : SagaStateMachineInstance
     public string CurrentState { get; set; } = null!;
 
     public string Channel { get; set; } = null!;
-    public string OriginatingExternalMessageId { get; set; } = null!;
     public DateTimeOffset ReceivedOn { get; set; }
     public string? MessageBody { get; set; }
 

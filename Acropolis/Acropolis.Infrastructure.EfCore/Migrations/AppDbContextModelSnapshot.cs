@@ -89,11 +89,6 @@ namespace Acropolis.Infrastructure.EfCore.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("OriginatingExternalMessageId")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .UseCollation("BINARY");
-
                     b.Property<DateTimeOffset>("ReceivedOn")
                         .HasColumnType("TEXT");
 
