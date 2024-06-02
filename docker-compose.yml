@@ -1,84 +1,64 @@
 version: '3.9'
 services:
-  acropolis:
-    build: 
-      context: ./Acropolis
-      dockerfile: ./Acropolis.Api/Dockerfile
+  # acropolis:
+  #   build: 
+  #     context: ./Acropolis
+  #     dockerfile: ./Acropolis.Api/Dockerfile
+  #   ports:
+  #     - "8000:8080"
+  #   user: "root:root"
+
+  #   environment:
+  #     - ConnectionStrings__MessengerDatabase=Data Source=data/Acropolis_Messenger.db;cache=shared
+  #     - Telegram__UserToken=${TELEGRAM_TOKEN}
+  #     - Telegram__ChatId=${TELEGRAM_CHAT_ID}
+  #     - YoutubeSettings__YoutubeDownloaderEndpoint=http://youtubedownloader:8080/
+  #     - ScrapeSettings__ScraperEndpoint=http://scraper:8080/
+  #     - DaprSettings__PubSubName=redis-pub-sub
+  #     - DaprSettings__ScraperTopicName=page-scraped
+  #     - DaprSettings__YoutubeDownloaderTopicName=youtube-video-downloaded
+  #   volumes:
+  #     - "./local/acropolis/data:/app/data"
+
+  rabbitmq:
+    image: rabbitmq:management
+    hostname: rabbitmq
     ports:
-      - "8000:8080"
-    user: "root:root"
-
+      - 5672:5672
+      - 15672:15672
     environment:
-      - ConnectionStrings__MessengerDatabase=Data Source=data/Acropolis_Messenger.db;cache=shared
-      - Telegram__UserToken=${TELEGRAM_TOKEN}
-      - Telegram__ChatId=${TELEGRAM_CHAT_ID}
-      - YoutubeSettings__YoutubeDownloaderEndpoint=http://youtubedownloader:8080/
-      - ScrapeSettings__ScraperEndpoint=http://scraper:8080/
-      - DaprSettings__PubSubName=redis-pub-sub
-      - DaprSettings__ScraperTopicName=page-scraped
-      - DaprSettings__YoutubeDownloaderTopicName=youtube-video-downloaded
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
     volumes:
-      - "./local/acropolis/data:/app/data"
+      - rabbitmq:/var/lib/rabbitmq
 
-  acropolis-sidecar:
-    image: "daprio/daprd:edge"
-    command: ["./daprd",
-      "--app-id", "acropolis",
-      "--app-port", "8080",
-      "--dapr-http-port", "3500",
-      "--resources-path", "/components"]
-    volumes:
-      - "./local/dapr/components/:/components"
-    network_mode: "service:acropolis"
+volumes:
+  rabbitmq:
 
-  scraper:
-    image: ghcr.io/chthy/scraper:0.1.0-9
-    ports:
-      - "8001:8080"
-    cap_add:
-      - "SYS_ADMIN"
-    environment:
-      - ConnectionStrings__database=Data Source=data/Scraper.db;cache=shared
-      - DaprSettings__PubSubName=redis-pub-sub
-      - DaprSettings__TopicName=page-scraped
-    volumes:
-      - "./local/scraper/downloads:/app/downloads"
-      - "./local/scraper/data:/app/data"
+  # scraper:
+  #   image: ghcr.io/chthy/scraper:0.1.0-9
+  #   ports:
+  #     - "8001:8080"
+  #   cap_add:
+  #     - "SYS_ADMIN"
+  #   environment:
+  #     - ConnectionStrings__database=Data Source=data/Scraper.db;cache=shared
+  #     - DaprSettings__PubSubName=redis-pub-sub
+  #     - DaprSettings__TopicName=page-scraped
+  #   volumes:
+  #     - "./local/scraper/downloads:/app/downloads"
+  #     - "./local/scraper/data:/app/data"
 
-  scraper-sidecar:
-    image: "daprio/daprd:edge"
-    command: ["./daprd",
-      "--app-id", "scraper",
-      "--app-port", "8080",
-      "--dapr-http-port", "3500",
-      "--resources-path", "/components"]
-    volumes:
-      - "./local/dapr/components/:/components"
-    network_mode: "service:scraper"
+  # youtubedownloader: 
+  #   image: ghcr.io/chthy/youtubedownloader:0.1.0-28
+  #   ports:
+  #     - "8002:8080"
+  #   environment:
+  #     - ConnectionStrings__database=Data Source=data/YoutubeDownloader.db;cache=shared
+  #     - DaprSettings__PubSubName=redis-pub-sub
+  #     - DaprSettings__TopicName=youtube-video-downloaded
+  #   volumes:
+  #     - "./local/youtubedownloader/downloads:/app/downloads"
+  #     - "./local/youtubedownloader/data:/app/data"
 
-  youtubedownloader: 
-    image: ghcr.io/chthy/youtubedownloader:0.1.0-28
-    ports:
-      - "8002:8080"
-    environment:
-      - ConnectionStrings__database=Data Source=data/YoutubeDownloader.db;cache=shared
-      - DaprSettings__PubSubName=redis-pub-sub
-      - DaprSettings__TopicName=youtube-video-downloaded
-    volumes:
-      - "./local/youtubedownloader/downloads:/app/downloads"
-      - "./local/youtubedownloader/data:/app/data"
-
-  youtubedownloader-sidecar:
-    image: "daprio/daprd:edge"
-    command: ["./daprd",
-      "--app-id", "youtubedownloader",
-      "--app-port", "8080",
-      "--dapr-http-port", "3500",
-      "--resources-path", "/components"]
-    volumes:
-      - "./local/dapr/components/:/components"
-    network_mode: "service:youtubedownloader"
-
-  redis:
-    image: "redis:alpine"
 # docker compose --env-file local.env up --build -d

@@ -1,14 +1,14 @@
-﻿using Acropolis.Infrastructure.EfCore.Messenger;
+﻿using Acropolis.Infrastructure.EfCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Acropolis.Api.HostedServices;
 
 public class DatabaseMigrator : IHostedService
 {
-    private readonly IDbContextFactory<MessengerDbContext> messengerDbContextFactory;
+    private readonly IDbContextFactory<AppDbContext> messengerDbContextFactory;
     private readonly ILogger<DatabaseMigrator> logger;
 
-    public DatabaseMigrator(IDbContextFactory<MessengerDbContext> messengerDbContextFactory, ILogger<DatabaseMigrator> logger)
+    public DatabaseMigrator(IDbContextFactory<AppDbContext> messengerDbContextFactory, ILogger<DatabaseMigrator> logger)
     {
         this.messengerDbContextFactory = messengerDbContextFactory;
         this.logger = logger;

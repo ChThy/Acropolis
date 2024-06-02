@@ -1,4 +1,6 @@
-﻿public record YoutubeSettings
+﻿namespace Acropolis.Application.YoutubeDownloader;
+
+public record YoutubeSettings
 {
     public const string Name = "YoutubeSettings";
     public string YoutubeDownloaderEndpoint { get; set; } = null!;

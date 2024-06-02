@@ -6,19 +6,20 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <InvariantGlobalization>true</InvariantGlobalization>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <UserSecretsId>secrets</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.0-preview.7.23375.9" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Acropolis.Application\Acropolis.Application.csproj" />
     <ProjectReference Include="..\Acropolis.Domain\Acropolis.Domain.csproj" />
-    <ProjectReference Include="..\Acropolis.Infrastructure.Dapr\Acropolis.Infrastructure.Dapr.csproj" />
     <ProjectReference Include="..\Acropolis.Infrastructure.EfCore\Acropolis.Infrastructure.EfCore.csproj" />
     <ProjectReference Include="..\Acropolis.Infrastructure.Telegram\Acropolis.Infrastructure.Telegram.csproj" />
+    <ProjectReference Include="..\Acropolis.Infrastructure.YoutubeDownloader\Acropolis.Infrastructure.YoutubeDownloader.csproj" />
     <ProjectReference Include="..\Acropolis.Infrastructure\Acropolis.Infrastructure.csproj" />
   </ItemGroup>
 
