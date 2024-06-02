@@ -102,13 +102,13 @@ public class DownloadVideoSaga : MassTransitStateMachine<DownloadVideoState>
             );
 
         Event(() => WhenUrlRequestReceived,
-            e => e.CorrelateById(ctx => ctx.Message.RequestId));
+            e => e.CorrelateById(ctx => ctx.Message.RequestId).CorrelateBy(saga => saga.Url, ctx => ctx.Message.Url));
         Event(() => WhenVideoDownloaded,
-            e => e.CorrelateBy(ctx => ctx.Url, saga => saga.Message.Url));
+            e => e.CorrelateBy(saga => saga.Url, ctx => ctx.Message.Url));
         Event(() => WhenVideoDownloadSkipped,
-            e => e.CorrelateBy(ctx => ctx.Url, saga => saga.Message.Url));
+            e => e.CorrelateBy(saga => saga.Url, ctx => ctx.Message.Url));
         Event(() => WhenVideoDownloadFailed,
-            e => e.CorrelateBy(ctx => ctx.Url, saga => saga.Message.Url));
+            e => e.CorrelateBy(saga => saga.Url, ctx => ctx.Message.Url));
     }
 
     public Event<UrlRequestReceived> WhenUrlRequestReceived { get; private set; } = null!;
