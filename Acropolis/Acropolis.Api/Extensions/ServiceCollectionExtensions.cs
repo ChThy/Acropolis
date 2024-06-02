@@ -23,7 +23,7 @@ public static class ServiceCollectionExtensions
 
         services.AddDbContextFactory<AppDbContext>(options =>
         {
-            options.UseSqlite("Data Source=Acropolis_Messenger.db;cache=shared");
+            options.UseSqlite(configuration.GetConnectionString("Database"));
         });
 
         services.AddInfrastructure(configuration);
@@ -68,8 +68,13 @@ public static class ServiceCollectionExtensions
             {
                 var username = configuration.GetValue<string>("RabbitMq:User");
                 var password = configuration.GetValue<string>("RabbitMq:Password");
-
-                config.Host("localhost", "/", r =>
+                var host = configuration.GetValue<string>("RabbitMq:Host");
+                var virtualHost = configuration.GetValue<string>("RabbitMq:VirtualHost");
+                
+                Console.WriteLine(host);
+                Console.WriteLine(virtualHost);
+                
+                config.Host(host, virtualHost, r =>
                 {
                     r.Username(username);
                     r.Password(password);
