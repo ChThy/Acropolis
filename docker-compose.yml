@@ -9,14 +9,13 @@ services:
   #   user: "root:root"
 
   #   environment:
-  #     - ConnectionStrings__MessengerDatabase=Data Source=data/Acropolis_Messenger.db;cache=shared
+  #     - ConnectionStrings__Database=Data Source=data/Acropolis.db;cache=shared
   #     - Telegram__UserToken=${TELEGRAM_TOKEN}
   #     - Telegram__ChatId=${TELEGRAM_CHAT_ID}
-  #     - YoutubeSettings__YoutubeDownloaderEndpoint=http://youtubedownloader:8080/
-  #     - ScrapeSettings__ScraperEndpoint=http://scraper:8080/
-  #     - DaprSettings__PubSubName=redis-pub-sub
-  #     - DaprSettings__ScraperTopicName=page-scraped
-  #     - DaprSettings__YoutubeDownloaderTopicName=youtube-video-downloaded
+  #     - RabbitMq__User=${RABBITMQ_DEFAULT_USER}
+  #     - RabbitMq__Password=${RABBITMQ_DEFAULT_PASS}
+  #     - RabbitMq__Host=rabbitmq
+  #     - RabbitMq__VirtualHost=/
   #   volumes:
   #     - "./local/acropolis/data:/app/data"
 
