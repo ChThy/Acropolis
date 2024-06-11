@@ -1,6 +1,6 @@
 ﻿using MassTransit;
 
-namespace Acropolis.Application.Extensions.MassTransitExteions;
+namespace Acropolis.Application.Extensions.MassTransitExtensions;
 public static class BehaviourContextExtensions
 {
     public static (TSaga saga, TMessage message) Deconstruct<TSaga, TMessage>(this BehaviorContext<TSaga, TMessage> ctx) 

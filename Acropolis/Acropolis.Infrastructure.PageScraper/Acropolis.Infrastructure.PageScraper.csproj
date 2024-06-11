@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Acropolis.Application\Acropolis.Application.csproj" />
+      <ProjectReference Include="..\Acropolis.Domain\Acropolis.Domain.csproj" />
+      <ProjectReference Include="..\Acropolis.Infrastructure\Acropolis.Infrastructure.csproj" />
+      <ProjectReference Include="..\Acropolis.Shared\Acropolis.Shared.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="PuppeteerSharp" Version="18.0.1" />
+    </ItemGroup>
+
+</Project>

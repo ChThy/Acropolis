@@ -10,12 +10,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.RegisterOptions<ScrapeSettings>(configuration, ScrapeSettings.Name);
-        services.AddHttpClient<IScrapeService, ScrapeService>((sp, client) =>
-        {
-            var options = sp.GetOptions<ScrapeSettings>();
-            client.BaseAddress = new Uri(options.ScraperEndpoint);
-        });
-
+        
         return services;
     }
 }

@@ -19,6 +19,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acropolis.Infrastructure.Yo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acropolis.Infrastructure", "Acropolis.Infrastructure\Acropolis.Infrastructure.csproj", "{183C43FF-9EB6-422D-80A2-E07688D2657F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acropolis.Infrastructure.PageScraper", "Acropolis.Infrastructure.PageScraper\Acropolis.Infrastructure.PageScraper.csproj", "{DE9C31DB-3D1B-4432-B236-83EBDA57656B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +59,10 @@ Global
 		{183C43FF-9EB6-422D-80A2-E07688D2657F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{183C43FF-9EB6-422D-80A2-E07688D2657F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{183C43FF-9EB6-422D-80A2-E07688D2657F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE9C31DB-3D1B-4432-B236-83EBDA57656B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE9C31DB-3D1B-4432-B236-83EBDA57656B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE9C31DB-3D1B-4432-B236-83EBDA57656B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE9C31DB-3D1B-4432-B236-83EBDA57656B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

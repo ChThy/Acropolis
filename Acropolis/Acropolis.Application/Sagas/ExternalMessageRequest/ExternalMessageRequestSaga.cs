@@ -1,5 +1,5 @@
 ﻿using Acropolis.Application.Events;
-using Acropolis.Application.Extensions.MassTransitExteions;
+using Acropolis.Application.Extensions.MassTransitExtensions;
 using MassTransit;
 
 namespace Acropolis.Application.Sagas.ExternalMessageRequest;
