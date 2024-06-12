@@ -16,6 +16,7 @@ public class AppDbContext : SagaDbContext
     protected override IEnumerable<ISagaClassMap> Configurations =>
     [
         new DownloadVideoStateMap(),
+        new ScrapePageStateMap(),
         new ExternalMessageRequestStateMap()
     ];
 

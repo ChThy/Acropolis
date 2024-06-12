@@ -1,4 +1,7 @@
 using System.Runtime.InteropServices;
+using Acropolis.Infrastructure.PageScraper.BackgroundWorkers;
+using Acropolis.Infrastructure.PageScraper.Options;
+using Acropolis.Shared.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PuppeteerSharp;
@@ -10,6 +13,9 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddPageScraper(this IServiceCollection services, IConfiguration configuration)
     {
+        services.RegisterOptions<ScrapeOptions>(configuration, ScrapeOptions.Name);
+        services.AddHostedService<BrowserDownloader>();
+        
         services.Configure<LaunchOptions>(o =>
         {
             o.Headless = true;
@@ -24,7 +30,8 @@ public static class ServiceCollectionExtensions
         {
             o.FullPage = true;
         });
-        
+
+        services.AddScoped<Browser>();
 
         return services;
     }

@@ -16,18 +16,13 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
         builder.Services.AddHostedService<DatabaseMigrator>();
 
-        //builder.Services.AddPersistence(builder.Configuration);
-
-        builder.Services.AddServices(builder.Configuration);
-        builder.Services.AddApplicationServices(builder.Configuration);
-
         builder.Services.AddAuthorization();
-
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
+        
+        builder.Services.AddServices(builder.Configuration);
 
         var app = builder.Build();
-
 
         app.UseSwagger();
         app.UseSwaggerUI();

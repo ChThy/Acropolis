@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PuppeteerSharp;
 
-namespace Acropolis.Infrastructure.PageScraper.Extensions;
+namespace Acropolis.Infrastructure.PageScraper;
 
 public class Browser(
     IOptions<LaunchOptions> launchOptions,
@@ -21,7 +21,7 @@ public class Browser(
         return Puppeteer.LaunchAsync(launchOptions);
     }
 
-    public async Task<(string, Stream)> GetPdf(string url)
+    public async Task<ScrapeResponse> GetPdf(string url)
     {
         await using var browser = await GetBrowser();
         logger.LogDebug("Browser started");
@@ -34,10 +34,10 @@ public class Browser(
 
         var result = await page.PdfStreamAsync(pdfOptions);
         logger.LogDebug("PDF stream taken");
-        return (pageTitle.RemoveInvalidFileNameChars(), result);
+        return new ScrapeResponse(pageTitle, new Uri(url).Host, Path.Combine(pageTitle.RemoveInvalidFileNameChars(), ".pdf"), result);
     }
 
-    public async Task<(string, Stream)> GetImage(string url)
+    public async Task<ScrapeResponse> GetImage(string url)
     {
         await using var browser = await GetBrowser();
         logger.LogDebug("Browser started");
@@ -50,6 +50,6 @@ public class Browser(
 
         var result = await page.ScreenshotStreamAsync(screenshotOptions);
         logger.LogDebug("Screenshot stream taken");
-        return (pageTitle.RemoveInvalidFileNameChars(), result);
+        return new ScrapeResponse(pageTitle, new Uri(url).Host, Path.Combine(pageTitle.RemoveInvalidFileNameChars(), ".png"), result);
     }
 }

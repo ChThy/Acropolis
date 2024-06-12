@@ -1,4 +1,5 @@
 ﻿using Acropolis.Application.Events;
+using Acropolis.Application.Events.VideoDownloader;
 using Acropolis.Application.Models;
 using Acropolis.Infrastructure.FileStorages;
 using Acropolis.Infrastructure.YoutubeDownloader.Helpers;
@@ -21,8 +22,8 @@ public class VideoDownloadRequestedHandler(
     private readonly YoutubeClient youtubeClient = youtubeClient;
     private readonly IFileStorage fileStorage = fileStorage;
     private readonly TimeProvider timeProvider = timeProvider;
-    private readonly YoutubeOptions youtubeOptions = optionsMonitor.CurrentValue;
     private readonly ILogger<VideoDownloadRequestedHandler> logger = logger;
+    private readonly YoutubeOptions youtubeOptions = optionsMonitor.CurrentValue;
 
     public async Task Consume(ConsumeContext<VideoDownloadRequested> context)
     {
