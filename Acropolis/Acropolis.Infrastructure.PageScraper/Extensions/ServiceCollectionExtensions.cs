@@ -14,12 +14,12 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddPageScraper(this IServiceCollection services, IConfiguration configuration)
     {
         services.RegisterOptions<ScrapeOptions>(configuration, ScrapeOptions.Name);
+        services.AddSingleton<InstalledBrowsers>();
         services.AddHostedService<BrowserDownloader>();
-        
+
         services.Configure<LaunchOptions>(o =>
         {
             o.Headless = true;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) o.ExecutablePath = "google-chrome-stable";
         });
         services.Configure<PdfOptions>(o =>
         {
