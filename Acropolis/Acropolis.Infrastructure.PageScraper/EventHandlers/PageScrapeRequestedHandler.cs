@@ -53,6 +53,6 @@ public class PageScrapeRequestedHandler(
     private static string ConstructFileName(string domain, DateTimeOffset uploaded, string filename)
     {
         var timestamp = uploaded.ToString("yyyyMMdd");
-        return Path.Join(domain, $"{timestamp}_{filename}");
+        return Path.Join("scraper", domain, $"{timestamp}_{filename}");
     }
 }

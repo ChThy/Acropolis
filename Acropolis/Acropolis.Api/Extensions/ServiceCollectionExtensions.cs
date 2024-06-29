@@ -80,9 +80,6 @@ public static class ServiceCollectionExtensions
                 var host = configuration.GetValue<string>("RabbitMq:Host");
                 var virtualHost = configuration.GetValue<string>("RabbitMq:VirtualHost");
 
-                Console.WriteLine(host);
-                Console.WriteLine(virtualHost);
-
                 config.Host(host, virtualHost, r =>
                 {
                     r.Username(username);
