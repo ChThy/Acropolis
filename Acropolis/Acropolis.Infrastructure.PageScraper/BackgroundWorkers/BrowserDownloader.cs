@@ -12,21 +12,17 @@ public class BrowserDownloader(InstalledBrowsers installedBrowsers, ILogger<Brow
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        // if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        // {
-        //     logger.LogInformation("Running on Linux and assuming stable Chrome is already installed.");
-        //     return;
-        // }
-        
         var browserFetcher = new BrowserFetcher(new BrowserFetcherOptions
         {
             Path = "browser",
             Platform = GetPlatform()
         });
-
-        await browserFetcher.DownloadAsync();
         
-        logger.LogInformation("Browser downloaded");
+        var installedBrowser = await browserFetcher.DownloadAsync();
+        var executablePath = installedBrowser.GetExecutablePath();
+        installedBrowsers.AddBrowserPath(executablePath);
+        
+        logger.LogInformation("Browser for platform {platform} installed at: {path}", GetPlatform(), executablePath);
     }
 
     private Platform? GetPlatform()

@@ -4,6 +4,8 @@ services:
     build: 
       context: ./Acropolis
       dockerfile: ./Acropolis.Api/Dockerfile
+    cap_add:
+      - "SYS_ADMIN"
     ports:
       - "8000:8080"
     depends_on:
@@ -20,6 +22,7 @@ services:
       - RabbitMq__VirtualHost=/
     volumes:
       - "./local/acropolis/data:/app/data"
+      - "./local/acropolis/browser:/app/browser"
 
   rabbitmq:
     image: rabbitmq:management

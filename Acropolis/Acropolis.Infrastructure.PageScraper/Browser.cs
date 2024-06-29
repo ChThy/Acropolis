@@ -1,4 +1,3 @@
-using System.Runtime.InteropServices;
 using Acropolis.Infrastructure.Helpers;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -13,8 +12,8 @@ public class Browser(
     IOptions<ScreenshotOptions> screenshotOptions,
     ILogger<Browser> logger)
 {
-    private readonly LaunchOptions launchOptions = launchOptions.Value;
     private readonly InstalledBrowsers installedBrowsers = installedBrowsers;
+    private readonly LaunchOptions launchOptions = launchOptions.Value;
     private readonly ILogger<Browser> logger = logger;
     private readonly PdfOptions pdfOptions = pdfOptions.Value;
     private readonly ScreenshotOptions screenshotOptions = screenshotOptions.Value;
@@ -26,16 +25,10 @@ public class Browser(
         {
             throw new InvalidOperationException("No browser installed");
         }
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        {
-            launchOptions.ExecutablePath = "google-chrome-stable";
-        }
-        else
-        {
-            logger.LogInformation("Using browser at: {path}", executablePath);
-            launchOptions.ExecutablePath = executablePath;
-        }
-        
+
+        logger.LogInformation("Using browser at: {path}", executablePath);
+        launchOptions.ExecutablePath = executablePath;
+
         return Puppeteer.LaunchAsync(launchOptions);
     }
 
