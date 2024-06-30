@@ -6,7 +6,7 @@ namespace Acropolis.Infrastructure.EfCore;
 
 public class AppDbContext : SagaDbContext
 {
-    public AppDbContext(DbContextOptions options) : base(options)
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
     }
 

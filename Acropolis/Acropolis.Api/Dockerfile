@@ -1,5 +1,5 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-ARG user=appuser
+ARG user=DockerAppUser
 USER ${user}
 WORKDIR /app
 EXPOSE 8080

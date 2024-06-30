@@ -46,31 +46,33 @@ public static class ServiceCollectionExtensions
             {
                 r.ConcurrencyMode = ConcurrencyMode.Optimistic;
                 r.ExistingDbContext<AppDbContext>();
-                r.LockStatementProvider = new SqliteLockStatementProvider();
             });
             x.AddSagaRepository<ScrapePageState>().EntityFrameworkRepository(r =>
             {
                 r.ConcurrencyMode = ConcurrencyMode.Optimistic;
                 r.ExistingDbContext<AppDbContext>();
-                r.LockStatementProvider = new SqliteLockStatementProvider();
             });
             x.AddSagaRepository<ExternalMessageRequestState>().EntityFrameworkRepository(r =>
             {
                 r.ConcurrencyMode = ConcurrencyMode.Optimistic;
                 r.ExistingDbContext<AppDbContext>();
-                r.LockStatementProvider = new SqliteLockStatementProvider();
             });
 
-            x.AddEntityFrameworkOutbox<AppDbContext>(o =>
+            // x.AddEntityFrameworkOutbox<AppDbContext>(o =>
+            // {
+            //     o.UseSqlite();
+            //     o.UseBusOutbox();
+            // });
+            //
+            // x.AddConfigureEndpointsCallback((ctx, name, cfg) =>
+            // {
+            //     cfg.UseEntityFrameworkOutbox<AppDbContext>(ctx);
+            // });
+            
+            x.AddConfigureEndpointsCallback((endpoint,cfg) =>
             {
-                o.UseSqlite();
-                o.UseBusOutbox();
-                o.LockStatementProvider = new SqliteLockStatementProvider();
-            });
-
-            x.AddConfigureEndpointsCallback((ctx, name, cfg) =>
-            {
-                cfg.UseEntityFrameworkOutbox<AppDbContext>(ctx);
+                cfg.ConcurrentMessageLimit = 1;
+                cfg.UseMessageRetry(r => r.Exponential(10, TimeSpan.FromTicks(1), TimeSpan.FromHours(12), TimeSpan.FromSeconds(2)));
             });
 
             x.UsingRabbitMq((context, config) =>
@@ -80,6 +82,8 @@ public static class ServiceCollectionExtensions
                 var host = configuration.GetValue<string>("RabbitMq:Host");
                 var virtualHost = configuration.GetValue<string>("RabbitMq:VirtualHost");
 
+                
+                
                 config.Host(host, virtualHost, r =>
                 {
                     r.Username(username);
