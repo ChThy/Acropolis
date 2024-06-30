@@ -76,7 +76,15 @@ public class Program
                     Url = $"https://www.youtube.com/watch?v={video.Request.VideoId}",
                     VideoMetaData = new(video.Request.VideoId, video.Video!.Title, video.Video.Author, video.Video.UploadTimeStamp, video.Video.StorageLocation)
                 };
-                dbContext.Add(videoState);
+                if (!(await dbContext.Set<DownloadVideoState>().AnyAsync(e => e.Url == videoState.Url)))
+                {
+                    dbContext.Add(videoState);
+                }
+                else
+                {
+                    logger.LogInformation("Duplicate found: {author} {title} | {duplicate}", 
+                        videoState.VideoMetaData.Author, videoState.VideoMetaData.VideoTitle, videoState.Url);
+                }
             }
 
             await dbContext.SaveChangesAsync();
