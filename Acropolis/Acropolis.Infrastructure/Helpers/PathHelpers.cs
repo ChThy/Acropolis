@@ -1,7 +1,7 @@
 ﻿using System.Text;
 
 namespace Acropolis.Infrastructure.Helpers;
-public static class FilePathHelpers
+public static class PathHelpers
 {
     public static char[] InvalidFileNameCharacters { get; } = Path.GetInvalidFileNameChars();
     public static char[] InvalidPathCharacters { get; } = Path.GetInvalidPathChars();

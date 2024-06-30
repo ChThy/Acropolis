@@ -1,8 +1,10 @@
-﻿using Acropolis.Application.EventHandlers;
-using Acropolis.Application.Sagas.DownloadVideo;
+﻿using Acropolis.Application.Sagas.DownloadVideo;
 using Acropolis.Application.Sagas.ExternalMessageRequest;
+using Acropolis.Application.Sagas.ScrapePage;
 using Acropolis.Infrastructure.EfCore;
 using Acropolis.Infrastructure.Extensions;
+using Acropolis.Infrastructure.PageScraper.EventHandlers;
+using Acropolis.Infrastructure.PageScraper.Extensions;
 using Acropolis.Infrastructure.Telegram.Extensions;
 using Acropolis.Infrastructure.Telegram.Messenger;
 using Acropolis.Infrastructure.YoutubeDownloader.EventHandlers;
@@ -29,39 +31,48 @@ public static class ServiceCollectionExtensions
         services.AddInfrastructure(configuration);
         services.AddTelegramMessenger(configuration);
         services.AddYoutubeDownloaderServices(configuration);
+        services.AddPageScraper(configuration);
 
         services.AddMassTransit(x =>
         {
-            x.AddConsumers(typeof(VideoDownloadAlreadyRequestedHandler).Assembly, 
+            x.AddConsumers(
                 typeof(VideoDownloadRequestedHandler).Assembly,
-                typeof(ExternalMessageReplyRequestedHandler).Assembly);
+                typeof(ExternalMessageReplyRequestedHandler).Assembly,
+                typeof(PageScrapeRequestedHandler).Assembly);
+
             x.AddSagaStateMachines(typeof(DownloadVideoSaga).Assembly);
 
             x.AddSagaRepository<DownloadVideoState>().EntityFrameworkRepository(r =>
             {
                 r.ConcurrencyMode = ConcurrencyMode.Optimistic;
-
                 r.ExistingDbContext<AppDbContext>();
-                r.LockStatementProvider = new SqliteLockStatementProvider();
+            });
+            x.AddSagaRepository<ScrapePageState>().EntityFrameworkRepository(r =>
+            {
+                r.ConcurrencyMode = ConcurrencyMode.Optimistic;
+                r.ExistingDbContext<AppDbContext>();
             });
             x.AddSagaRepository<ExternalMessageRequestState>().EntityFrameworkRepository(r =>
             {
                 r.ConcurrencyMode = ConcurrencyMode.Optimistic;
-
                 r.ExistingDbContext<AppDbContext>();
-                r.LockStatementProvider = new SqliteLockStatementProvider();
             });
 
-            x.AddEntityFrameworkOutbox<AppDbContext>(o =>
+            // x.AddEntityFrameworkOutbox<AppDbContext>(o =>
+            // {
+            //     o.UseSqlite();
+            //     o.UseBusOutbox();
+            // });
+            //
+            // x.AddConfigureEndpointsCallback((ctx, name, cfg) =>
+            // {
+            //     cfg.UseEntityFrameworkOutbox<AppDbContext>(ctx);
+            // });
+            
+            x.AddConfigureEndpointsCallback((endpoint,cfg) =>
             {
-                o.UseSqlite();
-                o.UseBusOutbox();
-                o.LockStatementProvider = new SqliteLockStatementProvider();
-            });
-
-            x.AddConfigureEndpointsCallback((ctx, name, cfg) =>
-            {
-                cfg.UseEntityFrameworkOutbox<AppDbContext>(ctx);
+                cfg.ConcurrentMessageLimit = 1;
+                cfg.UseMessageRetry(r => r.Exponential(10, TimeSpan.FromTicks(1), TimeSpan.FromHours(12), TimeSpan.FromSeconds(2)));
             });
 
             x.UsingRabbitMq((context, config) =>
@@ -70,9 +81,8 @@ public static class ServiceCollectionExtensions
                 var password = configuration.GetValue<string>("RabbitMq:Password");
                 var host = configuration.GetValue<string>("RabbitMq:Host");
                 var virtualHost = configuration.GetValue<string>("RabbitMq:VirtualHost");
+
                 
-                Console.WriteLine(host);
-                Console.WriteLine(virtualHost);
                 
                 config.Host(host, virtualHost, r =>
                 {

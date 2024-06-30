@@ -1,0 +1,43 @@
+using System.Runtime.InteropServices;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using PuppeteerSharp;
+
+namespace Acropolis.Infrastructure.PageScraper.BackgroundWorkers;
+
+public class BrowserDownloader(InstalledBrowsers installedBrowsers, ILogger<BrowserDownloader> logger) : BackgroundService
+{
+    private readonly InstalledBrowsers installedBrowsers = installedBrowsers;
+    private readonly ILogger<BrowserDownloader> logger = logger;
+
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        var browserFetcher = new BrowserFetcher(new BrowserFetcherOptions
+        {
+            Path = "browser",
+            Platform = GetPlatform()
+        });
+        
+        var installedBrowser = await browserFetcher.DownloadAsync();
+        var executablePath = installedBrowser.GetExecutablePath();
+        installedBrowsers.AddBrowserPath(executablePath);
+        
+        logger.LogInformation("Browser for platform {platform} installed at: {path}", GetPlatform(), executablePath);
+    }
+
+    private Platform? GetPlatform()
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return Platform.Win64;
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            return Platform.Linux;
+        }
+
+        logger.LogWarning("Could not resolve platform! Defaulting to unknown platform.");
+        return Platform.Unknown;
+    }
+}

@@ -1,8 +1,10 @@
 ﻿using Acropolis.Application.Events;
-using Acropolis.Application.Extensions.MassTransitExteions;
+using Acropolis.Application.Events.VideoDownloader;
+using Acropolis.Application.Extensions.MassTransitExtensions;
 using MassTransit;
 
 namespace Acropolis.Application.Sagas.DownloadVideo;
+
 public class DownloadVideoSaga : MassTransitStateMachine<DownloadVideoState>
 {
     public DownloadVideoSaga()
@@ -22,14 +24,7 @@ public class DownloadVideoSaga : MassTransitStateMachine<DownloadVideoState>
                 .TransitionTo(DownloadRequested));
 
         During(DownloadRequested,
-            When(WhenUrlRequestReceived)
-                .ThenAsync(async ctx =>
-                {
-                    var (saga, message) = ctx.Deconstruct();
-
-                    await ctx.Publish(new VideoDownloadRequested(saga.Url)); //TODO: Redownload?
-                    await ctx.Publish(new VideoDownloadAlreadyRequested(saga.Url, saga.RequestedTimestamp));
-                }),
+            Ignore(WhenUrlRequestReceived),
             When(WhenVideoDownloaded)
                 .Then(ctx =>
                 {
@@ -43,17 +38,22 @@ public class DownloadVideoSaga : MassTransitStateMachine<DownloadVideoState>
                     return new UrlRequestReplyRequested(
                         saga.CorrelationId,
                         saga.Url,
-                        "Done");
+                        $"Downloaded {saga.VideoMetaData?.VideoTitle}. Location: {saga.VideoMetaData?.StorageLocation}");
                 })
                 .TransitionTo(Downloaded),
             When(WhenVideoDownloadSkipped)
+                .Publish(ctx =>
+                {
+                    var (saga, message) = ctx.Deconstruct();
+                    return new UrlRequestReplyRequested(saga.CorrelationId, saga.Url, $"Download skipped: {message.Reason}");
+                })
                 .TransitionTo(DownloadSkipped),
             When(WhenVideoDownloadFailed)
                 .Then(x =>
                 {
                     var (saga, message) = x.Deconstruct();
                     saga.ErrorMessage = message.ErrorMessage;
-                    saga.DownloadedTimestamp = message.Timestamp;
+                    saga.ErrorTimestamp = message.Timestamp;
                 })
                 .Publish(ctx =>
                 {
@@ -61,7 +61,7 @@ public class DownloadVideoSaga : MassTransitStateMachine<DownloadVideoState>
                     return new UrlRequestReplyRequested(
                         saga.CorrelationId,
                         saga.Url,
-                        "Download failed");
+                        $"Download failed: {message.ErrorMessage}");
                 })
                 .TransitionTo(DownloadFailed)
         );
@@ -71,20 +71,25 @@ public class DownloadVideoSaga : MassTransitStateMachine<DownloadVideoState>
                 .ThenAsync(async ctx =>
                 {
                     var (saga, message) = ctx.Deconstruct();
-                    await ctx.Publish(new VideoAlreadyDownloaded(saga.Url, saga.DownloadedTimestamp!.Value, saga.VideoMetaData!));
+                    await ctx.Publish(new UrlRequestReplyRequested(saga.CorrelationId, saga.Url, $"Already downloaded. Location: {saga.VideoMetaData?.StorageLocation}"));
                 }),
             When(WhenVideoDownloaded)
                 .Then(x =>
                 {
                     var (saga, message) = x.Deconstruct();
-
                     saga.DownloadedTimestamp = message.Timestamp;
                     saga.VideoMetaData = message.VideoMetaData;
-                })
+                }),
+            Ignore(WhenVideoDownloadSkipped),
+            Ignore(WhenVideoDownloadFailed)
         );
-        
+
         During(DownloadSkipped,
-            Ignore(WhenUrlRequestReceived));
+            Ignore(WhenUrlRequestReceived),
+            Ignore(WhenVideoDownloaded),
+            Ignore(WhenVideoDownloadSkipped),
+            Ignore(WhenVideoDownloadFailed));
+        
         During(DownloadFailed,
             When(WhenUrlRequestReceived)
                 .Then(ctx =>
@@ -98,8 +103,11 @@ public class DownloadVideoSaga : MassTransitStateMachine<DownloadVideoState>
                     var (saga, message) = ctx.Deconstruct();
                     return new VideoDownloadRequested(saga.Url);
                 })
-                .TransitionTo(DownloadRequested)
-            );
+                .TransitionTo(DownloadRequested),
+            Ignore(WhenVideoDownloaded),
+            Ignore(WhenVideoDownloadSkipped),
+            Ignore(WhenVideoDownloadFailed)
+        );
 
         Event(() => WhenUrlRequestReceived,
             e => e.CorrelateById(ctx => ctx.Message.RequestId).CorrelateBy(saga => saga.Url, ctx => ctx.Message.Url));
@@ -111,13 +119,13 @@ public class DownloadVideoSaga : MassTransitStateMachine<DownloadVideoState>
             e => e.CorrelateBy(saga => saga.Url, ctx => ctx.Message.Url));
     }
 
-    public Event<UrlRequestReceived> WhenUrlRequestReceived { get; private set; } = null!;
-    public Event<VideoDownloaded> WhenVideoDownloaded { get; private set; } = null!;
-    public Event<VideoDownloadSkipped> WhenVideoDownloadSkipped { get; private set; } = null!;
-    public Event<VideoDownloadFailed> WhenVideoDownloadFailed { get; private set; } = null!;
+    public Event<UrlRequestReceived> WhenUrlRequestReceived { get; } = null!;
+    public Event<VideoDownloaded> WhenVideoDownloaded { get; } = null!;
+    public Event<VideoDownloadSkipped> WhenVideoDownloadSkipped { get; } = null!;
+    public Event<VideoDownloadFailed> WhenVideoDownloadFailed { get; } = null!;
 
-    public State DownloadRequested { get; private set; } = null!;
-    public State Downloaded { get; private set; } = null!;
-    public State DownloadFailed { get; private set; } = null!;
-    public State DownloadSkipped { get; private set; } = null!;
+    public State DownloadRequested { get; } = null!;
+    public State Downloaded { get; } = null!;
+    public State DownloadFailed { get; } = null!;
+    public State DownloadSkipped { get; } = null!;
 }

@@ -1,5 +1,5 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-ARG user=app
+ARG user=DockerAppUser
 USER ${user}
 WORKDIR /app
 EXPOSE 8080
@@ -19,5 +19,30 @@ RUN dotnet publish "Acropolis.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publis
 
 FROM base AS final
 WORKDIR /app
+
+USER root
+
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
+RUN apt-get update
+
+RUN apt-get install -y wget gnupg \
+    && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+    && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
+    && apt-get update \    
+    && apt-get install -y google-chrome-stable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN groupadd -r ${user} && useradd -r -g ${user} ${user}
+RUN mkdir -p /app/browser \
+    && mkdir -p /app/data \
+    && mkdir -p /home/${user} \
+    && mkdir -p /home/${user}/Downloads \
+    && chown -R ${user}:${user} /app/data \
+    && chown -R ${user}:${user} /app \
+    && chown -R ${user}:${user} /app/browser \
+    && chown -R ${user}:${user} /home/${user}
+
+USER ${user}
+
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Acropolis.Api.dll"]

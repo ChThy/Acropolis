@@ -402,3 +402,4 @@ FodyWeavers.xsd
 local/
 *.env
 Acropolis/.idea/.idea.Acropolis/.idea
+Acropolis/Acropolis.Api/browser
