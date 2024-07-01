@@ -1,28 +1,28 @@
 version: '3.9'
 services:
-  acropolis:
-    build: 
-      context: ./Acropolis
-      dockerfile: ./Acropolis.Api/Dockerfile
-    cap_add:
-      - "SYS_ADMIN"
-    ports:
-      - "8000:8080"
-    depends_on:
-      - rabbitmq
-    # user: "root:root"
+  # acropolis:
+  #   build: 
+  #     context: ./Acropolis
+  #     dockerfile: ./Acropolis.Api/Dockerfile
+  #   cap_add:
+  #     - "SYS_ADMIN"
+  #   ports:
+  #     - "8000:8080"
+  #   depends_on:
+  #     - rabbitmq
+  #   # user: "root:root"
 
-    environment:
-      - ConnectionStrings__Database=Data Source=data/Acropolis.db;cache=shared
-      - Telegram__UserToken=${TELEGRAM_TOKEN}
-      - Telegram__ChatId=${TELEGRAM_CHAT_ID}
-      - RabbitMq__User=${RABBITMQ_DEFAULT_USER}
-      - RabbitMq__Password=${RABBITMQ_DEFAULT_PASS}
-      - RabbitMq__Host=rabbitmq
-      - RabbitMq__VirtualHost=/
-    volumes:
-      - "./local/acropolis/data:/app/data"
-      - "./local/acropolis/browser:/app/browser"
+  #   environment:
+  #     - ConnectionStrings__Database=Data Source=data/Acropolis.db;cache=shared
+  #     - Telegram__UserToken=${TELEGRAM_TOKEN}
+  #     - Telegram__ChatId=${TELEGRAM_CHAT_ID}
+  #     - RabbitMq__User=${RABBITMQ_DEFAULT_USER}
+  #     - RabbitMq__Password=${RABBITMQ_DEFAULT_PASS}
+  #     - RabbitMq__Host=rabbitmq
+  #     - RabbitMq__VirtualHost=/
+  #   volumes:
+  #     - "./local/acropolis/data:/app/data"
+  #     - "./local/acropolis/browser:/app/browser"
 
   rabbitmq:
     image: rabbitmq:management
