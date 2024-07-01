@@ -42,11 +42,11 @@ public class DownloadVideoSaga : MassTransitStateMachine<DownloadVideoState>
                 })
                 .TransitionTo(Downloaded),
             When(WhenVideoDownloadSkipped)
-                .Publish(ctx =>
-                {
-                    var (saga, message) = ctx.Deconstruct();
-                    return new UrlRequestReplyRequested(saga.CorrelationId, saga.Url, $"Download skipped: {message.Reason}");
-                })
+                // .Publish(ctx =>
+                // {
+                //     var (saga, message) = ctx.Deconstruct();
+                //     return new UrlRequestReplyRequested(saga.CorrelationId, saga.Url, $"Download skipped: {message.Reason}");
+                // })
                 .TransitionTo(DownloadSkipped),
             When(WhenVideoDownloadFailed)
                 .Then(x =>

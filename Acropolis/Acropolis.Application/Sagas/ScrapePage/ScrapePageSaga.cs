@@ -45,11 +45,11 @@ public class ScrapePageSaga : MassTransitStateMachine<ScrapePageState>
                 })
                 .TransitionTo(Scraped),
             When(WhenPageScapeSkipped)
-                .Publish(ctx =>
-                {
-                    var (saga, message) = ctx.Deconstruct();
-                    return new UrlRequestReplyRequested(saga.CorrelationId, saga.Url, $"Scrape skipped: {message.Reason}");
-                })
+                // .Publish(ctx =>
+                // {
+                //     var (saga, message) = ctx.Deconstruct();
+                //     return new UrlRequestReplyRequested(saga.CorrelationId, saga.Url, $"Scrape skipped: {message.Reason}");
+                // })
                 .TransitionTo(ScrapeSkipped),
             When(WhenPageScrapeFailed)
                 .Then(x =>
