@@ -12,7 +12,7 @@ public sealed class FileStorage(IOptionsMonitor<FileStorageOptions> optionsMonit
 
     public async ValueTask<string> StoreFile(string fileName, Stream stream, CancellationToken cancellationToken = default)
     {
-        var safeFileName = fileName.RemoveInvalidFilePathChars();
+        var safeFileName = LimitFilenameLength(fileName).RemoveInvalidFilePathChars();
         var filePath = Path.Combine(fileStorageOptions.BaseDirectory, safeFileName);
         logger.LogDebug("Storing file {file}", filePath);
 
@@ -24,6 +24,18 @@ public sealed class FileStorage(IOptionsMonitor<FileStorageOptions> optionsMonit
         file.Close();
 
         return safeFileName;
+    }
+
+    private string LimitFilenameLength(string filename)
+    {
+        if (filename.Length <= fileStorageOptions.MaxFilenameLength)
+        {
+            return filename;
+        }
+        
+        var extension = Path.GetExtension(filename);
+        var filenameWithoutExtension = Path.GetFileNameWithoutExtension(filename);
+        return $"{filenameWithoutExtension.Substring(0, fileStorageOptions.MaxFilenameLength-extension.Length)}{extension}";
     }
 
     private void CreateDirectoryIfNeeded(string directory)

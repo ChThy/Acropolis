@@ -3,12 +3,13 @@ using Acropolis.Api.HostedServices;
 using Acropolis.Api.MigrateOldData;
 using Acropolis.Api.Models;
 using Acropolis.Application.Events;
-using Acropolis.Application.Events.VideoDownloader;
 using Acropolis.Application.Sagas.DownloadVideo;
+using Acropolis.Application.Sagas.ScrapePage;
 using Acropolis.Infrastructure.EfCore;
 using MassTransit;
 using MassTransit.Internals;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using YoutubeExplode;
 
@@ -48,88 +49,68 @@ public class Program
             return Results.Accepted();
         });
 
-        app.MapPost("migratevideos", async (
+        app.MapPost("migrate", async (
             int take,
             int skip,
-            YoutubeDownloaderDbContext youtubeDownloaderDbContext,
+            ScraperDbContext scraperDbContext,
             AppDbContext dbContext,
-            YoutubeClient youtubeClient,
             IBus bus,
-            ILogger<YoutubeClient> logger) =>
+            
+            ILogger<ScrapeRequest> logger) =>
         {
             List<string> notFound = [];
 
-            var videos = await youtubeDownloaderDbContext
-                .Set<YoutubeDownload>()
+            var scrapedPages = await scraperDbContext
+                .Set<ScrapedPage>()
                 .Skip(skip)
                 .Take(take)
                 .ToListAsync();
 
-            foreach (var video in videos.Where(e => e.Request is not null && e.Video is not null))
+            foreach (var page in scrapedPages.Where(e => e.Content.Count > 1))
             {
-                var videoState = new DownloadVideoState()
+                logger.LogWarning("More than 1 content for: {url}", page.Request.Url);
+            }
+            
+            foreach (var page in scrapedPages.Where(e => e.PageData is not null && e.Content.Count == 1))
+            {
+                var content = page.Content.Single();
+                if (!File.Exists(Path.Combine("data", "downloads", "scraper", content.FileName)))
                 {
-                    CorrelationId = video.Id,
-                    CurrentState = "Downloaded",
-                    RequestedTimestamp =  video.Request!.Timestamp,
-                    DownloadedTimestamp = video.Request.Timestamp,
-                    Url = $"https://www.youtube.com/watch?v={video.Request.VideoId}",
-                    VideoMetaData = new(video.Request.VideoId, video.Video!.Title, video.Video.Author, video.Video.UploadTimeStamp, video.Video.StorageLocation)
-                };
-                if (!(await dbContext.Set<DownloadVideoState>().AnyAsync(e => e.Url == videoState.Url)))
-                {
-                    dbContext.Add(videoState);
+                    // Download file
+                    
                 }
                 else
                 {
-                    logger.LogInformation("Duplicate found: {author} {title} | {duplicate}", 
-                        videoState.VideoMetaData.Author, videoState.VideoMetaData.VideoTitle, videoState.Url);
+                    var pageState = new ScrapePageState()
+                    {
+                        CorrelationId = page.Id,
+                        CurrentState = "Downloaded",
+                        RequestedTimestamp =  page.Request!.Timestamp,
+                        Url = page.Request.Url,
+                        Domain = page.PageData!.Domain,
+                        Title = page.PageData.Title,
+                        ScrapedTimestamp = content.ScrapedOn,
+                        StorageLocation = Path.Combine("scraper", content.FileName)
+                    };
+                    if (!(await dbContext.Set<ScrapePageState>().AnyAsync(e => e.Url == pageState.Url)))
+                    {
+                        dbContext.Add(pageState);
+                    }
+                    else
+                    {
+                        logger.LogInformation("Duplicate found: {duplicate}", pageState.Url);
+                    }
                 }
             }
 
             await dbContext.SaveChangesAsync();
-            
-            foreach (var video in videos.Where(e => e.Request is null))
+
+            foreach (var page in scrapedPages.Where(e => e.PageData is null))
             {
-                if (video.Video?.Title is null)
-                {
-                    throw new InvalidOperationException($"Cannot find author and title for video with id: {video.Id}");
-                }
-
-                logger.LogInformation("Searching for {author} {title}", video.Video.Author, video.Video.Title);
-                try
-                {
-                    var results = await youtubeClient.Search
-                        .GetVideosAsync($"{video.Video.Author} {video.Video.Title}").ToListAsync();
-
-                    var match = results.FirstOrDefault(e => e.Author.ChannelTitle == video.Video.Author && e.Title == video.Video.Title)?
-                        .Url;
-
-                    if (match is null)
-                    {
-                        notFound.Add(video.Video.ToString());
-                        logger.LogWarning("Nothing found for {video}", video.Video.ToString());
-                        continue;
-                    }
-
-                    logger.LogInformation("Match: {match}", match);
-                    await bus.Publish(new UrlRequestReceived(video.Id, match, DateTimeOffset.UtcNow));
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, "While checking {video}", video.Video.Author + " " + video.Video.Title);
-                    notFound.Add(video.Video.ToString());
-                    logger.LogWarning("Nothing found for {video}", video.Video.ToString());
-                }
-            }
-
-            foreach (var video in videos.Where(e => e.Request is not null && e.Video is null))
-            {
-                await bus.Publish(new UrlRequestReceived(video.Id, $"https://www.youtube.com/watch?v={video.Request.VideoId}", DateTimeOffset.UtcNow));
+                await bus.Publish(new UrlRequestReceived(page.Id, page.Request.Url, DateTimeOffset.UtcNow));
             }
 
             return Results.Ok(notFound);
-            // http://www.youtube.com/watch?v=<VideoId>
         });
 
         app.Run();
