@@ -81,17 +81,33 @@ public class DownloadVideoSaga : MassTransitStateMachine<DownloadVideoState>
                     saga.VideoMetaData = message.VideoMetaData;
                 }),
             Ignore(WhenVideoDownloadSkipped),
-            Ignore(WhenVideoDownloadFailed)
+            Ignore(WhenVideoDownloadFailed),
+            Ignore(WhenRetryFailedVideoDownloadRequested)
         );
 
         During(DownloadSkipped,
             Ignore(WhenUrlRequestReceived),
             Ignore(WhenVideoDownloaded),
             Ignore(WhenVideoDownloadSkipped),
-            Ignore(WhenVideoDownloadFailed));
+            Ignore(WhenVideoDownloadFailed),
+            Ignore(WhenRetryFailedVideoDownloadRequested)
+        );
         
         During(DownloadFailed,
             When(WhenUrlRequestReceived)
+                .Then(ctx =>
+                {
+                    var (saga, message) = ctx.Deconstruct();
+                    saga.ErrorTimestamp = null;
+                    saga.ErrorMessage = null;
+                })
+                .Publish(ctx =>
+                {
+                    var (saga, message) = ctx.Deconstruct();
+                    return new VideoDownloadRequested(saga.Url);
+                })
+                .TransitionTo(DownloadRequested),
+            When(WhenRetryFailedVideoDownloadRequested)
                 .Then(ctx =>
                 {
                     var (saga, message) = ctx.Deconstruct();
@@ -117,12 +133,15 @@ public class DownloadVideoSaga : MassTransitStateMachine<DownloadVideoState>
             e => e.CorrelateBy(saga => saga.Url, ctx => ctx.Message.Url));
         Event(() => WhenVideoDownloadFailed,
             e => e.CorrelateBy(saga => saga.Url, ctx => ctx.Message.Url));
+        Event(() => WhenRetryFailedVideoDownloadRequested,
+            e => e.CorrelateBy(saga => saga.Url, ctx => ctx.Message.Url));
     }
 
     public Event<UrlRequestReceived> WhenUrlRequestReceived { get; } = null!;
     public Event<VideoDownloaded> WhenVideoDownloaded { get; } = null!;
     public Event<VideoDownloadSkipped> WhenVideoDownloadSkipped { get; } = null!;
     public Event<VideoDownloadFailed> WhenVideoDownloadFailed { get; } = null!;
+    public Event<RetryFailedVideoDownloadRequested> WhenRetryFailedVideoDownloadRequested { get; } = null!;
 
     public State DownloadRequested { get; } = null!;
     public State Downloaded { get; } = null!;
