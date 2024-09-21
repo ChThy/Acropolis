@@ -22,7 +22,8 @@ public class ScrapePageSaga : MassTransitStateMachine<ScrapePageState>
 
                     await ctx.Publish(new PageScrapeRequested(saga.Url));
                 })
-                .TransitionTo(ScrapeRequested));
+                .TransitionTo(ScrapeRequested)
+        );
         
         During(ScrapeRequested,
             Ignore(WhenUrlRequestReceived),
@@ -86,17 +87,33 @@ public class ScrapePageSaga : MassTransitStateMachine<ScrapePageState>
                     saga.StorageLocation = message.StorageLocation;
                 }),
             Ignore(WhenPageScapeSkipped),
-            Ignore(WhenPageScrapeFailed)
+            Ignore(WhenPageScrapeFailed),
+            Ignore(WhenRetryFailedPageScrapeRequested)
         );
         
         During(ScrapeSkipped,
             Ignore(WhenUrlRequestReceived),
             Ignore(WhenPageScraped),
             Ignore(WhenPageScapeSkipped),
-            Ignore(WhenPageScrapeFailed));
+            Ignore(WhenPageScrapeFailed),
+            Ignore(WhenRetryFailedPageScrapeRequested)
+        );
         
         During(ScrapeFailed,
             When(WhenUrlRequestReceived)
+                .Then(ctx =>
+                {
+                    var (saga, message) = ctx.Deconstruct();
+                    saga.ErrorTimestamp = null;
+                    saga.ErrorMessage = null;
+                })
+                .Publish(ctx =>
+                {
+                    var (saga, message) = ctx.Deconstruct();
+                    return new PageScrapeRequested(saga.Url);
+                })
+                .TransitionTo(ScrapeRequested),
+            When(WhenRetryFailedPageScrapeRequested)
                 .Then(ctx =>
                 {
                     var (saga, message) = ctx.Deconstruct();
@@ -122,12 +139,15 @@ public class ScrapePageSaga : MassTransitStateMachine<ScrapePageState>
             e => e.CorrelateBy(saga => saga.Url, ctx => ctx.Message.Url));
         Event(() => WhenPageScapeSkipped,
             e => e.CorrelateBy(saga => saga.Url, ctx => ctx.Message.Url));
+        Event(() => WhenRetryFailedPageScrapeRequested,
+            e => e.CorrelateBy(saga => saga.Url, ctx => ctx.Message.Url));
     }
 
     public Event<UrlRequestReceived> WhenUrlRequestReceived { get; private set; } = null!;
     public Event<PageScraped> WhenPageScraped { get; private set; } = null!;
-    public Event<PageScrapeFailed> WhenPageScrapeFailed { get; private set; } = null!;
     public Event<PageScrapeSkipped> WhenPageScapeSkipped { get; private set; } = null!;
+    public Event<PageScrapeFailed> WhenPageScrapeFailed { get; private set; } = null!;
+    public Event<RetryFailedPageScrapeRequested> WhenRetryFailedPageScrapeRequested { get; private set; } = null!;
 
     public State ScrapeRequested { get; private set; } = null!;
     public State Scraped { get; private set; } = null!;

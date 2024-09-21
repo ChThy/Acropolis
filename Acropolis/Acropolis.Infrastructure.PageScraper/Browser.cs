@@ -47,6 +47,7 @@ public class Browser(
         logger.LogDebug("Browser started");
 
         await using var page = await browser.NewPageAsync();
+        await SetPageOptions(page);
         await page.GoToAsync(url);
         logger.LogDebug("Navigated to {url}", url);
 
@@ -63,6 +64,7 @@ public class Browser(
         logger.LogDebug("Browser started");
 
         await using var page = await browser.NewPageAsync();
+        await SetPageOptions(page);
         await page.GoToAsync(url);
         logger.LogDebug("Navigated to {url}", url);
 
@@ -71,5 +73,15 @@ public class Browser(
         var result = await page.ScreenshotStreamAsync(screenshotOptions);
         logger.LogDebug("Screenshot stream taken");
         return new ScrapeResponse(pageTitle, new Uri(url).Host, $"{pageTitle.RemoveInvalidFileNameChars()}.png", result);
+    }
+
+    private static Task SetPageOptions(IPage page)
+    {
+        return page.SetViewportAsync(new ViewPortOptions
+        {
+            Width = 1920,
+            Height = 1080,
+            IsLandscape = true
+        });
     }
 }

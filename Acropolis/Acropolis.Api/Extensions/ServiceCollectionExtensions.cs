@@ -10,7 +10,6 @@ using Acropolis.Infrastructure.Telegram.Messenger;
 using Acropolis.Infrastructure.YoutubeDownloader.EventHandlers;
 using Acropolis.Infrastructure.YoutubeDownloader.Extensions;
 using MassTransit;
-using MassTransit.EntityFrameworkCoreIntegration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -81,13 +80,11 @@ public static class ServiceCollectionExtensions
                 var password = configuration.GetValue<string>("RabbitMq:Password");
                 var host = configuration.GetValue<string>("RabbitMq:Host");
                 var virtualHost = configuration.GetValue<string>("RabbitMq:VirtualHost");
-
-                
                 
                 config.Host(host, virtualHost, r =>
                 {
-                    r.Username(username);
-                    r.Password(password);
+                    r.Username(username!);
+                    r.Password(password!);
                 });
                 config.ConfigureEndpoints(context);
             });

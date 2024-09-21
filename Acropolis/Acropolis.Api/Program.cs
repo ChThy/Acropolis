@@ -2,8 +2,14 @@ using Acropolis.Api.Extensions;
 using Acropolis.Api.HostedServices;
 using Acropolis.Api.Models;
 using Acropolis.Application.Events;
+using Acropolis.Application.Events.PageScraper;
+using Acropolis.Application.Events.VideoDownloader;
+using Acropolis.Application.Sagas.DownloadVideo;
+using Acropolis.Application.Sagas.ScrapePage;
+using Acropolis.Infrastructure.EfCore;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Acropolis.Api;
 
@@ -36,6 +42,36 @@ public class Program
         {
             await bus.Publish(new UrlRequestReceived(Guid.NewGuid(), request.Url, DateTimeOffset.UtcNow),
                 ctx => ctx.CorrelationId = NewId.NextGuid(), cancellationToken);
+            return Results.Accepted();
+        });
+
+        app.MapPost("retry-failed-videos", async (
+            [FromServices] IBus bus,
+            [FromServices] AppDbContext dbContext,
+            CancellationToken cancellationToken) =>
+        {
+            var failedVideos = await dbContext.Set<DownloadVideoState>()
+                .Where(e => e.CurrentState == "DownloadFailed")
+                .ToListAsync(cancellationToken);
+            
+            await bus.PublishBatch(failedVideos.Select(e => new RetryFailedVideoDownloadRequested(e.Url, DateTimeOffset.UtcNow)), 
+                cancellationToken);
+
+            return Results.Accepted();
+        });
+        
+        app.MapPost("retry-failed-pagescrapes", async (
+            [FromServices] IBus bus,
+            [FromServices] AppDbContext dbContext,
+            CancellationToken cancellationToken) =>
+        {
+            var failedVideos = await dbContext.Set<ScrapePageState>()
+                .Where(e => e.CurrentState == "ScrapeFailed")
+                .ToListAsync(cancellationToken);
+            
+            await bus.PublishBatch(failedVideos.Select(e => new RetryFailedPageScrapeRequested(e.Url, DateTimeOffset.UtcNow)), 
+                cancellationToken);
+
             return Results.Accepted();
         });
 
