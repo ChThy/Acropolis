@@ -71,7 +71,7 @@ public static class ServiceCollectionExtensions
             x.AddConfigureEndpointsCallback((endpoint,cfg) =>
             {
                 cfg.ConcurrentMessageLimit = 1;
-                cfg.UseMessageRetry(r => r.Exponential(10, TimeSpan.FromTicks(1), TimeSpan.FromHours(12), TimeSpan.FromSeconds(2)));
+                cfg.UseMessageRetry(r => r.Exponential(10, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(60), TimeSpan.FromSeconds(20)));
             });
 
             x.UsingRabbitMq((context, config) =>
