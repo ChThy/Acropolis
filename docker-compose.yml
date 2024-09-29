@@ -1,28 +1,28 @@
 version: '3.9'
 services:
-  # acropolis:
-  #   build: 
-  #     context: ./Acropolis
-  #     dockerfile: ./Acropolis.Api/Dockerfile
-  #   cap_add:
-  #     - "SYS_ADMIN"
-  #   ports:
-  #     - "8000:8080"
-  #   depends_on:
-  #     - rabbitmq
-  #   # user: "root:root"
+  acropolis:
+    build: 
+      context: ./Acropolis
+      dockerfile: ./Acropolis.Api/Dockerfile
+    cap_add:
+      - "SYS_ADMIN"
+    ports:
+      - "8000:8080"
+    depends_on:
+      - rabbitmq
+    # user: "root:root"
 
-  #   environment:
-  #     - ConnectionStrings__Database=Data Source=data/Acropolis.db;cache=shared
-  #     - Telegram__UserToken=${TELEGRAM_TOKEN}
-  #     - Telegram__ChatId=${TELEGRAM_CHAT_ID}
-  #     - RabbitMq__User=${RABBITMQ_DEFAULT_USER}
-  #     - RabbitMq__Password=${RABBITMQ_DEFAULT_PASS}
-  #     - RabbitMq__Host=rabbitmq
-  #     - RabbitMq__VirtualHost=/
-  #   volumes:
-  #     - "./local/acropolis/data:/app/data"
-  #     - "./local/acropolis/browser:/app/browser"
+    environment:
+      - ConnectionStrings__Database=Data Source=data/Acropolis.db;cache=shared
+      - Telegram__UserToken=${TELEGRAM_TOKEN}
+      - Telegram__ChatId=${TELEGRAM_CHAT_ID}
+      - RabbitMq__User=${RABBITMQ_DEFAULT_USER}
+      - RabbitMq__Password=${RABBITMQ_DEFAULT_PASS}
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__VirtualHost=/
+    volumes:
+      - "./local/acropolis/data:/app/data"
+      - "./local/acropolis/browser:/app/browser"
 
   rabbitmq:
     image: rabbitmq:management
@@ -38,31 +38,5 @@ services:
 
 volumes:
   rabbitmq:
-
-  # scraper:
-  #   image: ghcr.io/chthy/scraper:0.1.0-9
-  #   ports:
-  #     - "8001:8080"
-  #   cap_add:
-  #     - "SYS_ADMIN"
-  #   environment:
-  #     - ConnectionStrings__database=Data Source=data/Scraper.db;cache=shared
-  #     - DaprSettings__PubSubName=redis-pub-sub
-  #     - DaprSettings__TopicName=page-scraped
-  #   volumes:
-  #     - "./local/scraper/downloads:/app/downloads"
-  #     - "./local/scraper/data:/app/data"
-
-  # youtubedownloader: 
-  #   image: ghcr.io/chthy/youtubedownloader:0.1.0-28
-  #   ports:
-  #     - "8002:8080"
-  #   environment:
-  #     - ConnectionStrings__database=Data Source=data/YoutubeDownloader.db;cache=shared
-  #     - DaprSettings__PubSubName=redis-pub-sub
-  #     - DaprSettings__TopicName=youtube-video-downloaded
-  #   volumes:
-  #     - "./local/youtubedownloader/downloads:/app/downloads"
-  #     - "./local/youtubedownloader/data:/app/data"
 
 # docker compose --env-file local.env up --build -d
