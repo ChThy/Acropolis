@@ -19,11 +19,25 @@ public sealed class FileStorage(IOptionsMonitor<FileStorageOptions> optionsMonit
         var directory = Path.GetDirectoryName(filePath);
         CreateDirectoryIfNeeded(directory!);
 
-        var file = File.OpenWrite(filePath);
+        await using var file = File.OpenWrite(filePath);
         await stream.CopyToAsync(file, cancellationToken);
         file.Close();
 
-        return safeFileName;
+        return filePath;
+    }
+
+    public void DeleteFile(string fileName)
+    {
+        var filePath = Path.Combine(fileStorageOptions.BaseDirectory, fileName);
+        logger.LogDebug("Deleting file {file}", filePath);
+
+        if (!File.Exists(filePath))
+        {
+            logger.LogWarning("File {file} does nog exist at path {path}", filePath, filePath);
+            return;
+        }
+        File.Delete(filePath);
+        
     }
 
     private string LimitFilenameLength(string filename)

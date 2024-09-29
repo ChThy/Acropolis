@@ -1,6 +1,7 @@
 ﻿using Acropolis.Application.Sagas.DownloadVideo;
 using Acropolis.Application.Sagas.ExternalMessageRequest;
 using Acropolis.Application.Sagas.ScrapePage;
+using Acropolis.Application.Services;
 using Acropolis.Infrastructure.EfCore;
 using Acropolis.Infrastructure.Extensions;
 using Acropolis.Infrastructure.PageScraper.EventHandlers;
@@ -27,6 +28,8 @@ public static class ServiceCollectionExtensions
             options.UseSqlite(configuration.GetConnectionString("Database"));
         });
 
+        services.AddTransient<ProcessService>();
+        
         services.AddInfrastructure(configuration);
         services.AddTelegramMessenger(configuration);
         services.AddYoutubeDownloaderServices(configuration);

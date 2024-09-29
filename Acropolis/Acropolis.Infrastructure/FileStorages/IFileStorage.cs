@@ -3,4 +3,5 @@
 public interface IFileStorage
 {
     ValueTask<string> StoreFile(string fileName, Stream stream, CancellationToken cancellationToken = default);
+    void DeleteFile(string fileName);
 }

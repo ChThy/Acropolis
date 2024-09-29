@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using Acropolis.Application.Events.VideoDownloader;
 using Acropolis.Application.Models;
+using Acropolis.Application.Services;
 using Acropolis.Infrastructure.FileStorages;
 using Acropolis.Infrastructure.YoutubeDownloader.Helpers;
 using Acropolis.Infrastructure.YoutubeDownloader.Options;
@@ -17,9 +18,11 @@ public class VideoDownloadRequestedHandler(
     IOptionsMonitor<YoutubeOptions> optionsMonitor,
     IFileStorage fileStorage,
     TimeProvider timeProvider,
+    ProcessService processService,
     ILogger<VideoDownloadRequestedHandler> logger)
     : IConsumer<VideoDownloadRequested>
 {
+    public ProcessService ProcessService { get; } = processService;
     private readonly IFileStorage fileStorage = fileStorage;
     private readonly ILogger<VideoDownloadRequestedHandler> logger = logger;
     private readonly TimeProvider timeProvider = timeProvider;
@@ -40,8 +43,7 @@ public class VideoDownloadRequestedHandler(
 
         try
         {
-            var (videoMetaData, videoStream) = await DownloadVideo(url, context.CancellationToken);
-            videoStream.Dispose();
+            var videoMetaData = await DownloadVideo(url, context.CancellationToken);
             await context.Publish(new VideoDownloaded(url, timeProvider.GetLocalNow(), videoMetaData));
             logger.LogInformation("Video downloaded: {video}", videoMetaData);
         }
@@ -52,7 +54,7 @@ public class VideoDownloadRequestedHandler(
         }
     }
 
-    private async Task<(VideoMetaData videoMetaData, Stream videoStream)> DownloadVideo(string url, CancellationToken cancellationToken)
+    private async Task<VideoMetaData> DownloadVideo(string url, CancellationToken cancellationToken)
     {
         var videoId = VideoIdExtractor.ExtractVideoId(url);
         var video = await youtubeClient.Videos.GetAsync(videoId, cancellationToken);
@@ -67,37 +69,39 @@ public class VideoDownloadRequestedHandler(
         
         var videoStreamInfo = WithLowestPreferredQuality(videoOnlyStreamInfos) ?? videoOnlyStreamInfos.GetWithHighestVideoQuality();
         var audioStreamInfo = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate();
-
-        // IStreamInfo[] streams = [videoStreamInfo, audioStreamInfo];
-        // var conversionRequest = new ConversionRequestBuilder(FileNameWithExtension(FullPath(directory, filename), videoStreamInfo.Container.Name.ToLowerInvariant()))
-        //     .SetFFmpegPath(@"C:\ProgramData\chocolatey\bin")
-        //     .Build();
-        // await youtubeClient.Videos.DownloadAsync(streams, conversionRequest, cancellationToken: cancellationToken);
         
-        //TODO dispose streams etc
         
         var videoOnlyFileName = VideoOnlyFileName(filename);
         var audioOnlyFileName = AudioOnlyFileName(filename);
         var videoOnlyFullPath = FullPath(directory, FileNameWithExtension(videoOnlyFileName, videoStreamInfo.Container.Name));
         var audioOnlyFullPath = FullPath(directory, FileNameWithExtension(audioOnlyFileName, videoStreamInfo.Container.Name));
-        
-        var videoStream = await youtubeClient.Videos.Streams.GetAsync(videoStreamInfo, cancellationToken);
-        var audioStream = await youtubeClient.Videos.Streams.GetAsync(audioStreamInfo, cancellationToken);
+
+        await using var videoStream = await youtubeClient.Videos.Streams.GetAsync(videoStreamInfo, cancellationToken);
+        await using var audioStream = await youtubeClient.Videos.Streams.GetAsync(audioStreamInfo, cancellationToken);
         
         var storedVideoPart = await fileStorage.StoreFile(videoOnlyFullPath, videoStream, cancellationToken);
         var storedAudioPart = await fileStorage.StoreFile(audioOnlyFullPath, audioStream, cancellationToken);
+
+        var fileDirectory = Path.GetDirectoryName(storedVideoPart);
+        var videoFullPath = Path.Combine(Directory.GetCurrentDirectory(), storedVideoPart);
+        var audioFullPath = Path.Combine(Directory.GetCurrentDirectory(), storedAudioPart);
+        var outputPath = Path.Join(Directory.GetCurrentDirectory(), fileDirectory, FileNameWithExtension(filename, videoStreamInfo.Container.Name.ToLowerInvariant()));
         
-        VideoService.MuxVideoWithAudio(videoOnlyFullPath, audioOnlyFullPath, 
-            FullPath(directory, FileNameWithExtension(filename, videoStreamInfo.Container.Name.ToLowerInvariant())));
+        var muxResult = await processService.RunProcessAsync("ffmpeg", $"-i \"{videoFullPath}\" -i \"{audioFullPath}\" -c:v copy -c:a aac \"{outputPath}\"");
+        if (muxResult.ExitCode != 0)
+        {
+            throw new Exception($"Failed to mux video {outputPath}");
+        }
         
-        return (
-            new VideoMetaData(
+        fileStorage.DeleteFile(videoOnlyFullPath);
+        fileStorage.DeleteFile(audioOnlyFullPath);
+        
+        return new VideoMetaData(
                 videoId,
                 video.Title,
                 video.Author.ChannelTitle,
                 video.UploadDate,
-                "storedLocation"),
-            null);
+                Path.Join(fileDirectory, FileNameWithExtension(filename, videoStreamInfo.Container.Name.ToLowerInvariant())));
     }
 
     private VideoOnlyStreamInfo? WithLowestPreferredQuality(ICollection<VideoOnlyStreamInfo> streams) =>
@@ -131,12 +135,9 @@ public class VideoDownloadRequestedHandler(
 
 public static class VideoService
 {
-    
-    // See https://gist.github.com/AlexMAS/276eed492bc989e13dcce7c78b9e179d
-    // https://gist.github.com/georg-jung/3a8703946075d56423e418ea76212745
     public static void MuxVideoWithAudio(string videoPath, string audioPath, string outputPath)
     {
-        var ffmpegPath = @"C:\ProgramData\chocolatey\bin\ffmpeg.exe";
+        var ffmpegPath = @"ffmpeg";
         var arguments = $"-i {videoPath} -i {audioPath} -c:v copy -c:a aac {outputPath}";
 
         var process = new Process
