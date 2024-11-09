@@ -3,6 +3,7 @@ using Acropolis.Application.Events.VideoDownloader;
 using Acropolis.Application.Models;
 using Acropolis.Application.Services;
 using Acropolis.Infrastructure.FileStorages;
+using Acropolis.Infrastructure.Helpers;
 using Acropolis.Infrastructure.YoutubeDownloader.Helpers;
 using Acropolis.Infrastructure.YoutubeDownloader.Options;
 using MassTransit;
@@ -123,11 +124,11 @@ public class VideoDownloadRequestedHandler(
     private static string FileNameWithoutExtension(DateTimeOffset uploaded, string title)
     {
         var timestamp = uploaded.ToString("yyyyMMdd");
-        return Path.Join($"{timestamp}_{title}");
+        return $"{timestamp}_{title}".RemoveInvalidFileNameChars();
     }
 
     private static string FileNameWithExtension(string filename, string extension) => $"{filename}.{extension}";
-    private static string ConstructDirectory(string author) => Path.Join("youtubedownloader", author); 
+    private static string ConstructDirectory(string author) => Path.Join("youtubedownloader", author).RemoveInvalidDirectoryChars(); 
     private static string FullPath(string directory, string filename) => Path.Join(directory, filename);
     private static string VideoOnlyFileName(string fileName) => $"VideoPart.{fileName}";
     private static string AudioOnlyFileName(string fileName) => $"AudioPart.{fileName}";

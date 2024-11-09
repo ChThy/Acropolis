@@ -60,6 +60,25 @@ public class Program
             return Results.Accepted();
         });
         
+        app.MapPost("retry-failed-videos/{id:guid}", async (
+            [FromServices] IBus bus,
+            [FromServices] AppDbContext dbContext,
+            [FromRoute] Guid id,
+            CancellationToken cancellationToken) =>
+        {
+            var failedVideo = await dbContext.Set<DownloadVideoState>()
+                .FirstOrDefaultAsync(e => e.CorrelationId == id && e.CurrentState == "DownloadFailed", cancellationToken);
+
+            if (failedVideo is null)
+            {
+                return Results.NotFound();
+            }
+            
+            await bus.Publish(new RetryFailedVideoDownloadRequested(failedVideo.Url, DateTimeOffset.UtcNow), cancellationToken);
+
+            return Results.Accepted();
+        });
+        
         app.MapPost("retry-failed-pagescrapes", async (
             [FromServices] IBus bus,
             [FromServices] AppDbContext dbContext,
