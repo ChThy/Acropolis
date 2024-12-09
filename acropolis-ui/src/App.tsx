@@ -1,8 +1,19 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
+import { useAppDispatch } from './store/hooks'
+import { fetchPages } from './store/actions';
 
 function App() {
   const [count, setCount] = useState(0)
+
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    console.log('dispatching');
+    dispatch(fetchPages);
+  }, []);
+
+
 
   return (
     <>
