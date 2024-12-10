@@ -23,6 +23,13 @@ public class Program
         builder.Services.AddAuthorization();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
+        builder.Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(p =>
+            {
+                p.WithOrigins("http://localhost:5173");
+            });
+        });
 
         builder.Services.AddServices(builder.Configuration);
 
@@ -32,67 +39,12 @@ public class Program
         app.UseSwaggerUI();
 
         app.UseHttpsRedirection();
-
+        app.UseCors();
         app.UseAuthorization();
 
-        app.MapPost("download", async (
-            [FromServices] IBus bus,
-            [FromBody] DownloadVideoRequest request,
-            CancellationToken cancellationToken) =>
-        {
-            await bus.Publish(new UrlRequestReceived(Guid.NewGuid(), request.Url, DateTimeOffset.UtcNow),
-                ctx => ctx.CorrelationId = NewId.NextGuid(), cancellationToken);
-            return Results.Accepted();
-        });
-
-        app.MapPost("retry-failed-videos", async (
-            [FromServices] IBus bus,
-            [FromServices] AppDbContext dbContext,
-            CancellationToken cancellationToken) =>
-        {
-            var failedVideos = await dbContext.Set<DownloadVideoState>()
-                .Where(e => e.CurrentState == "DownloadFailed")
-                .ToListAsync(cancellationToken);
-            
-            await bus.PublishBatch(failedVideos.Select(e => new RetryFailedVideoDownloadRequested(e.Url, DateTimeOffset.UtcNow)), 
-                cancellationToken);
-
-            return Results.Accepted();
-        });
-        
-        app.MapPost("retry-failed-videos/{id:guid}", async (
-            [FromServices] IBus bus,
-            [FromServices] AppDbContext dbContext,
-            [FromRoute] Guid id,
-            CancellationToken cancellationToken) =>
-        {
-            var failedVideo = await dbContext.Set<DownloadVideoState>()
-                .FirstOrDefaultAsync(e => e.CorrelationId == id && e.CurrentState == "DownloadFailed", cancellationToken);
-
-            if (failedVideo is null)
-            {
-                return Results.NotFound();
-            }
-            
-            await bus.Publish(new RetryFailedVideoDownloadRequested(failedVideo.Url, DateTimeOffset.UtcNow), cancellationToken);
-
-            return Results.Accepted();
-        });
-        
-        app.MapPost("retry-failed-pagescrapes", async (
-            [FromServices] IBus bus,
-            [FromServices] AppDbContext dbContext,
-            CancellationToken cancellationToken) =>
-        {
-            var failedVideos = await dbContext.Set<ScrapePageState>()
-                .Where(e => e.CurrentState == "ScrapeFailed")
-                .ToListAsync(cancellationToken);
-            
-            await bus.PublishBatch(failedVideos.Select(e => new RetryFailedPageScrapeRequested(e.Url, DateTimeOffset.UtcNow)), 
-                cancellationToken);
-
-            return Results.Accepted();
-        });
+        app.MapDownloadEndpoints();
+        app.MapVideoEndpoints();
+        app.MapScrapedPagesEndpoints();
 
         app.Run();
     }
