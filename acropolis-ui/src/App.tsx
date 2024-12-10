@@ -10,7 +10,7 @@ function App() {
 
   useEffect(() => {
     console.log('dispatching');
-    dispatch(fetchPages);
+    dispatch(fetchPages());
   }, []);
 
 

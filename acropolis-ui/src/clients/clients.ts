@@ -87,7 +87,7 @@ export interface IPagesClient {
     /**
      * @return OK
      */
-    pages(): Promise<ScrapePageState>;
+    pages(): Promise<ScrapePageState[]>;
     /**
      * @return OK
      */
@@ -110,7 +110,7 @@ export class PagesClient implements IPagesClient {
     /**
      * @return OK
      */
-    pages( cancelToken?: CancelToken): Promise<ScrapePageState> {
+    pages( cancelToken?: CancelToken): Promise<ScrapePageState[]> {
         let url_ = this.baseUrl + "/pages";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -134,7 +134,7 @@ export class PagesClient implements IPagesClient {
         });
     }
 
-    protected processPages(response: AxiosResponse): Promise<ScrapePageState> {
+    protected processPages(response: AxiosResponse): Promise<ScrapePageState[]> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -148,14 +148,21 @@ export class PagesClient implements IPagesClient {
             const _responseText = response.data;
             let result200: any = null;
             let resultData200  = _responseText;
-            result200 = ScrapePageState.fromJS(resultData200);
-            return Promise.resolve<ScrapePageState>(result200);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(ScrapePageState.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return Promise.resolve<ScrapePageState[]>(result200);
 
         } else if (status !== 200 && status !== 204) {
             const _responseText = response.data;
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
         }
-        return Promise.resolve<ScrapePageState>(null as any);
+        return Promise.resolve<ScrapePageState[]>(null as any);
     }
 
     /**
@@ -431,11 +438,11 @@ export class DownloadVideoState implements IDownloadVideoState {
     rowVersion?: number;
     currentState?: string | undefined;
     url?: string | undefined;
-    requestedTimestamp?: Date;
-    downloadedTimestamp?: Date | undefined;
+    requestedTimestamp?: string;
+    downloadedTimestamp?: string | undefined;
     videoMetaData?: VideoMetaData;
     errorMessage?: string | undefined;
-    errorTimestamp?: Date | undefined;
+    errorTimestamp?: string | undefined;
 
     constructor(data?: IDownloadVideoState) {
         if (data) {
@@ -452,11 +459,11 @@ export class DownloadVideoState implements IDownloadVideoState {
             this.rowVersion = _data["rowVersion"];
             this.currentState = _data["currentState"];
             this.url = _data["url"];
-            this.requestedTimestamp = _data["requestedTimestamp"] ? new Date(_data["requestedTimestamp"].toString()) : <any>undefined;
-            this.downloadedTimestamp = _data["downloadedTimestamp"] ? new Date(_data["downloadedTimestamp"].toString()) : <any>undefined;
+            this.requestedTimestamp = _data["requestedTimestamp"];
+            this.downloadedTimestamp = _data["downloadedTimestamp"];
             this.videoMetaData = _data["videoMetaData"] ? VideoMetaData.fromJS(_data["videoMetaData"]) : <any>undefined;
             this.errorMessage = _data["errorMessage"];
-            this.errorTimestamp = _data["errorTimestamp"] ? new Date(_data["errorTimestamp"].toString()) : <any>undefined;
+            this.errorTimestamp = _data["errorTimestamp"];
         }
     }
 
@@ -473,11 +480,11 @@ export class DownloadVideoState implements IDownloadVideoState {
         data["rowVersion"] = this.rowVersion;
         data["currentState"] = this.currentState;
         data["url"] = this.url;
-        data["requestedTimestamp"] = this.requestedTimestamp ? this.requestedTimestamp.toISOString() : <any>undefined;
-        data["downloadedTimestamp"] = this.downloadedTimestamp ? this.downloadedTimestamp.toISOString() : <any>undefined;
+        data["requestedTimestamp"] = this.requestedTimestamp;
+        data["downloadedTimestamp"] = this.downloadedTimestamp;
         data["videoMetaData"] = this.videoMetaData ? this.videoMetaData.toJSON() : <any>undefined;
         data["errorMessage"] = this.errorMessage;
-        data["errorTimestamp"] = this.errorTimestamp ? this.errorTimestamp.toISOString() : <any>undefined;
+        data["errorTimestamp"] = this.errorTimestamp;
         return data;
     }
 }
@@ -487,11 +494,11 @@ export interface IDownloadVideoState {
     rowVersion?: number;
     currentState?: string | undefined;
     url?: string | undefined;
-    requestedTimestamp?: Date;
-    downloadedTimestamp?: Date | undefined;
+    requestedTimestamp?: string;
+    downloadedTimestamp?: string | undefined;
     videoMetaData?: VideoMetaData;
     errorMessage?: string | undefined;
-    errorTimestamp?: Date | undefined;
+    errorTimestamp?: string | undefined;
 }
 
 export class ScrapePageState implements IScrapePageState {
@@ -499,13 +506,13 @@ export class ScrapePageState implements IScrapePageState {
     rowVersion?: number;
     currentState?: string | undefined;
     url?: string | undefined;
-    requestedTimestamp?: Date;
-    scrapedTimestamp?: Date | undefined;
+    requestedTimestamp?: string;
+    scrapedTimestamp?: string | undefined;
     domain?: string | undefined;
     title?: string | undefined;
     storageLocation?: string | undefined;
     errorMessage?: string | undefined;
-    errorTimestamp?: Date | undefined;
+    errorTimestamp?: string | undefined;
 
     constructor(data?: IScrapePageState) {
         if (data) {
@@ -522,13 +529,13 @@ export class ScrapePageState implements IScrapePageState {
             this.rowVersion = _data["rowVersion"];
             this.currentState = _data["currentState"];
             this.url = _data["url"];
-            this.requestedTimestamp = _data["requestedTimestamp"] ? new Date(_data["requestedTimestamp"].toString()) : <any>undefined;
-            this.scrapedTimestamp = _data["scrapedTimestamp"] ? new Date(_data["scrapedTimestamp"].toString()) : <any>undefined;
+            this.requestedTimestamp = _data["requestedTimestamp"];
+            this.scrapedTimestamp = _data["scrapedTimestamp"];
             this.domain = _data["domain"];
             this.title = _data["title"];
             this.storageLocation = _data["storageLocation"];
             this.errorMessage = _data["errorMessage"];
-            this.errorTimestamp = _data["errorTimestamp"] ? new Date(_data["errorTimestamp"].toString()) : <any>undefined;
+            this.errorTimestamp = _data["errorTimestamp"];
         }
     }
 
@@ -545,13 +552,13 @@ export class ScrapePageState implements IScrapePageState {
         data["rowVersion"] = this.rowVersion;
         data["currentState"] = this.currentState;
         data["url"] = this.url;
-        data["requestedTimestamp"] = this.requestedTimestamp ? this.requestedTimestamp.toISOString() : <any>undefined;
-        data["scrapedTimestamp"] = this.scrapedTimestamp ? this.scrapedTimestamp.toISOString() : <any>undefined;
+        data["requestedTimestamp"] = this.requestedTimestamp;
+        data["scrapedTimestamp"] = this.scrapedTimestamp;
         data["domain"] = this.domain;
         data["title"] = this.title;
         data["storageLocation"] = this.storageLocation;
         data["errorMessage"] = this.errorMessage;
-        data["errorTimestamp"] = this.errorTimestamp ? this.errorTimestamp.toISOString() : <any>undefined;
+        data["errorTimestamp"] = this.errorTimestamp;
         return data;
     }
 }
@@ -561,20 +568,20 @@ export interface IScrapePageState {
     rowVersion?: number;
     currentState?: string | undefined;
     url?: string | undefined;
-    requestedTimestamp?: Date;
-    scrapedTimestamp?: Date | undefined;
+    requestedTimestamp?: string;
+    scrapedTimestamp?: string | undefined;
     domain?: string | undefined;
     title?: string | undefined;
     storageLocation?: string | undefined;
     errorMessage?: string | undefined;
-    errorTimestamp?: Date | undefined;
+    errorTimestamp?: string | undefined;
 }
 
 export class VideoMetaData implements IVideoMetaData {
     videoId?: string | undefined;
     videoTitle?: string | undefined;
     author?: string | undefined;
-    videoUploadTimestamp?: Date;
+    videoUploadTimestamp?: string;
     storageLocation?: string | undefined;
 
     constructor(data?: IVideoMetaData) {
@@ -591,7 +598,7 @@ export class VideoMetaData implements IVideoMetaData {
             this.videoId = _data["videoId"];
             this.videoTitle = _data["videoTitle"];
             this.author = _data["author"];
-            this.videoUploadTimestamp = _data["videoUploadTimestamp"] ? new Date(_data["videoUploadTimestamp"].toString()) : <any>undefined;
+            this.videoUploadTimestamp = _data["videoUploadTimestamp"];
             this.storageLocation = _data["storageLocation"];
         }
     }
@@ -608,7 +615,7 @@ export class VideoMetaData implements IVideoMetaData {
         data["videoId"] = this.videoId;
         data["videoTitle"] = this.videoTitle;
         data["author"] = this.author;
-        data["videoUploadTimestamp"] = this.videoUploadTimestamp ? this.videoUploadTimestamp.toISOString() : <any>undefined;
+        data["videoUploadTimestamp"] = this.videoUploadTimestamp;
         data["storageLocation"] = this.storageLocation;
         return data;
     }
@@ -618,7 +625,7 @@ export interface IVideoMetaData {
     videoId?: string | undefined;
     videoTitle?: string | undefined;
     author?: string | undefined;
-    videoUploadTimestamp?: Date;
+    videoUploadTimestamp?: string;
     storageLocation?: string | undefined;
 }
 
