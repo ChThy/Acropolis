@@ -3,6 +3,7 @@ import './App.css'
 import { useAppDispatch, useAppSelector } from './store/hooks'
 import { fetchPages } from './store/actions';
 import { pagesSelector } from './store/selectors';
+import Pages from './components/Pages';
 
 function App() {
   const dispatch = useAppDispatch();
@@ -16,14 +17,7 @@ function App() {
 
   return (
     <>
-      <p>Total pages scraped: {pages.length}</p>
-      <div>
-        {pages.map(page => (
-          <>
-            <p key={page.url} >{page.url}</p>
-          </>
-        ))}
-      </div>
+      <Pages pages={pages} />
     </>
   )
 }
