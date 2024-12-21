@@ -88,10 +88,16 @@ public static class EndpointBuilderExtensions
         
         group.MapGet("", async (
             [FromServices] AppDbContext dbContext,
+            [FromQuery] bool includeSkipped,
             CancellationToken cancellationToken) =>
         {
-            var result = await dbContext.Set<ScrapePageState>()
-                .ToListAsync(cancellationToken);
+            var query = dbContext.Set<ScrapePageState>().AsQueryable();
+
+            if (!includeSkipped)
+            {
+                query = query.Where(e => e.CurrentState != nameof(ScrapePageSaga.ScrapeSkipped));
+            }
+            var result = await query.ToListAsync(cancellationToken);
             
             return Results.Ok(result);
         }).Produces<ScrapePageState[]>();

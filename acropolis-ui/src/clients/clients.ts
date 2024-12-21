@@ -87,7 +87,7 @@ export interface IPagesClient {
     /**
      * @return OK
      */
-    pages(): Promise<ScrapePageState[]>;
+    pages(includeSkipped: boolean): Promise<ScrapePageState[]>;
     /**
      * @return OK
      */
@@ -110,8 +110,12 @@ export class PagesClient implements IPagesClient {
     /**
      * @return OK
      */
-    pages( cancelToken?: CancelToken): Promise<ScrapePageState[]> {
-        let url_ = this.baseUrl + "/pages";
+    pages(includeSkipped: boolean, cancelToken?: CancelToken): Promise<ScrapePageState[]> {
+        let url_ = this.baseUrl + "/pages?";
+        if (includeSkipped === undefined || includeSkipped === null)
+            throw new Error("The parameter 'includeSkipped' must be defined and cannot be null.");
+        else
+            url_ += "includeSkipped=" + encodeURIComponent("" + includeSkipped) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_: AxiosRequestConfig = {
