@@ -3,6 +3,7 @@ using Acropolis.Application.Sagas.ExternalMessageRequest;
 using Acropolis.Application.Sagas.ScrapePage;
 using Acropolis.Application.Services;
 using Acropolis.Infrastructure.EfCore;
+using Acropolis.Infrastructure.EfCore.Queries;
 using Acropolis.Infrastructure.Extensions;
 using Acropolis.Infrastructure.PageScraper.EventHandlers;
 using Acropolis.Infrastructure.PageScraper.Extensions;
@@ -10,6 +11,7 @@ using Acropolis.Infrastructure.Telegram.Extensions;
 using Acropolis.Infrastructure.Telegram.Messenger;
 using Acropolis.Infrastructure.YoutubeDownloader.EventHandlers;
 using Acropolis.Infrastructure.YoutubeDownloader.Extensions;
+using Acropolis.Shared.Queries;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -35,6 +37,8 @@ public static class ServiceCollectionExtensions
         services.AddYoutubeDownloaderServices(configuration);
         services.AddPageScraper(configuration);
 
+        services.AddQueryHandling(typeof(DownloadedVideosQueryHandler).Assembly);
+        
         services.AddMassTransit(x =>
         {
             x.AddConsumers(

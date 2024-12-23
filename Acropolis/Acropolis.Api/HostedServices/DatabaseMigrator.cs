@@ -16,7 +16,7 @@ public class DatabaseMigrator : IHostedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        using var messengerDbContext = messengerDbContextFactory.CreateDbContext();
+        await using var messengerDbContext = await messengerDbContextFactory.CreateDbContextAsync(cancellationToken);
         await messengerDbContext.Database.MigrateAsync(cancellationToken);
         logger.LogInformation("Done migrating databases");
     }
