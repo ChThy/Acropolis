@@ -5,12 +5,13 @@ export interface ResourceModel {
   url: string;
   source: string;
   viewed: boolean;
+  type: 'page' | 'video';
 }
 
 export interface Page extends ResourceModel {
-  
+  type: 'page';
 }
 
-export interface Videos extends ResourceModel {
-  
+export interface Video extends ResourceModel {
+  type: 'video';
 }

@@ -1,19 +1,27 @@
-import { createAsyncThunk, createSelector } from "@reduxjs/toolkit";
-import { PagesClient } from "../clients/clients";
+import { createAsyncThunk } from "@reduxjs/toolkit";
+import { PagesClient, VideosClient } from "../clients/clients";
 import axios from "axios";
-import { Page } from "../models/resource";
+import { Page, Video } from "../models/resource";
 import { RootState } from "./store";
-import { resourcesSelector } from "./selectors";
+import { activeFetchPagesRequestIdSelector, activeFetchVideosRequestIdSelector } from "./selectors";
 import parseUrl from "parse-url";
 
-const pagesClient = new PagesClient('http://localhost:5092', axios.create());
+const baseUrl = 'http://localhost:5092';
+
+const pagesClient = new PagesClient(baseUrl, axios.create());
+const videosClient = new VideosClient(baseUrl);
+
+function rejectRequestBusy(thunkApi: any) {
+  return thunkApi.rejectWithValue("Still fetching previous request.");
+}
 
 export const fetchPages = createAsyncThunk(
   'pages/fetch',
-  async (_, thunkApi) => {
-    const activeFetchRequestId = resourcesSelector(thunkApi.getState() as RootState).pages.activeFetchRequestId;
+  async (arg, thunkApi) => {
+    const activeFetchRequestId = activeFetchPagesRequestIdSelector(thunkApi.getState() as RootState);
     if (activeFetchRequestId && activeFetchRequestId !== thunkApi.requestId) {
-      return thunkApi.rejectWithValue("Still fetching previous request.");
+      // return thunkApi.rejectWithValue("Still fetching previous request.");
+      return rejectRequestBusy(thunkApi)
     }
 
     const pages = await pagesClient.pages(false);
@@ -21,13 +29,40 @@ export const fetchPages = createAsyncThunk(
       const parsedUrl = parseUrl(e.url!);
 
       return ({
-      id: e.correlationId!,
-      title: e.title ?? "",
-      url: e.url ?? "",
-      source: parsedUrl.resource,
-      description: parsedUrl.pathname.replace(/[\W_]/g, " ").trim(),
-      viewed: false
-    })
-  });
+        type: 'page',        
+        id: e.correlationId!,
+        title: e.title ?? "",
+        url: e.url ?? "",
+        source: parsedUrl.resource,
+        description: parsedUrl.pathname.replace(/[\W_]/g, " ").trim(),
+        viewed: false
+      })
+    });
+  }
+);
+
+export const fetchVideos = createAsyncThunk(
+  'videos/fetch',
+  async (_, thunkApi) => {
+    const activeFetchRequestId = activeFetchVideosRequestIdSelector(thunkApi.getState() as RootState);
+    if (activeFetchRequestId && activeFetchRequestId !== thunkApi.requestId) {      
+      return rejectRequestBusy(thunkApi)
+    }
+
+    const pages = await videosClient.videos();
+    return pages.map<Video>(e => {
+      const parsedUrl = parseUrl(e.url!);
+
+      return ({
+        type: 'video',
+        id: e.correlationId!,
+        title: e.videoMetaData?.videoTitle ?? "",
+        url: e.url ?? "",
+        source: parsedUrl.resource,
+        description: parsedUrl.pathname.replace(/[\W_]/g, " ").trim(),
+        viewed: false
+      })
+    });
+
   }
 );
