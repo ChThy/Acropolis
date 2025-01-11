@@ -1,6 +1,6 @@
 using Acropolis.Shared.Queries;
 
-namespace Acropolis.Infrastructure.EfCore.Queries;
+namespace Acropolis.Infrastructure.EfCore.QueryHandlers;
 
 public abstract class QueryHandlerBase<TQuery, TResult, TDbContext>(TDbContext dbContext) : 
     IQueryHandler<TQuery, TResult> where TQuery : IQuery<TResult>

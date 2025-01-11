@@ -1,4 +1,6 @@
 using Acropolis.Api.Models;
+using Acropolis.Application.DownloadedVideos;
+using Acropolis.Application.DownloadedVideos.CreateDownloadedVideo;
 using Acropolis.Application.Events;
 using Acropolis.Application.Events.PageScraper;
 using Acropolis.Application.Events.VideoDownloader;
@@ -6,6 +8,7 @@ using Acropolis.Application.Sagas.DownloadVideo;
 using Acropolis.Application.Sagas.ScrapePage;
 using Acropolis.Infrastructure.EfCore;
 using MassTransit;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,6 +29,14 @@ public static class EndpointBuilderExtensions
                 ctx => ctx.CorrelationId = NewId.NextGuid(), cancellationToken);
             
             return Results.Accepted();
+        });
+
+        var debug = endpoints.MapGroup("debug").WithTags("Debug");
+
+        debug.MapGet("", async (IMediator mediator) =>
+        {
+            await mediator.Send(new CreateDownloadedVideoRequest(new("", DateTimeOffset.Now, null!)));
+            return Results.Ok();
         });
         
         return endpoints;

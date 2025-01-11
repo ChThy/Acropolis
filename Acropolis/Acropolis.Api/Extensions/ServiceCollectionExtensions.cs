@@ -1,9 +1,12 @@
-﻿using Acropolis.Application.Sagas.DownloadVideo;
+﻿using Acropolis.Application.DownloadedVideos;
+using Acropolis.Application.DownloadedVideos.CreateDownloadedVideo;
+using Acropolis.Application.Sagas.DownloadVideo;
 using Acropolis.Application.Sagas.ExternalMessageRequest;
 using Acropolis.Application.Sagas.ScrapePage;
 using Acropolis.Application.Services;
+using Acropolis.Application.Shared;
 using Acropolis.Infrastructure.EfCore;
-using Acropolis.Infrastructure.EfCore.Queries;
+using Acropolis.Infrastructure.EfCore.QueryHandlers;
 using Acropolis.Infrastructure.Extensions;
 using Acropolis.Infrastructure.PageScraper.EventHandlers;
 using Acropolis.Infrastructure.PageScraper.Extensions;
@@ -11,8 +14,10 @@ using Acropolis.Infrastructure.Telegram.Extensions;
 using Acropolis.Infrastructure.Telegram.Messenger;
 using Acropolis.Infrastructure.YoutubeDownloader.EventHandlers;
 using Acropolis.Infrastructure.YoutubeDownloader.Extensions;
+using Acropolis.Shared.Commands;
 using Acropolis.Shared.Queries;
 using MassTransit;
+using MediatR.Pipeline;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -33,17 +38,24 @@ public static class ServiceCollectionExtensions
         services.AddTransient<ProcessService>();
         
         services.AddInfrastructure(configuration);
-        services.AddTelegramMessenger(configuration);
+        // services.AddTelegramMessenger(configuration);
         services.AddYoutubeDownloaderServices(configuration);
         services.AddPageScraper(configuration);
 
+        services.AddMediatR(config =>
+        {
+            config.RegisterServicesFromAssemblies(typeof(CreateDownloadedVideoRequest).Assembly);
+            // config.AddRequestPostProcessor(typeof(IRequestPostProcessor<,>), typeof(SaveChangesPostProcessor<,>), ServiceLifetime.Scoped);
+        });
+
         services.AddQueryHandling(typeof(DownloadedVideosQueryHandler).Assembly);
+        services.AddCommandHandling(typeof(SaveChangesPostProcessor<,>).Assembly);
         
         services.AddMassTransit(x =>
         {
             x.AddConsumers(
                 typeof(VideoDownloadRequestedHandler).Assembly,
-                typeof(ExternalMessageReplyRequestedHandler).Assembly,
+                // typeof(ExternalMessageReplyRequestedHandler).Assembly,
                 typeof(PageScrapeRequestedHandler).Assembly);
 
             x.AddSagaStateMachines(typeof(DownloadVideoSaga).Assembly);
