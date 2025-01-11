@@ -1,12 +1,13 @@
 using Acropolis.Application.Events.PageScraper;
 using MassTransit;
+using MediatR;
 
 namespace Acropolis.Application.ScrapedPages.CreateScrapedPage;
 
-public class PageScrapedConsumer : IConsumer<PageScraped>
+public class PageScrapedConsumer(IMediator mediator) : IConsumer<PageScraped>
 {
     public Task Consume(ConsumeContext<PageScraped> context)
     {
-        throw new NotImplementedException();
+        return mediator.Send(context.Message, context.CancellationToken);
     }
 }

@@ -1,3 +1,4 @@
+using Acropolis.Api.Endpoints;
 using Acropolis.Api.Extensions;
 using Acropolis.Api.HostedServices;
 using Acropolis.Api.Models;
@@ -45,6 +46,7 @@ public class Program
         app.MapDownloadEndpoints();
         app.MapVideoEndpoints();
         app.MapScrapedPagesEndpoints();
+        app.MapMigrationEndpoints();
 
         app.Run();
     }

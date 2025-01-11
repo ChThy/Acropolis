@@ -28,9 +28,9 @@ public class DownloadVideoSaga : MassTransitStateMachine<DownloadVideoState>
             When(WhenVideoDownloaded)
                 .Then(ctx =>
                 {
-                    var (saga, message) = ctx.Deconstruct();
-                    saga.DownloadedTimestamp = message.Timestamp;
-                    saga.VideoMetaData = message.VideoMetaData;
+                    // var (saga, message) = ctx.Deconstruct();
+                    // saga.DownloadedTimestamp = message.Timestamp;
+                    // saga.VideoMetaData = message.VideoMetaData;
                 })
                 .Publish(ctx =>
                 {
@@ -76,10 +76,11 @@ public class DownloadVideoSaga : MassTransitStateMachine<DownloadVideoState>
             When(WhenVideoDownloaded)
                 .Then(x =>
                 {
-                    var (saga, message) = x.Deconstruct();
-                    saga.DownloadedTimestamp = message.Timestamp;
-                    saga.VideoMetaData = message.VideoMetaData;
-                }),
+                    // var (saga, message) = x.Deconstruct();
+                    // saga.DownloadedTimestamp = message.Timestamp;
+                    // saga.VideoMetaData = message.VideoMetaData;
+                })
+                .TransitionTo(Final),
             Ignore(WhenVideoDownloadSkipped),
             Ignore(WhenVideoDownloadFailed),
             Ignore(WhenRetryFailedVideoDownloadRequested)

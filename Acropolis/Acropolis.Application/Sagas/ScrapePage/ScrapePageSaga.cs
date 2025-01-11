@@ -10,6 +10,7 @@ public class ScrapePageSaga : MassTransitStateMachine<ScrapePageState>
     public ScrapePageSaga()
     {
         InstanceState(e => e.CurrentState);
+        SetCompletedWhenFinalized();
 
         Initially(
             When(WhenUrlRequestReceived)
@@ -30,11 +31,11 @@ public class ScrapePageSaga : MassTransitStateMachine<ScrapePageState>
             When(WhenPageScraped)
                 .Then(ctx =>
                 {
-                    var (saga, message) = ctx.Deconstruct();
-                    saga.ScrapedTimestamp = message.Timestamp;
-                    saga.Title = message.PageTitle;
-                    saga.Domain = message.Domain;
-                    saga.StorageLocation = message.StorageLocation;
+                    // var (saga, message) = ctx.Deconstruct();
+                    // saga.ScrapedTimestamp = message.Timestamp;
+                    // saga.Title = message.PageTitle;
+                    // saga.Domain = message.Domain;
+                    // saga.StorageLocation = message.StorageLocation;
                 })
                 .Publish(ctx =>
                 {
@@ -80,12 +81,13 @@ public class ScrapePageSaga : MassTransitStateMachine<ScrapePageState>
             When(WhenPageScraped)
                 .Then(x =>
                 {
-                    var (saga, message) = x.Deconstruct();
-                    saga.ScrapedTimestamp = message.Timestamp;
-                    saga.Title = message.PageTitle;
-                    saga.Domain = message.Domain;
-                    saga.StorageLocation = message.StorageLocation;
-                }),
+                    // var (saga, message) = x.Deconstruct();
+                    // saga.ScrapedTimestamp = message.Timestamp;
+                    // saga.Title = message.PageTitle;
+                    // saga.Domain = message.Domain;
+                    // saga.StorageLocation = message.StorageLocation;
+                })
+                .TransitionTo(Final),
             Ignore(WhenPageScapeSkipped),
             Ignore(WhenPageScrapeFailed),
             Ignore(WhenRetryFailedPageScrapeRequested)
