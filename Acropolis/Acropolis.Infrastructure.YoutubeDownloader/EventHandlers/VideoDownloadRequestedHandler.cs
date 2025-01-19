@@ -67,7 +67,9 @@ public class VideoDownloadRequestedHandler(
             .ToList();
 
         var directory = ConstructDirectory(video.Author.ChannelTitle);
-        var filename = FileNameWithoutExtension(video.UploadDate, video.Title).Replace("'", "");
+        var filename = FileNameWithoutExtension(video.UploadDate, video.Title)
+            .Replace("'", "")
+            .Replace("-", "_");
         
         var videoStreamInfo = WithLowestPreferredQuality(videoOnlyStreamInfos) ?? videoOnlyStreamInfos.GetWithHighestVideoQuality();
         var audioStreamInfo = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate();
