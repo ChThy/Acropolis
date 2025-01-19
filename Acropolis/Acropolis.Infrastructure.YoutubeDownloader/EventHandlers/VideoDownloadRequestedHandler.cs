@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Web;
 using Acropolis.Application.Events.VideoDownloader;
 using Acropolis.Application.Models;
 using Acropolis.Application.Services;
@@ -44,7 +45,7 @@ public class VideoDownloadRequestedHandler(
 
         try
         {
-            var videoMetaData = await DownloadVideo(url, context.CancellationToken);
+            var videoMetaData = await DownloadVideo(new(url), context.CancellationToken);
             await context.Publish(new VideoDownloaded(url, timeProvider.GetLocalNow(), videoMetaData));
             logger.LogInformation("Video downloaded: {video}", videoMetaData);
         }
@@ -55,9 +56,9 @@ public class VideoDownloadRequestedHandler(
         }
     }
 
-    private async Task<VideoMetaData> DownloadVideo(string url, CancellationToken cancellationToken)
+    private async Task<VideoMetaData> DownloadVideo(Uri uri, CancellationToken cancellationToken)
     {
-        var videoId = VideoIdExtractor.ExtractVideoId(url);
+        var videoId = VideoIdExtractor.ExtractVideoId(uri);
         var video = await youtubeClient.Videos.GetAsync(videoId, cancellationToken);
         var streamManifest = await youtubeClient.Videos.Streams.GetManifestAsync(videoId, cancellationToken);
 
