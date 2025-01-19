@@ -32,7 +32,7 @@ public class Program
             });
         });
 
-        builder.Services.AddServices(builder.Configuration);
+        builder.Services.AddServices(builder.Configuration, builder.Environment);
 
         var app = builder.Build();
 

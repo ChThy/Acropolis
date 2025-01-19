@@ -8,6 +8,6 @@ public class VideoDownloadedConsumer(IMediator mediator) : IConsumer<VideoDownlo
 {
     public async Task Consume(ConsumeContext<VideoDownloaded> context)
     {
-        await mediator.Send(new CreateDownloadedVideoRequest(context.Message));
+        await mediator.Send(new CreateDownloadedVideoRequest(context.Message), context.CancellationToken);
     }
 }

@@ -32,7 +32,7 @@ public class PageScrapeRequestedHandler(
         if (options.IgnoredDomains.Contains(uri.Host))
         {
             logger.LogWarning("Ignoring domain {domain}", uri.Host);
-            await context.Publish(new PageScrapeSkipped(context.Message.Url, $"Invalid url: {context.Message.Url}"));
+            await context.Publish(new PageScrapeSkipped(context.Message.Url, $"Ignored domain: {context.Message.Url}"));
             return;
         }
 

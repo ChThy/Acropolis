@@ -1,5 +1,6 @@
 ﻿using Acropolis.Application.Events.PageScraper;
 using Acropolis.Application.Sagas.ScrapePage;
+using Acropolis.Domain.ScrapedPages;
 using Acropolis.Infrastructure.EfCore;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
@@ -15,16 +16,20 @@ public static class PageEndpoints
         
         group.MapGet("", async (
             [FromServices] AppDbContext dbContext,
-            [FromQuery] bool includeSkipped,
             CancellationToken cancellationToken) =>
         {
-            var query = dbContext.Set<ScrapePageState>().AsQueryable();
-
-            if (!includeSkipped)
-            {
-                query = query.Where(e => e.CurrentState != nameof(ScrapePageSaga.ScrapeSkipped));
-            }
-            var result = await query.ToListAsync(cancellationToken);
+            var result = await dbContext.ScrapedPages
+                .Include(e => e.Resources)
+                .ToListAsync(cancellationToken);
+            
+            return Results.Ok(result);
+        }).Produces<ScrapedPage[]>();
+        
+        group.MapGet("requested", async (
+            [FromServices] AppDbContext dbContext,
+            CancellationToken cancellationToken) =>
+        {
+            var result = await dbContext.Set<ScrapePageState>().ToListAsync(cancellationToken);
             
             return Results.Ok(result);
         }).Produces<ScrapePageState[]>();

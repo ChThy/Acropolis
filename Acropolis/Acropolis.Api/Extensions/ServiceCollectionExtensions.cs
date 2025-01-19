@@ -6,6 +6,7 @@ using Acropolis.Application.Sagas.ScrapePage;
 using Acropolis.Application.Services;
 using Acropolis.Application.Shared;
 using Acropolis.Infrastructure.EfCore;
+using Acropolis.Infrastructure.EfCore.CommandHandlers;
 using Acropolis.Infrastructure.EfCore.QueryHandlers;
 using Acropolis.Infrastructure.Extensions;
 using Acropolis.Infrastructure.PageScraper.EventHandlers;
@@ -25,7 +26,7 @@ namespace Acropolis.Api.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
         services.TryAddSingleton(TimeProvider.System);
         services.AddHttpClient();
@@ -49,11 +50,12 @@ public static class ServiceCollectionExtensions
         });
 
         services.AddQueryHandling(typeof(DownloadedVideosQueryHandler).Assembly);
-        services.AddCommandHandling(typeof(SaveChangesPostProcessor<,>).Assembly);
+        services.AddCommandHandling(typeof(SaveChangesCommandHandler).Assembly);
         
         services.AddMassTransit(x =>
         {
             x.AddConsumers(
+                typeof(VideoDownloadedConsumer).Assembly,
                 typeof(VideoDownloadRequestedHandler).Assembly,
                 // typeof(ExternalMessageReplyRequestedHandler).Assembly,
                 typeof(PageScrapeRequestedHandler).Assembly);
@@ -90,7 +92,15 @@ public static class ServiceCollectionExtensions
             x.AddConfigureEndpointsCallback((endpoint,cfg) =>
             {
                 cfg.ConcurrentMessageLimit = 1;
-                cfg.UseMessageRetry(r => r.Exponential(10, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(60), TimeSpan.FromSeconds(20)));
+
+                if (environment.IsProduction())
+                {
+                    cfg.UseMessageRetry(r => r.Exponential(10, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(60), TimeSpan.FromSeconds(20)));
+                }
+                else
+                {
+                    cfg.UseMessageRetry(r => r.Immediate(0));
+                }
             });
 
             x.UsingRabbitMq((context, config) =>

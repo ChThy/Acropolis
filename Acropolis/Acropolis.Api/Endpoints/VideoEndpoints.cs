@@ -1,5 +1,6 @@
 ﻿using Acropolis.Application.Events.VideoDownloader;
 using Acropolis.Application.Sagas.DownloadVideo;
+using Acropolis.Domain.DownloadedVideos;
 using Acropolis.Infrastructure.EfCore;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
@@ -17,11 +18,22 @@ public static class VideoEndpoints
             [FromServices] AppDbContext dbContext,
             CancellationToken cancellationToken) =>
         {
+            var result = await dbContext.DownloadedVideos
+                .Include(e => e.Resources)
+                .ToListAsync(cancellationToken);
+            
+            return Results.Ok(result);
+        }).Produces<DownloadedVideo[]>();
+        
+        group.MapGet("requested", async (
+            [FromServices] AppDbContext dbContext,
+            CancellationToken cancellationToken) =>
+        {
             var result = await dbContext.Set<DownloadVideoState>()
                 .ToListAsync(cancellationToken);
             
             return Results.Ok(result);
-        }).Produces<DownloadVideoState[]>();
+        });
         
         group.MapPost("failed/retry", async (
             [FromServices] IBus bus,
