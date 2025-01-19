@@ -39,14 +39,14 @@ public static class ServiceCollectionExtensions
         services.AddTransient<ProcessService>();
         
         services.AddInfrastructure(configuration);
-        // services.AddTelegramMessenger(configuration);
+        services.AddTelegramMessenger(configuration);
         services.AddYoutubeDownloaderServices(configuration);
         services.AddPageScraper(configuration);
 
         services.AddMediatR(config =>
         {
             config.RegisterServicesFromAssemblies(typeof(CreateDownloadedVideoRequest).Assembly);
-            // config.AddRequestPostProcessor(typeof(IRequestPostProcessor<,>), typeof(SaveChangesPostProcessor<,>), ServiceLifetime.Scoped);
+            config.AddRequestPostProcessor(typeof(IRequestPostProcessor<,>), typeof(SaveChangesPostProcessor<,>), ServiceLifetime.Scoped);
         });
 
         services.AddQueryHandling(typeof(DownloadedVideosQueryHandler).Assembly);
@@ -57,7 +57,7 @@ public static class ServiceCollectionExtensions
             x.AddConsumers(
                 typeof(VideoDownloadedConsumer).Assembly,
                 typeof(VideoDownloadRequestedHandler).Assembly,
-                // typeof(ExternalMessageReplyRequestedHandler).Assembly,
+                typeof(ExternalMessageReplyRequestedHandler).Assembly,
                 typeof(PageScrapeRequestedHandler).Assembly);
 
             x.AddSagaStateMachines(typeof(DownloadVideoSaga).Assembly);
