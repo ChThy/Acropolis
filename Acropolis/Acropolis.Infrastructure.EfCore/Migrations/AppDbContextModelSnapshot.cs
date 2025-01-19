@@ -17,7 +17,7 @@ namespace Acropolis.Infrastructure.EfCore.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .UseCollation("BINARY")
-                .HasAnnotation("ProductVersion", "8.0.3");
+                .HasAnnotation("ProductVersion", "9.0.0");
 
             modelBuilder.Entity("Acropolis.Application.Sagas.DownloadVideo.DownloadVideoState", b =>
                 {
@@ -161,6 +161,69 @@ namespace Acropolis.Infrastructure.EfCore.Migrations
                     b.ToTable("ScrapePageState");
                 });
 
+            modelBuilder.Entity("Acropolis.Domain.DownloadedVideos.DownloadedVideo", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(2048)
+                        .HasColumnType("TEXT")
+                        .UseCollation("BINARY");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DownloadedVideos");
+                });
+
+            modelBuilder.Entity("Acropolis.Domain.Resource", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset>("CreatedTimestamp")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("DownloadedVideoId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("ScrapedPageId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StorageLocation")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .UseCollation("BINARY");
+
+                    b.Property<int>("Views")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DownloadedVideoId");
+
+                    b.HasIndex("ScrapedPageId");
+
+                    b.ToTable("Resource");
+                });
+
+            modelBuilder.Entity("Acropolis.Domain.ScrapedPages.ScrapedPage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(2048)
+                        .HasColumnType("TEXT")
+                        .UseCollation("BINARY");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ScrapedPages");
+                });
+
             modelBuilder.Entity("MassTransit.EntityFrameworkCoreIntegration.InboxState", b =>
                 {
                     b.Property<long>("Id")
@@ -200,8 +263,6 @@ namespace Acropolis.Infrastructure.EfCore.Migrations
                         .HasColumnType("BLOB");
 
                     b.HasKey("Id");
-
-                    b.HasAlternateKey("MessageId", "ConsumerId");
 
                     b.HasIndex("Delivered");
 
@@ -371,6 +432,107 @@ namespace Acropolis.Infrastructure.EfCore.Migrations
                         });
 
                     b.Navigation("VideoMetaData");
+                });
+
+            modelBuilder.Entity("Acropolis.Domain.DownloadedVideos.DownloadedVideo", b =>
+                {
+                    b.OwnsOne("Acropolis.Domain.DownloadedVideos.VideoMetaData", "MetaData", b1 =>
+                        {
+                            b1.Property<Guid>("DownloadedVideoId")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Author")
+                                .IsRequired()
+                                .HasColumnType("TEXT")
+                                .UseCollation("BINARY");
+
+                            b1.Property<string>("VideoId")
+                                .IsRequired()
+                                .HasColumnType("TEXT")
+                                .UseCollation("BINARY");
+
+                            b1.Property<string>("VideoTitle")
+                                .IsRequired()
+                                .HasColumnType("TEXT")
+                                .UseCollation("BINARY");
+
+                            b1.Property<DateTimeOffset>("VideoUploadTimestamp")
+                                .HasColumnType("TEXT");
+
+                            b1.HasKey("DownloadedVideoId");
+
+                            b1.ToTable("DownloadedVideos");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DownloadedVideoId");
+                        });
+
+                    b.Navigation("MetaData")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Acropolis.Domain.Resource", b =>
+                {
+                    b.HasOne("Acropolis.Domain.DownloadedVideos.DownloadedVideo", null)
+                        .WithMany("Resources")
+                        .HasForeignKey("DownloadedVideoId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Acropolis.Domain.ScrapedPages.ScrapedPage", null)
+                        .WithMany("Resources")
+                        .HasForeignKey("ScrapedPageId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Acropolis.Domain.ScrapedPages.ScrapedPage", b =>
+                {
+                    b.OwnsOne("Acropolis.Domain.ScrapedPages.PageMetaData", "MetaData", b1 =>
+                        {
+                            b1.Property<Guid>("ScrapedPageId")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Domain")
+                                .IsRequired()
+                                .HasColumnType("TEXT")
+                                .UseCollation("BINARY");
+
+                            b1.Property<string>("PageTitle")
+                                .IsRequired()
+                                .HasColumnType("TEXT")
+                                .UseCollation("BINARY");
+
+                            b1.HasKey("ScrapedPageId");
+
+                            b1.ToTable("ScrapedPages");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ScrapedPageId");
+                        });
+
+                    b.Navigation("MetaData")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("MassTransit.EntityFrameworkCoreIntegration.OutboxMessage", b =>
+                {
+                    b.HasOne("MassTransit.EntityFrameworkCoreIntegration.OutboxState", null)
+                        .WithMany()
+                        .HasForeignKey("OutboxId");
+
+                    b.HasOne("MassTransit.EntityFrameworkCoreIntegration.InboxState", null)
+                        .WithMany()
+                        .HasForeignKey("InboxMessageId", "InboxConsumerId")
+                        .HasPrincipalKey("MessageId", "ConsumerId");
+                });
+
+            modelBuilder.Entity("Acropolis.Domain.DownloadedVideos.DownloadedVideo", b =>
+                {
+                    b.Navigation("Resources");
+                });
+
+            modelBuilder.Entity("Acropolis.Domain.ScrapedPages.ScrapedPage", b =>
+                {
+                    b.Navigation("Resources");
                 });
 #pragma warning restore 612, 618
         }

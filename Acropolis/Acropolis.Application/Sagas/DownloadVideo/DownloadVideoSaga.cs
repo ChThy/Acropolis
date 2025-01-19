@@ -10,6 +10,11 @@ public class DownloadVideoSaga : MassTransitStateMachine<DownloadVideoState>
     public DownloadVideoSaga()
     {
         InstanceState(e => e.CurrentState);
+        SetCompletedWhenFinalized();
+        
+        WhenEnter(Downloaded, x => x.TransitionTo(Final));
+        WhenEnter(DownloadSkipped, x => x.TransitionTo(Final));
+        
         Initially(
             When(WhenUrlRequestReceived)
                 .ThenAsync(async ctx =>
@@ -26,12 +31,6 @@ public class DownloadVideoSaga : MassTransitStateMachine<DownloadVideoState>
         During(DownloadRequested,
             Ignore(WhenUrlRequestReceived),
             When(WhenVideoDownloaded)
-                .Then(ctx =>
-                {
-                    var (saga, message) = ctx.Deconstruct();
-                    saga.DownloadedTimestamp = message.Timestamp;
-                    saga.VideoMetaData = message.VideoMetaData;
-                })
                 .Publish(ctx =>
                 {
                     var (saga, message) = ctx.Deconstruct();
@@ -42,11 +41,6 @@ public class DownloadVideoSaga : MassTransitStateMachine<DownloadVideoState>
                 })
                 .TransitionTo(Downloaded),
             When(WhenVideoDownloadSkipped)
-                // .Publish(ctx =>
-                // {
-                //     var (saga, message) = ctx.Deconstruct();
-                //     return new UrlRequestReplyRequested(saga.CorrelationId, saga.Url, $"Download skipped: {message.Reason}");
-                // })
                 .TransitionTo(DownloadSkipped),
             When(WhenVideoDownloadFailed)
                 .Then(x =>
@@ -64,33 +58,6 @@ public class DownloadVideoSaga : MassTransitStateMachine<DownloadVideoState>
                         $"Download failed: {message.ErrorMessage}");
                 })
                 .TransitionTo(DownloadFailed)
-        );
-
-        During(Downloaded,
-            When(WhenUrlRequestReceived)
-                .ThenAsync(async ctx =>
-                {
-                    var (saga, message) = ctx.Deconstruct();
-                    await ctx.Publish(new UrlRequestReplyRequested(saga.CorrelationId, saga.Url, $"Already downloaded. Location: {saga.VideoMetaData?.StorageLocation}"));
-                }),
-            When(WhenVideoDownloaded)
-                .Then(x =>
-                {
-                    var (saga, message) = x.Deconstruct();
-                    saga.DownloadedTimestamp = message.Timestamp;
-                    saga.VideoMetaData = message.VideoMetaData;
-                }),
-            Ignore(WhenVideoDownloadSkipped),
-            Ignore(WhenVideoDownloadFailed),
-            Ignore(WhenRetryFailedVideoDownloadRequested)
-        );
-
-        During(DownloadSkipped,
-            Ignore(WhenUrlRequestReceived),
-            Ignore(WhenVideoDownloaded),
-            Ignore(WhenVideoDownloadSkipped),
-            Ignore(WhenVideoDownloadFailed),
-            Ignore(WhenRetryFailedVideoDownloadRequested)
         );
         
         During(DownloadFailed,
@@ -124,6 +91,10 @@ public class DownloadVideoSaga : MassTransitStateMachine<DownloadVideoState>
             Ignore(WhenVideoDownloadSkipped),
             Ignore(WhenVideoDownloadFailed)
         );
+        
+        During(Downloaded,
+            When(WhenVideoDownloaded)
+                .TransitionTo(Final));
 
         Event(() => WhenUrlRequestReceived,
             e => e.CorrelateById(ctx => ctx.Message.RequestId).CorrelateBy(saga => saga.Url, ctx => ctx.Message.Url));

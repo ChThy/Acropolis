@@ -1,5 +1,8 @@
-﻿using MassTransit;
+﻿using Acropolis.Domain.DownloadedVideos;
+using Acropolis.Domain.ScrapedPages;
+using MassTransit;
 using MassTransit.EntityFrameworkCoreIntegration;
+using MassTransit.Futures.Contracts;
 using Microsoft.EntityFrameworkCore;
 
 namespace Acropolis.Infrastructure.EfCore;
@@ -12,6 +15,9 @@ public class AppDbContext : SagaDbContext
 
     public DbSet<InboxState> InboxStates => Set<InboxState>();
     public DbSet<OutboxState> OutboxStates => Set<OutboxState>();
+
+    public DbSet<DownloadedVideo> DownloadedVideos => Set<DownloadedVideo>();
+    public DbSet<ScrapedPage> ScrapedPages => Set<ScrapedPage>();
 
     protected override IEnumerable<ISagaClassMap> Configurations =>
     [
@@ -29,6 +35,8 @@ public class AppDbContext : SagaDbContext
         modelBuilder.AddInboxStateEntity();
         modelBuilder.AddOutboxMessageEntity();
         modelBuilder.AddOutboxStateEntity();
+
+        modelBuilder.ApplyConfigurationsFromAssembly(GetType().Assembly);
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

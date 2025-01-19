@@ -1,8 +1,13 @@
-﻿using Acropolis.Application.Sagas.DownloadVideo;
+﻿using Acropolis.Application.DownloadedVideos;
+using Acropolis.Application.DownloadedVideos.CreateDownloadedVideo;
+using Acropolis.Application.Sagas.DownloadVideo;
 using Acropolis.Application.Sagas.ExternalMessageRequest;
 using Acropolis.Application.Sagas.ScrapePage;
 using Acropolis.Application.Services;
+using Acropolis.Application.Shared;
 using Acropolis.Infrastructure.EfCore;
+using Acropolis.Infrastructure.EfCore.CommandHandlers;
+using Acropolis.Infrastructure.EfCore.QueryHandlers;
 using Acropolis.Infrastructure.Extensions;
 using Acropolis.Infrastructure.PageScraper.EventHandlers;
 using Acropolis.Infrastructure.PageScraper.Extensions;
@@ -10,7 +15,10 @@ using Acropolis.Infrastructure.Telegram.Extensions;
 using Acropolis.Infrastructure.Telegram.Messenger;
 using Acropolis.Infrastructure.YoutubeDownloader.EventHandlers;
 using Acropolis.Infrastructure.YoutubeDownloader.Extensions;
+using Acropolis.Shared.Commands;
+using Acropolis.Shared.Queries;
 using MassTransit;
+using MediatR.Pipeline;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -18,7 +26,7 @@ namespace Acropolis.Api.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
         services.TryAddSingleton(TimeProvider.System);
         services.AddHttpClient();
@@ -31,15 +39,25 @@ public static class ServiceCollectionExtensions
         services.AddTransient<ProcessService>();
         
         services.AddInfrastructure(configuration);
-        services.AddTelegramMessenger(configuration);
+        // services.AddTelegramMessenger(configuration);
         services.AddYoutubeDownloaderServices(configuration);
         services.AddPageScraper(configuration);
 
+        services.AddMediatR(config =>
+        {
+            config.RegisterServicesFromAssemblies(typeof(CreateDownloadedVideoRequest).Assembly);
+            // config.AddRequestPostProcessor(typeof(IRequestPostProcessor<,>), typeof(SaveChangesPostProcessor<,>), ServiceLifetime.Scoped);
+        });
+
+        services.AddQueryHandling(typeof(DownloadedVideosQueryHandler).Assembly);
+        services.AddCommandHandling(typeof(SaveChangesCommandHandler).Assembly);
+        
         services.AddMassTransit(x =>
         {
             x.AddConsumers(
+                typeof(VideoDownloadedConsumer).Assembly,
                 typeof(VideoDownloadRequestedHandler).Assembly,
-                typeof(ExternalMessageReplyRequestedHandler).Assembly,
+                // typeof(ExternalMessageReplyRequestedHandler).Assembly,
                 typeof(PageScrapeRequestedHandler).Assembly);
 
             x.AddSagaStateMachines(typeof(DownloadVideoSaga).Assembly);
@@ -74,7 +92,15 @@ public static class ServiceCollectionExtensions
             x.AddConfigureEndpointsCallback((endpoint,cfg) =>
             {
                 cfg.ConcurrentMessageLimit = 1;
-                cfg.UseMessageRetry(r => r.Exponential(10, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(60), TimeSpan.FromSeconds(20)));
+
+                if (environment.IsProduction())
+                {
+                    cfg.UseMessageRetry(r => r.Exponential(10, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(60), TimeSpan.FromSeconds(20)));
+                }
+                else
+                {
+                    cfg.UseMessageRetry(r => r.Immediate(0));
+                }
             });
 
             x.UsingRabbitMq((context, config) =>

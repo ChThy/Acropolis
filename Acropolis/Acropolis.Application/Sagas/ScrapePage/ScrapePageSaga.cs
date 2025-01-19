@@ -10,7 +10,11 @@ public class ScrapePageSaga : MassTransitStateMachine<ScrapePageState>
     public ScrapePageSaga()
     {
         InstanceState(e => e.CurrentState);
+        SetCompletedWhenFinalized();
 
+        WhenEnter(Scraped, x => x.TransitionTo(Final));
+        WhenEnter(ScrapeSkipped, x => x.TransitionTo(Final));
+        
         Initially(
             When(WhenUrlRequestReceived)
                 .ThenAsync(async ctx =>
@@ -28,14 +32,6 @@ public class ScrapePageSaga : MassTransitStateMachine<ScrapePageState>
         During(ScrapeRequested,
             Ignore(WhenUrlRequestReceived),
             When(WhenPageScraped)
-                .Then(ctx =>
-                {
-                    var (saga, message) = ctx.Deconstruct();
-                    saga.ScrapedTimestamp = message.Timestamp;
-                    saga.Title = message.PageTitle;
-                    saga.Domain = message.Domain;
-                    saga.StorageLocation = message.StorageLocation;
-                })
                 .Publish(ctx =>
                 {
                     var (saga, message) = ctx.Deconstruct();
@@ -46,11 +42,6 @@ public class ScrapePageSaga : MassTransitStateMachine<ScrapePageState>
                 })
                 .TransitionTo(Scraped),
             When(WhenPageScapeSkipped)
-                // .Publish(ctx =>
-                // {
-                //     var (saga, message) = ctx.Deconstruct();
-                //     return new UrlRequestReplyRequested(saga.CorrelationId, saga.Url, $"Scrape skipped: {message.Reason}");
-                // })
                 .TransitionTo(ScrapeSkipped),
             When(WhenPageScrapeFailed)
                 .Then(x =>
@@ -68,35 +59,6 @@ public class ScrapePageSaga : MassTransitStateMachine<ScrapePageState>
                         $"Scrape failed: {message.ErrorMessage}");
                 })
                 .TransitionTo(ScrapeFailed)
-        );
-        
-        During(Scraped,
-            When(WhenUrlRequestReceived)
-                .ThenAsync(async ctx =>
-                {
-                    var (saga, message) = ctx.Deconstruct();
-                    await ctx.Publish(new UrlRequestReplyRequested(saga.CorrelationId, saga.Url, $"Already scraped. Location: {saga.StorageLocation}"));
-                }),
-            When(WhenPageScraped)
-                .Then(x =>
-                {
-                    var (saga, message) = x.Deconstruct();
-                    saga.ScrapedTimestamp = message.Timestamp;
-                    saga.Title = message.PageTitle;
-                    saga.Domain = message.Domain;
-                    saga.StorageLocation = message.StorageLocation;
-                }),
-            Ignore(WhenPageScapeSkipped),
-            Ignore(WhenPageScrapeFailed),
-            Ignore(WhenRetryFailedPageScrapeRequested)
-        );
-        
-        During(ScrapeSkipped,
-            Ignore(WhenUrlRequestReceived),
-            Ignore(WhenPageScraped),
-            Ignore(WhenPageScapeSkipped),
-            Ignore(WhenPageScrapeFailed),
-            Ignore(WhenRetryFailedPageScrapeRequested)
         );
         
         During(ScrapeFailed,
@@ -130,6 +92,10 @@ public class ScrapePageSaga : MassTransitStateMachine<ScrapePageState>
             Ignore(WhenPageScapeSkipped),
             Ignore(WhenPageScrapeFailed)
         );
+        
+        During(Scraped,
+            When(WhenPageScraped)
+                .TransitionTo(Final));
         
         Event(() => WhenUrlRequestReceived,
             e => e.CorrelateById(ctx => ctx.Message.RequestId).CorrelateBy(saga => saga.Url, ctx => ctx.Message.Url));

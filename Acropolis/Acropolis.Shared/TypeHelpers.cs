@@ -6,6 +6,7 @@ public static class TypeHelpers
     {
         return types.Where(t => !t.IsInterface && !t.IsAbstract && t.GetInterfaces()
             .Any(i => i.IsGenericType && i.GetGenericTypeDefinition().IsAssignableTo(openGenericType)))
-            .Select(t => (t.GetInterfaces().Where(i => i.IsGenericType && i.GetGenericTypeDefinition().IsAssignableTo(openGenericType)).Single(), t));
+            .SelectMany(t => t.GetInterfaces().Where(i => i.IsGenericType && i.GetGenericTypeDefinition().IsAssignableTo(openGenericType))
+                .Select(i =>(i , t)));
     }
 }

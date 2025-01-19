@@ -11,6 +11,7 @@ public class ExternalMessageRequestSaga : MassTransitStateMachine<ExternalMessag
     public ExternalMessageRequestSaga()
     {
         InstanceState(e => e.CurrentState);
+        SetCompletedWhenFinalized();
         
         Initially(
             When(WhenExternalMessageRequestReceived)
@@ -39,6 +40,7 @@ public class ExternalMessageRequestSaga : MassTransitStateMachine<ExternalMessag
                         ctx.Message.Message,
                         ctx.Saga.MessageProps);
                 })
+                .TransitionTo(Final)
         );
         
         Event(() => WhenExternalMessageRequestReceived, 

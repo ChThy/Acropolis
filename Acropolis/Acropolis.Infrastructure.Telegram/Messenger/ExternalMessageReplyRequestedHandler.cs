@@ -8,10 +8,13 @@ public class ExternalMessageReplyRequestedHandler(TelegramBotClient telegramBotC
 {
     public async Task Consume(ConsumeContext<ExternalMessageReplyRequested> context)
     {
-        await telegramBotClient.SendTextMessageAsync(
+        await telegramBotClient.SendMessage(
             context.Message.MessageProps["ChatId"],
             context.Message.MessageBody,
-            replyToMessageId: int.Parse(context.Message.MessageProps["MessageId"]),
+            replyParameters: new()
+            {
+                MessageId = int.Parse(context.Message.MessageProps["MessageId"]) 
+            },
             cancellationToken: context.CancellationToken);
     }
 }
