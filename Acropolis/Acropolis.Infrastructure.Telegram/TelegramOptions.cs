@@ -6,5 +6,5 @@ public class TelegramOptions
 
     public bool Enabled { get; set; } = true;
     public string UserToken { get; set; } = "";
-    public string[] ValidChannelTitles { get; set; } = Array.Empty<string>();
+    public string[] ValidChannelTitles { get; set; } = [];
 }
