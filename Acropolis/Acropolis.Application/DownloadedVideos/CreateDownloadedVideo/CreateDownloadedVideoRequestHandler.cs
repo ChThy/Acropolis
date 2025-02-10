@@ -17,7 +17,7 @@ public class CreateDownloadedVideoRequestHandler(ICommandHandler commandHandler)
             request.Video.VideoMetaData.VideoUploadTimestamp
         ));
         
-        downloadedVideo.AddResource(new Resource(Guid.CreateVersion7(), request.Video.VideoMetaData.StorageLocation, request.Video.Timestamp));
+        downloadedVideo.AddResource(new Resource(Guid.CreateVersion7(), request.Video.StorageLocation, request.Video.Timestamp));
 
         await commandHandler.Handle(SaveChangesCommand.AddSave(downloadedVideo), cancellationToken);
         return downloadedVideo;

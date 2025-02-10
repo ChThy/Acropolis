@@ -45,7 +45,7 @@ public class Program
 
         app.MapDownloadEndpoints();
         app.MapVideoEndpoints();
-        app.MapScrapedPagesEndpoints();
+        app.MapPagesEndpoints();
         app.MapMigrationEndpoints();
 
         app.Run();

@@ -1,5 +1,4 @@
-﻿using Acropolis.Application.DownloadedVideos;
-using Acropolis.Application.DownloadedVideos.CreateDownloadedVideo;
+﻿using Acropolis.Application.DownloadedVideos.CreateDownloadedVideo;
 using Acropolis.Application.Sagas.DownloadVideo;
 using Acropolis.Application.Sagas.ExternalMessageRequest;
 using Acropolis.Application.Sagas.ScrapePage;
