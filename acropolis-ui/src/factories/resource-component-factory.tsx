@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
-import PageComponent from "../components/PageComponent";
-import VideoComponent from "../components/VideoComponent";
+import PageCardComponent from "../components/PageCardComponent";
+import VideoCardComponent from "../components/VideoCardComponent";
 import { ElementProps } from "../helpers/component-props.helper";
 import { Page, ResourceModel, Video } from "../models/resource";
 
@@ -9,10 +9,10 @@ const isVideo = (resource: ResourceModel): resource is Video => resource.type ==
 
 export default function create(resource: ResourceModel, props?: ElementProps): ReactElement {
   if (isPage(resource)) {
-    return <PageComponent key={resource.id} page={resource} {...props} />
+    return <PageCardComponent key={resource.id} page={resource} {...props} />
   }
   else if (isVideo(resource)) {
-    return <VideoComponent key={resource.id} video={resource} {...props} />
+    return <VideoCardComponent key={resource.id} video={resource} {...props} />
   }
   console.error(`Invalid ResourceModel: ${typeof resource} `)
   return <></>;

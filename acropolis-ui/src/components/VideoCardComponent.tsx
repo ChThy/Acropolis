@@ -1,7 +1,7 @@
 import { Props } from "../helpers/component-props.helper";
 import { Video } from "../models/resource";
 
-export const VideoComponent: React.FC<Props<{ video: Video }>> = ({ video, className, ...rest }) => {
+export const VideoCardComponent: React.FC<Props<{ video: Video }>> = ({ video, className, ...rest }) => {
 
   return (
     <div {...rest} className={className + " border rounded-lg border-slate-600 p-2"}>
@@ -24,4 +24,4 @@ export const VideoComponent: React.FC<Props<{ video: Video }>> = ({ video, class
   );
 }
 
-export default VideoComponent;
+export default VideoCardComponent;

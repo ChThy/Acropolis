@@ -1,9 +1,9 @@
 import "./Drawer.css";
 import { useEffect, useRef } from "react";
-import { Props } from "../helpers/component-props.helper";
+import { Props } from "../../helpers/component-props.helper";
 import cn from "classnames";
 import { createPortal } from "react-dom";
-import useMountTransition from "../helpers/useMountTransition";
+import useMountTransition from "../../helpers/useMountTransition";
 import { FocusTrap } from "focus-trap-react";
 
 export interface DrawerProps {

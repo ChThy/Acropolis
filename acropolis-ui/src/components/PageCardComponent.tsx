@@ -1,7 +1,7 @@
 import { Props } from "../helpers/component-props.helper";
 import { Page } from "../models/resource";
 
-export const PageComponent: React.FC<Props<{ page: Page }>> = ({ page, className, ...rest }) => {
+export const PageCardComponent: React.FC<Props<{ page: Page }>> = ({ page, className, ...rest }) => {
   return (
     <div {...rest} className={className + " border rounded-lg border-slate-600 p-2"}>
       <div className="mb-3">
@@ -22,4 +22,4 @@ export const PageComponent: React.FC<Props<{ page: Page }>> = ({ page, className
     </div>
   );
 }
-export default PageComponent;
+export default PageCardComponent;
