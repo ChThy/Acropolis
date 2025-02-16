@@ -4,6 +4,7 @@ import { Props } from "../helpers/component-props.helper";
 import cn from "classnames";
 import { createPortal } from "react-dom";
 import useMountTransition from "../helpers/useMountTransition";
+import { FocusTrap } from "focus-trap-react";
 
 export interface DrawerProps {
   isOpen: boolean;
@@ -68,16 +69,18 @@ const Drawer: React.FC<Props<DrawerProps>> = ({ isOpen, className, children, pos
   }
 
   return createPortal(
-    <div
-      className={cn("drawer-container", { open: isOpen, in: isTransitioning, className })}>
+    <FocusTrap>
       <div
-        className={cn("drawer", position)}
-        role="dialog"
-      >
-        {children}
+        className={cn("drawer-container", { open: isOpen, in: isTransitioning, className })}>
+        <div
+          className={cn("drawer", "bg-slate-800", "text-slate-300", position)}
+          role="dialog"
+        >
+          {children}
+        </div>
+        <div className="backdrop" onClick={onClose}></div>
       </div>
-      <div className="backdrop" onClick={onClose}></div>
-    </div>,
+    </FocusTrap>,
     portalRootRef.current
   );
 }
