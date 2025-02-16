@@ -1,10 +1,15 @@
 import './App.css'
+import 'bootstrap-icons/font/bootstrap-icons.css';
+
 import { useEffect, useState } from 'react'
 import { useAppDispatch, useAppSelector } from './store/hooks'
 import { fetchPages, fetchVideos } from './store/actions';
 import { pagesSelector, videosSelector } from './store/selectors';
 import ResourceList from './components/ResourceList';
 import Drawer from './components/drawer/Drawer';
+import { Button, Card } from 'antd';
+import { DeleteFilled } from '@ant-design/icons';
+
 
 function App() {
   const dispatch = useAppDispatch();
@@ -22,14 +27,27 @@ function App() {
 
   return (
     <div className='container mx-auto max-w-max'>
-      <button type='button' onClick={() => setIsOpen(!isOpen)}>Toggle drawer</button>
+
+      <i className="bi-alarm" />
+      <Button type='primary' onClick={() => setIsOpen(!isOpen)}>Toggle drawer</Button>
+
+      <Card
+        actions={[
+          <Button>
+            <DeleteFilled style={{ color: "red" }  } />
+          </Button>
+        ]}
+      >
+
+      </Card>
+
       <Drawer isOpen={isOpen} position='right' onClose={() => setIsOpen(false)}>
         <div>
           <p>Something inside the drawer</p>
-        
-          <button className='' type="button" onClick={() => setIsOpen(false)}>
+
+          <Button variant='solid' color='danger' onClick={() => setIsOpen(false)}>
             Close
-          </button>
+          </Button>
         </div>
       </Drawer>
 
