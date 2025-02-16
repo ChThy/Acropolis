@@ -13,7 +13,7 @@ import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, CancelToken } fr
 
 export interface IDownloadClient {
     /**
-     * @return OK
+     * @return Accepted
      */
     download(body: DownloadVideoRequest): Promise<void>;
 }
@@ -32,10 +32,10 @@ export class DownloadClient implements IDownloadClient {
     }
 
     /**
-     * @return OK
+     * @return Accepted
      */
     download(body: DownloadVideoRequest, cancelToken?: CancelToken): Promise<void> {
-        let url_ = this.baseUrl + "/download/download";
+        let url_ = this.baseUrl + "/download";
         url_ = url_.replace(/[?&]$/, "");
 
         const content_ = JSON.stringify(body);
@@ -71,6 +71,350 @@ export class DownloadClient implements IDownloadClient {
                 }
             }
         }
+        if (status === 202) {
+            const _responseText = response.data;
+            return Promise.resolve<void>(null as any);
+
+        } else if (status === 400) {
+            const _responseText = response.data;
+            let result400: any = null;
+            let resultData400  = _responseText;
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+
+        } else if (status === 404) {
+            const _responseText = response.data;
+            let result404: any = null;
+            let resultData404  = _responseText;
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("Not Found", status, _responseText, _headers, result404);
+
+        } else if (status === 500) {
+            const _responseText = response.data;
+            let result500: any = null;
+            let resultData500  = _responseText;
+            result500 = ProblemDetails.fromJS(resultData500);
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<void>(null as any);
+    }
+}
+
+export interface IMigrateClient {
+    /**
+     * @return OK
+     */
+    pages(): Promise<void>;
+    /**
+     * @return OK
+     */
+    skippedpages(): Promise<void>;
+    /**
+     * @return OK
+     */
+    scrapedpages(): Promise<void>;
+    /**
+     * @return OK
+     */
+    videos(): Promise<void>;
+    /**
+     * @return OK
+     */
+    skippedvideos(): Promise<void>;
+    /**
+     * @return OK
+     */
+    downloadedvideos(): Promise<void>;
+}
+
+export class MigrateClient implements IMigrateClient {
+    protected instance: AxiosInstance;
+    protected baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, instance?: AxiosInstance) {
+
+        this.instance = instance || axios.create();
+
+        this.baseUrl = baseUrl ?? "";
+
+    }
+
+    /**
+     * @return OK
+     */
+    pages( cancelToken?: CancelToken): Promise<void> {
+        let url_ = this.baseUrl + "/migrate/pages";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "POST",
+            url: url_,
+            headers: {
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processPages(_response);
+        });
+    }
+
+    protected processPages(response: AxiosResponse): Promise<void> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            return Promise.resolve<void>(null as any);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    skippedpages( cancelToken?: CancelToken): Promise<void> {
+        let url_ = this.baseUrl + "/migrate/skippedpages";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "DELETE",
+            url: url_,
+            headers: {
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processSkippedpages(_response);
+        });
+    }
+
+    protected processSkippedpages(response: AxiosResponse): Promise<void> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            return Promise.resolve<void>(null as any);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    scrapedpages( cancelToken?: CancelToken): Promise<void> {
+        let url_ = this.baseUrl + "/migrate/scrapedpages";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "DELETE",
+            url: url_,
+            headers: {
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processScrapedpages(_response);
+        });
+    }
+
+    protected processScrapedpages(response: AxiosResponse): Promise<void> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            return Promise.resolve<void>(null as any);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    videos( cancelToken?: CancelToken): Promise<void> {
+        let url_ = this.baseUrl + "/migrate/videos";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "POST",
+            url: url_,
+            headers: {
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processVideos(_response);
+        });
+    }
+
+    protected processVideos(response: AxiosResponse): Promise<void> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            return Promise.resolve<void>(null as any);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    skippedvideos( cancelToken?: CancelToken): Promise<void> {
+        let url_ = this.baseUrl + "/migrate/skippedvideos";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "DELETE",
+            url: url_,
+            headers: {
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processSkippedvideos(_response);
+        });
+    }
+
+    protected processSkippedvideos(response: AxiosResponse): Promise<void> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            return Promise.resolve<void>(null as any);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    downloadedvideos( cancelToken?: CancelToken): Promise<void> {
+        let url_ = this.baseUrl + "/migrate/downloadedvideos";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "DELETE",
+            url: url_,
+            headers: {
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processDownloadedvideos(_response);
+        });
+    }
+
+    protected processDownloadedvideos(response: AxiosResponse): Promise<void> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
         if (status === 200) {
             const _responseText = response.data;
             return Promise.resolve<void>(null as any);
@@ -87,11 +431,15 @@ export interface IPagesClient {
     /**
      * @return OK
      */
-    pages(includeSkipped: boolean): Promise<ScrapePageState[]>;
+    pages(): Promise<ScrapedPage[]>;
     /**
      * @return OK
      */
-    retry(): Promise<void>;
+    requestedPages(): Promise<ScrapePageState[]>;
+    /**
+     * @return Accepted
+     */
+    retryFailedScrapes(): Promise<void>;
 }
 
 export class PagesClient implements IPagesClient {
@@ -110,12 +458,8 @@ export class PagesClient implements IPagesClient {
     /**
      * @return OK
      */
-    pages(includeSkipped: boolean, cancelToken?: CancelToken): Promise<ScrapePageState[]> {
-        let url_ = this.baseUrl + "/pages?";
-        if (includeSkipped === undefined || includeSkipped === null)
-            throw new Error("The parameter 'includeSkipped' must be defined and cannot be null.");
-        else
-            url_ += "includeSkipped=" + encodeURIComponent("" + includeSkipped) + "&";
+    pages( cancelToken?: CancelToken): Promise<ScrapedPage[]> {
+        let url_ = this.baseUrl + "/pages";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_: AxiosRequestConfig = {
@@ -138,7 +482,86 @@ export class PagesClient implements IPagesClient {
         });
     }
 
-    protected processPages(response: AxiosResponse): Promise<ScrapePageState[]> {
+    protected processPages(response: AxiosResponse): Promise<ScrapedPage[]> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(ScrapedPage.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return Promise.resolve<ScrapedPage[]>(result200);
+
+        } else if (status === 400) {
+            const _responseText = response.data;
+            let result400: any = null;
+            let resultData400  = _responseText;
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+
+        } else if (status === 404) {
+            const _responseText = response.data;
+            let result404: any = null;
+            let resultData404  = _responseText;
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("Not Found", status, _responseText, _headers, result404);
+
+        } else if (status === 500) {
+            const _responseText = response.data;
+            let result500: any = null;
+            let resultData500  = _responseText;
+            result500 = ProblemDetails.fromJS(resultData500);
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<ScrapedPage[]>(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    requestedPages( cancelToken?: CancelToken): Promise<ScrapePageState[]> {
+        let url_ = this.baseUrl + "/pages/requested";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processRequestedPages(_response);
+        });
+    }
+
+    protected processRequestedPages(response: AxiosResponse): Promise<ScrapePageState[]> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -162,6 +585,27 @@ export class PagesClient implements IPagesClient {
             }
             return Promise.resolve<ScrapePageState[]>(result200);
 
+        } else if (status === 400) {
+            const _responseText = response.data;
+            let result400: any = null;
+            let resultData400  = _responseText;
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+
+        } else if (status === 404) {
+            const _responseText = response.data;
+            let result404: any = null;
+            let resultData404  = _responseText;
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("Not Found", status, _responseText, _headers, result404);
+
+        } else if (status === 500) {
+            const _responseText = response.data;
+            let result500: any = null;
+            let resultData500  = _responseText;
+            result500 = ProblemDetails.fromJS(resultData500);
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
+
         } else if (status !== 200 && status !== 204) {
             const _responseText = response.data;
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
@@ -170,9 +614,9 @@ export class PagesClient implements IPagesClient {
     }
 
     /**
-     * @return OK
+     * @return Accepted
      */
-    retry( cancelToken?: CancelToken): Promise<void> {
+    retryFailedScrapes( cancelToken?: CancelToken): Promise<void> {
         let url_ = this.baseUrl + "/pages/failed/retry";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -191,11 +635,11 @@ export class PagesClient implements IPagesClient {
                 throw _error;
             }
         }).then((_response: AxiosResponse) => {
-            return this.processRetry(_response);
+            return this.processRetryFailedScrapes(_response);
         });
     }
 
-    protected processRetry(response: AxiosResponse): Promise<void> {
+    protected processRetryFailedScrapes(response: AxiosResponse): Promise<void> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -205,9 +649,30 @@ export class PagesClient implements IPagesClient {
                 }
             }
         }
-        if (status === 200) {
+        if (status === 202) {
             const _responseText = response.data;
             return Promise.resolve<void>(null as any);
+
+        } else if (status === 400) {
+            const _responseText = response.data;
+            let result400: any = null;
+            let resultData400  = _responseText;
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+
+        } else if (status === 404) {
+            const _responseText = response.data;
+            let result404: any = null;
+            let resultData404  = _responseText;
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("Not Found", status, _responseText, _headers, result404);
+
+        } else if (status === 500) {
+            const _responseText = response.data;
+            let result500: any = null;
+            let resultData500  = _responseText;
+            result500 = ProblemDetails.fromJS(resultData500);
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
 
         } else if (status !== 200 && status !== 204) {
             const _responseText = response.data;
@@ -221,15 +686,19 @@ export interface IVideosClient {
     /**
      * @return OK
      */
-    videos(): Promise<DownloadVideoState[]>;
+    videos(): Promise<DownloadedVideo[]>;
     /**
      * @return OK
      */
-    retry2(): Promise<void>;
+    requestedVideos(): Promise<DownloadVideoState>;
     /**
-     * @return OK
+     * @return Accepted
      */
-    retry3(id: string): Promise<void>;
+    retryAllFailedVideos(): Promise<void>;
+    /**
+     * @return Accepted
+     */
+    retryFailedVideo(id: string): Promise<void>;
 }
 
 export class VideosClient implements IVideosClient {
@@ -248,7 +717,7 @@ export class VideosClient implements IVideosClient {
     /**
      * @return OK
      */
-    videos( cancelToken?: CancelToken): Promise<DownloadVideoState[]> {
+    videos( cancelToken?: CancelToken): Promise<DownloadedVideo[]> {
         let url_ = this.baseUrl + "/videos";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -272,7 +741,7 @@ export class VideosClient implements IVideosClient {
         });
     }
 
-    protected processVideos(response: AxiosResponse): Promise<DownloadVideoState[]> {
+    protected processVideos(response: AxiosResponse): Promise<DownloadedVideo[]> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -289,24 +758,117 @@ export class VideosClient implements IVideosClient {
             if (Array.isArray(resultData200)) {
                 result200 = [] as any;
                 for (let item of resultData200)
-                    result200!.push(DownloadVideoState.fromJS(item));
+                    result200!.push(DownloadedVideo.fromJS(item));
             }
             else {
                 result200 = <any>null;
             }
-            return Promise.resolve<DownloadVideoState[]>(result200);
+            return Promise.resolve<DownloadedVideo[]>(result200);
+
+        } else if (status === 400) {
+            const _responseText = response.data;
+            let result400: any = null;
+            let resultData400  = _responseText;
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+
+        } else if (status === 404) {
+            const _responseText = response.data;
+            let result404: any = null;
+            let resultData404  = _responseText;
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("Not Found", status, _responseText, _headers, result404);
+
+        } else if (status === 500) {
+            const _responseText = response.data;
+            let result500: any = null;
+            let resultData500  = _responseText;
+            result500 = ProblemDetails.fromJS(resultData500);
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
 
         } else if (status !== 200 && status !== 204) {
             const _responseText = response.data;
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
         }
-        return Promise.resolve<DownloadVideoState[]>(null as any);
+        return Promise.resolve<DownloadedVideo[]>(null as any);
     }
 
     /**
      * @return OK
      */
-    retry2( cancelToken?: CancelToken): Promise<void> {
+    requestedVideos( cancelToken?: CancelToken): Promise<DownloadVideoState> {
+        let url_ = this.baseUrl + "/videos/requested";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: AxiosRequestConfig = {
+            method: "GET",
+            url: url_,
+            headers: {
+                "Accept": "application/json"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processRequestedVideos(_response);
+        });
+    }
+
+    protected processRequestedVideos(response: AxiosResponse): Promise<DownloadVideoState> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = DownloadVideoState.fromJS(resultData200);
+            return Promise.resolve<DownloadVideoState>(result200);
+
+        } else if (status === 400) {
+            const _responseText = response.data;
+            let result400: any = null;
+            let resultData400  = _responseText;
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+
+        } else if (status === 404) {
+            const _responseText = response.data;
+            let result404: any = null;
+            let resultData404  = _responseText;
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("Not Found", status, _responseText, _headers, result404);
+
+        } else if (status === 500) {
+            const _responseText = response.data;
+            let result500: any = null;
+            let resultData500  = _responseText;
+            result500 = ProblemDetails.fromJS(resultData500);
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<DownloadVideoState>(null as any);
+    }
+
+    /**
+     * @return Accepted
+     */
+    retryAllFailedVideos( cancelToken?: CancelToken): Promise<void> {
         let url_ = this.baseUrl + "/videos/failed/retry";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -325,11 +887,11 @@ export class VideosClient implements IVideosClient {
                 throw _error;
             }
         }).then((_response: AxiosResponse) => {
-            return this.processRetry2(_response);
+            return this.processRetryAllFailedVideos(_response);
         });
     }
 
-    protected processRetry2(response: AxiosResponse): Promise<void> {
+    protected processRetryAllFailedVideos(response: AxiosResponse): Promise<void> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -339,9 +901,30 @@ export class VideosClient implements IVideosClient {
                 }
             }
         }
-        if (status === 200) {
+        if (status === 202) {
             const _responseText = response.data;
             return Promise.resolve<void>(null as any);
+
+        } else if (status === 400) {
+            const _responseText = response.data;
+            let result400: any = null;
+            let resultData400  = _responseText;
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+
+        } else if (status === 404) {
+            const _responseText = response.data;
+            let result404: any = null;
+            let resultData404  = _responseText;
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("Not Found", status, _responseText, _headers, result404);
+
+        } else if (status === 500) {
+            const _responseText = response.data;
+            let result500: any = null;
+            let resultData500  = _responseText;
+            result500 = ProblemDetails.fromJS(resultData500);
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
 
         } else if (status !== 200 && status !== 204) {
             const _responseText = response.data;
@@ -351,9 +934,9 @@ export class VideosClient implements IVideosClient {
     }
 
     /**
-     * @return OK
+     * @return Accepted
      */
-    retry3(id: string, cancelToken?: CancelToken): Promise<void> {
+    retryFailedVideo(id: string, cancelToken?: CancelToken): Promise<void> {
         let url_ = this.baseUrl + "/videos/failed/{id}/retry";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -375,11 +958,11 @@ export class VideosClient implements IVideosClient {
                 throw _error;
             }
         }).then((_response: AxiosResponse) => {
-            return this.processRetry3(_response);
+            return this.processRetryFailedVideo(_response);
         });
     }
 
-    protected processRetry3(response: AxiosResponse): Promise<void> {
+    protected processRetryFailedVideo(response: AxiosResponse): Promise<void> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -389,9 +972,30 @@ export class VideosClient implements IVideosClient {
                 }
             }
         }
-        if (status === 200) {
+        if (status === 202) {
             const _responseText = response.data;
             return Promise.resolve<void>(null as any);
+
+        } else if (status === 400) {
+            const _responseText = response.data;
+            let result400: any = null;
+            let resultData400  = _responseText;
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+
+        } else if (status === 404) {
+            const _responseText = response.data;
+            let result404: any = null;
+            let resultData404  = _responseText;
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("Not Found", status, _responseText, _headers, result404);
+
+        } else if (status === 500) {
+            const _responseText = response.data;
+            let result500: any = null;
+            let resultData500  = _responseText;
+            result500 = ProblemDetails.fromJS(resultData500);
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
 
         } else if (status !== 200 && status !== 204) {
             const _responseText = response.data;
@@ -438,15 +1042,15 @@ export interface IDownloadVideoRequest {
 }
 
 export class DownloadVideoState implements IDownloadVideoState {
-    correlationId?: string;
     rowVersion?: number;
     currentState?: string | undefined;
     url?: string | undefined;
     requestedTimestamp?: string;
     downloadedTimestamp?: string | undefined;
-    videoMetaData?: VideoMetaData;
+    storedVideo?: StoredVideo;
     errorMessage?: string | undefined;
     errorTimestamp?: string | undefined;
+    correlationId?: string;
 
     constructor(data?: IDownloadVideoState) {
         if (data) {
@@ -459,15 +1063,15 @@ export class DownloadVideoState implements IDownloadVideoState {
 
     init(_data?: any) {
         if (_data) {
-            this.correlationId = _data["correlationId"];
             this.rowVersion = _data["rowVersion"];
             this.currentState = _data["currentState"];
             this.url = _data["url"];
             this.requestedTimestamp = _data["requestedTimestamp"];
             this.downloadedTimestamp = _data["downloadedTimestamp"];
-            this.videoMetaData = _data["videoMetaData"] ? VideoMetaData.fromJS(_data["videoMetaData"]) : <any>undefined;
+            this.storedVideo = _data["storedVideo"] ? StoredVideo.fromJS(_data["storedVideo"]) : <any>undefined;
             this.errorMessage = _data["errorMessage"];
             this.errorTimestamp = _data["errorTimestamp"];
+            this.correlationId = _data["correlationId"];
         }
     }
 
@@ -480,29 +1084,237 @@ export class DownloadVideoState implements IDownloadVideoState {
 
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
-        data["correlationId"] = this.correlationId;
         data["rowVersion"] = this.rowVersion;
         data["currentState"] = this.currentState;
         data["url"] = this.url;
         data["requestedTimestamp"] = this.requestedTimestamp;
         data["downloadedTimestamp"] = this.downloadedTimestamp;
-        data["videoMetaData"] = this.videoMetaData ? this.videoMetaData.toJSON() : <any>undefined;
+        data["storedVideo"] = this.storedVideo ? this.storedVideo.toJSON() : <any>undefined;
         data["errorMessage"] = this.errorMessage;
         data["errorTimestamp"] = this.errorTimestamp;
+        data["correlationId"] = this.correlationId;
         return data;
     }
 }
 
 export interface IDownloadVideoState {
-    correlationId?: string;
     rowVersion?: number;
     currentState?: string | undefined;
     url?: string | undefined;
     requestedTimestamp?: string;
     downloadedTimestamp?: string | undefined;
-    videoMetaData?: VideoMetaData;
+    storedVideo?: StoredVideo;
     errorMessage?: string | undefined;
     errorTimestamp?: string | undefined;
+    correlationId?: string;
+}
+
+export class DownloadedVideo implements IDownloadedVideo {
+    id?: string;
+    url?: string | undefined;
+    metaData?: VideoMetaData;
+    readonly resources?: Resource[] | undefined;
+
+    constructor(data?: IDownloadedVideo) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.url = _data["url"];
+            this.metaData = _data["metaData"] ? VideoMetaData.fromJS(_data["metaData"]) : <any>undefined;
+            if (Array.isArray(_data["resources"])) {
+                (<any>this).resources = [] as any;
+                for (let item of _data["resources"])
+                    (<any>this).resources!.push(Resource.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): DownloadedVideo {
+        data = typeof data === 'object' ? data : {};
+        let result = new DownloadedVideo();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["url"] = this.url;
+        data["metaData"] = this.metaData ? this.metaData.toJSON() : <any>undefined;
+        if (Array.isArray(this.resources)) {
+            data["resources"] = [];
+            for (let item of this.resources)
+                data["resources"].push(item.toJSON());
+        }
+        return data;
+    }
+}
+
+export interface IDownloadedVideo {
+    id?: string;
+    url?: string | undefined;
+    metaData?: VideoMetaData;
+    resources?: Resource[] | undefined;
+}
+
+export class PageMetaData implements IPageMetaData {
+    pageTitle?: string | undefined;
+    domain?: string | undefined;
+
+    constructor(data?: IPageMetaData) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.pageTitle = _data["pageTitle"];
+            this.domain = _data["domain"];
+        }
+    }
+
+    static fromJS(data: any): PageMetaData {
+        data = typeof data === 'object' ? data : {};
+        let result = new PageMetaData();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["pageTitle"] = this.pageTitle;
+        data["domain"] = this.domain;
+        return data;
+    }
+}
+
+export interface IPageMetaData {
+    pageTitle?: string | undefined;
+    domain?: string | undefined;
+}
+
+export class ProblemDetails implements IProblemDetails {
+    type?: string | undefined;
+    title?: string | undefined;
+    status?: number | undefined;
+    detail?: string | undefined;
+    instance?: string | undefined;
+
+    [key: string]: any;
+
+    constructor(data?: IProblemDetails) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.type = _data["type"];
+            this.title = _data["title"];
+            this.status = _data["status"];
+            this.detail = _data["detail"];
+            this.instance = _data["instance"];
+        }
+    }
+
+    static fromJS(data: any): ProblemDetails {
+        data = typeof data === 'object' ? data : {};
+        let result = new ProblemDetails();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["type"] = this.type;
+        data["title"] = this.title;
+        data["status"] = this.status;
+        data["detail"] = this.detail;
+        data["instance"] = this.instance;
+        return data;
+    }
+}
+
+export interface IProblemDetails {
+    type?: string | undefined;
+    title?: string | undefined;
+    status?: number | undefined;
+    detail?: string | undefined;
+    instance?: string | undefined;
+
+    [key: string]: any;
+}
+
+export class Resource implements IResource {
+    id?: string;
+    storageLocation?: string | undefined;
+    createdTimestamp?: string;
+    readonly views?: number;
+
+    constructor(data?: IResource) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.storageLocation = _data["storageLocation"];
+            this.createdTimestamp = _data["createdTimestamp"];
+            (<any>this).views = _data["views"];
+        }
+    }
+
+    static fromJS(data: any): Resource {
+        data = typeof data === 'object' ? data : {};
+        let result = new Resource();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["storageLocation"] = this.storageLocation;
+        data["createdTimestamp"] = this.createdTimestamp;
+        data["views"] = this.views;
+        return data;
+    }
+}
+
+export interface IResource {
+    id?: string;
+    storageLocation?: string | undefined;
+    createdTimestamp?: string;
+    views?: number;
 }
 
 export class ScrapePageState implements IScrapePageState {
@@ -581,12 +1393,107 @@ export interface IScrapePageState {
     errorTimestamp?: string | undefined;
 }
 
+export class ScrapedPage implements IScrapedPage {
+    id?: string;
+    url?: string | undefined;
+    metaData?: PageMetaData;
+    readonly resources?: Resource[] | undefined;
+
+    constructor(data?: IScrapedPage) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.url = _data["url"];
+            this.metaData = _data["metaData"] ? PageMetaData.fromJS(_data["metaData"]) : <any>undefined;
+            if (Array.isArray(_data["resources"])) {
+                (<any>this).resources = [] as any;
+                for (let item of _data["resources"])
+                    (<any>this).resources!.push(Resource.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): ScrapedPage {
+        data = typeof data === 'object' ? data : {};
+        let result = new ScrapedPage();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["url"] = this.url;
+        data["metaData"] = this.metaData ? this.metaData.toJSON() : <any>undefined;
+        if (Array.isArray(this.resources)) {
+            data["resources"] = [];
+            for (let item of this.resources)
+                data["resources"].push(item.toJSON());
+        }
+        return data;
+    }
+}
+
+export interface IScrapedPage {
+    id?: string;
+    url?: string | undefined;
+    metaData?: PageMetaData;
+    resources?: Resource[] | undefined;
+}
+
+export class StoredVideo implements IStoredVideo {
+    metaData?: VideoMetaData;
+    storageLocation?: string | undefined;
+
+    constructor(data?: IStoredVideo) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.metaData = _data["metaData"] ? VideoMetaData.fromJS(_data["metaData"]) : <any>undefined;
+            this.storageLocation = _data["storageLocation"];
+        }
+    }
+
+    static fromJS(data: any): StoredVideo {
+        data = typeof data === 'object' ? data : {};
+        let result = new StoredVideo();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["metaData"] = this.metaData ? this.metaData.toJSON() : <any>undefined;
+        data["storageLocation"] = this.storageLocation;
+        return data;
+    }
+}
+
+export interface IStoredVideo {
+    metaData?: VideoMetaData;
+    storageLocation?: string | undefined;
+}
+
 export class VideoMetaData implements IVideoMetaData {
     videoId?: string | undefined;
     videoTitle?: string | undefined;
     author?: string | undefined;
     videoUploadTimestamp?: string;
-    storageLocation?: string | undefined;
 
     constructor(data?: IVideoMetaData) {
         if (data) {
@@ -603,7 +1510,6 @@ export class VideoMetaData implements IVideoMetaData {
             this.videoTitle = _data["videoTitle"];
             this.author = _data["author"];
             this.videoUploadTimestamp = _data["videoUploadTimestamp"];
-            this.storageLocation = _data["storageLocation"];
         }
     }
 
@@ -620,7 +1526,6 @@ export class VideoMetaData implements IVideoMetaData {
         data["videoTitle"] = this.videoTitle;
         data["author"] = this.author;
         data["videoUploadTimestamp"] = this.videoUploadTimestamp;
-        data["storageLocation"] = this.storageLocation;
         return data;
     }
 }
@@ -630,7 +1535,6 @@ export interface IVideoMetaData {
     videoTitle?: string | undefined;
     author?: string | undefined;
     videoUploadTimestamp?: string;
-    storageLocation?: string | undefined;
 }
 
 export class ApiException extends Error {

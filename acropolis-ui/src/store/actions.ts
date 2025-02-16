@@ -24,14 +24,14 @@ export const fetchPages = createAsyncThunk(
       return rejectRequestBusy(thunkApi)
     }
 
-    const pages = await pagesClient.pages(false);
+    const pages = await pagesClient.pages();
     return pages.map<Page>(e => {
       const parsedUrl = parseUrl(e.url!);
 
       return ({
-        type: 'page',        
-        id: e.correlationId!,
-        title: e.title ?? "",
+        type: 'page',
+        id: e.id!,
+        title: e.metaData?.pageTitle ?? "",
         url: e.url ?? "",
         source: parsedUrl.resource,
         description: parsedUrl.pathname.replace(/[\W_]/g, " ").trim(),
@@ -45,7 +45,7 @@ export const fetchVideos = createAsyncThunk(
   'videos/fetch',
   async (_, thunkApi) => {
     const activeFetchRequestId = activeFetchVideosRequestIdSelector(thunkApi.getState() as RootState);
-    if (activeFetchRequestId && activeFetchRequestId !== thunkApi.requestId) {      
+    if (activeFetchRequestId && activeFetchRequestId !== thunkApi.requestId) {
       return rejectRequestBusy(thunkApi)
     }
 
@@ -55,14 +55,13 @@ export const fetchVideos = createAsyncThunk(
 
       return ({
         type: 'video',
-        id: e.correlationId!,
-        title: e.videoMetaData?.videoTitle ?? "",
+        id: e.id!,
+        title: e.metaData?.videoTitle ?? "",
         url: e.url ?? "",
         source: parsedUrl.resource,
         description: parsedUrl.pathname.replace(/[\W_]/g, " ").trim(),
         viewed: false
       })
     });
-
   }
 );
