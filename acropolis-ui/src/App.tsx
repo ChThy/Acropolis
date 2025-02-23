@@ -9,21 +9,35 @@ import ResourceList from './components/ResourceList';
 import Drawer from './components/drawer/Drawer';
 import { Button, Card } from 'antd';
 import { DeleteFilled } from '@ant-design/icons';
+import { useResourcesDispatch, useThunkDispath,  } from './store/resource-slice';
 
 
 function App() {
   const dispatch = useAppDispatch();
+  const thunkDispatch = useThunkDispath();
+  const resourcesDispatch = useResourcesDispatch();
 
   const pages = useAppSelector(pagesSelector)
   const videos = useAppSelector(videosSelector);
+
+
 
   useEffect(() => {
     console.log('dispatching');
     dispatch(fetchPages());
     dispatch(fetchVideos());
+    dispatch
+
+    thunkDispatch(fetchPages());
+    thunkDispatch(fetchVideos());
+
+    resourcesDispatch(fetchPages());
+    resourcesDispatch(fetchVideos());
+    
   }, []);
 
   const [isOpen, setIsOpen] = useState(false);
+  
 
   return (
     <div className='container mx-auto max-w-max'>

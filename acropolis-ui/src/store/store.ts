@@ -1,10 +1,14 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { resourcesSlice } from "./resource-slice";
+import { IResourcesStoreState, resourcesSlice } from "./resource-slice";
 
-export const store = configureStore({
+interface ExpectedRootState extends IResourcesStoreState {
+  
+}
+
+export const store = configureStore<ExpectedRootState>({
   reducer: {
-    resources: resourcesSlice.reducer
-  }
+    resources: resourcesSlice.reducer,
+  } 
 });
 
 export type RootState = ReturnType<typeof store.getState>;

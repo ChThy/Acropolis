@@ -1,6 +1,7 @@
-import { createSlice } from "@reduxjs/toolkit"
+import { Action, createSelector, createSlice, Dispatch, ThunkAction, ThunkDispatch, UnknownAction } from "@reduxjs/toolkit"
 import { Page, Video } from "../models/resource"
 import { fetchPages, fetchVideos } from "./actions";
+import { useDispatch, useStore } from "react-redux";
 
 interface PagesState {
   pages: Page[]
@@ -32,7 +33,9 @@ export const resourcesSlice = createSlice({
   name: 'resources',
   initialState: initalState,
   reducers: {
+    add: (state) => {
 
+    }
   },
   extraReducers: builder => {
     builder.addCase(fetchPages.pending, (state, action) => {
@@ -65,4 +68,17 @@ export const resourcesSlice = createSlice({
     });
   }
 });
+
+export const resourcesActions = resourcesSlice.actions;
+export type ResourcesActions = typeof resourcesSlice.actions;
+
+export type ResourcesDispatch = ThunkDispatch<ResourcesState, unknown, ResourcesActions[keyof ResourcesActions]> & Dispatch<UnknownAction>;
+export const useResourcesDispatch = useDispatch.withTypes<ResourcesDispatch>();
+
+export const useThunkDispath = useDispatch.withTypes<ThunkDispatch<ResourcesState, unknown, UnknownAction>>();
+
+export interface IResourcesStoreState {
+  resources: ResourcesState
+}
+
 
