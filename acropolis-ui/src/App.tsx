@@ -9,7 +9,7 @@ import ResourceList from './components/ResourceList';
 import Drawer from './components/drawer/Drawer';
 import { Button, Card } from 'antd';
 import { DeleteFilled } from '@ant-design/icons';
-import { useResourcesDispatch, useThunkDispath,  } from './store/resource-slice';
+import { resourcesActions, useResourcesDispatch, useThunkDispath,  } from './store/resource-slice';
 
 
 function App() {
@@ -26,13 +26,15 @@ function App() {
     console.log('dispatching');
     dispatch(fetchPages());
     dispatch(fetchVideos());
-    dispatch
+    dispatch(resourcesActions.add());
 
     thunkDispatch(fetchPages());
     thunkDispatch(fetchVideos());
+    thunkDispatch(resourcesActions.add());
 
     resourcesDispatch(fetchPages());
     resourcesDispatch(fetchVideos());
+    resourcesDispatch(resourcesActions.add());
     
   }, []);
 
