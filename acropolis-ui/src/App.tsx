@@ -3,15 +3,16 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 
 import { useEffect, useState } from 'react'
 import { useAppDispatch, useAppSelector } from './store/hooks'
-import { fetchPages, fetchVideos } from './store/actions';
+import { fetchPages, fetchVideos } from './store/thunks.ts';
 import { pagesSelector, videosSelector } from './store/selectors';
 import ResourceList from './components/ResourceList';
 import Drawer from './components/drawer/Drawer';
-import { Button, Card } from 'antd';
-import { DeleteFilled } from '@ant-design/icons';
+import { Button } from 'antd';
+import { MainLayout } from './components/layout/MainLayout';
+import { routes } from './routes.tsx';
+import { useRoutes } from 'react-router';
 
-
-function App() {
+export function App() {
   const dispatch = useAppDispatch();
 
   const pages = useAppSelector(pagesSelector)
@@ -26,20 +27,13 @@ function App() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
+    <>
+      <MainLayout />
+    </>
+  );
+
+  return (
     <div className='container mx-auto max-w-max'>
-
-      <i className="bi-alarm" />
-      <Button type='primary' onClick={() => setIsOpen(!isOpen)}>Toggle drawer</Button>
-
-      <Card
-        actions={[
-          <Button>
-            <DeleteFilled style={{ color: "red" }  } />
-          </Button>
-        ]}
-      >
-
-      </Card>
 
       <Drawer isOpen={isOpen} position='right' onClose={() => setIsOpen(false)}>
         <div>
@@ -59,4 +53,4 @@ function App() {
   )
 }
 
-export default App
+export default App;

@@ -9,3 +9,4 @@ export const pagesSelector = createSelector(resourcesSelector, resources => reso
 
 export const activeFetchVideosRequestIdSelector = createSelector(resourcesSelector, resources => resources.videos.activeFetchRequestId);
 export const videosSelector = createSelector(resourcesSelector, resources => resources.videos.videos);
+export const pendingVideosSelector = createSelector(resourcesSelector, resources => resources.videos.pendingVideos);

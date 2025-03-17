@@ -1,15 +1,16 @@
 import { createSlice } from "@reduxjs/toolkit"
-import { Page, Video } from "../models/resource"
-import { fetchPages, fetchVideos } from "./actions";
+import { Page, PendingResource, Video } from "../models/resource"
+import { fetchPages, fetchPendingVideos, fetchVideos } from "./thunks";
 
 interface PagesState {
-  pages: Page[]
-  activeFetchRequestId: string | null
+  pages: Page[];
+  activeFetchRequestId: string | null;
 }
 
 interface VideoState {
-  videos: Video[]
-  activeFetchRequestId: string | null
+  videos: Video[];
+  pendingVideos: PendingResource[];
+  activeFetchRequestId: string | null;
 }
 
 interface ResourcesState {
@@ -24,7 +25,8 @@ const initalState: ResourcesState = {
   },
   videos: {
     activeFetchRequestId: null,
-    videos: []
+    videos: [],
+    pendingVideos: []
   }
 }
 
@@ -35,6 +37,10 @@ export const resourcesSlice = createSlice({
 
   },
   extraReducers: builder => {
+    builder.addCase(fetchPendingVideos.fulfilled, (state, action) => {
+      state.videos.pendingVideos = action.payload
+    })
+
     builder.addCase(fetchPages.pending, (state, action) => {
       state.pages.activeFetchRequestId ??= action.meta.requestId;
     });

@@ -690,7 +690,7 @@ export interface IVideosClient {
     /**
      * @return OK
      */
-    requestedVideos(): Promise<DownloadVideoState>;
+    requestedVideos(): Promise<DownloadVideoState[]>;
     /**
      * @return Accepted
      */
@@ -796,7 +796,7 @@ export class VideosClient implements IVideosClient {
     /**
      * @return OK
      */
-    requestedVideos( cancelToken?: CancelToken): Promise<DownloadVideoState> {
+    requestedVideos( cancelToken?: CancelToken): Promise<DownloadVideoState[]> {
         let url_ = this.baseUrl + "/videos/requested";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -820,7 +820,7 @@ export class VideosClient implements IVideosClient {
         });
     }
 
-    protected processRequestedVideos(response: AxiosResponse): Promise<DownloadVideoState> {
+    protected processRequestedVideos(response: AxiosResponse): Promise<DownloadVideoState[]> {
         const status = response.status;
         let _headers: any = {};
         if (response.headers && typeof response.headers === "object") {
@@ -834,8 +834,15 @@ export class VideosClient implements IVideosClient {
             const _responseText = response.data;
             let result200: any = null;
             let resultData200  = _responseText;
-            result200 = DownloadVideoState.fromJS(resultData200);
-            return Promise.resolve<DownloadVideoState>(result200);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(DownloadVideoState.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return Promise.resolve<DownloadVideoState[]>(result200);
 
         } else if (status === 400) {
             const _responseText = response.data;
@@ -862,7 +869,7 @@ export class VideosClient implements IVideosClient {
             const _responseText = response.data;
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
         }
-        return Promise.resolve<DownloadVideoState>(null as any);
+        return Promise.resolve<DownloadVideoState[]>(null as any);
     }
 
     /**

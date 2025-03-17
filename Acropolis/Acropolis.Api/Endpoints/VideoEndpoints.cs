@@ -21,7 +21,7 @@ public static class VideoEndpoints
             .WithName(nameof(Videos));
 
         group.MapGet("requested", RequestedVideos)
-            .Produces<DownloadVideoState>()
+            .Produces<DownloadVideoState[]>()
             .ProducesCommonResponses()
             .WithName(nameof(RequestedVideos));
 

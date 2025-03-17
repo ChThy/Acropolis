@@ -1,7 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { PagesClient, VideosClient } from "../clients/clients";
 import axios from "axios";
-import { Page, Video } from "../models/resource";
+import { Page, PendingResource, Video } from "../models/resource";
 import { RootState } from "./store";
 import { activeFetchPagesRequestIdSelector, activeFetchVideosRequestIdSelector } from "./selectors";
 import parseUrl from "parse-url";
@@ -63,5 +63,39 @@ export const fetchVideos = createAsyncThunk(
         viewed: false
       })
     });
+  }
+);
+
+export const fetchPendingVideos = createAsyncThunk(
+  'videos/fetchPendingVideos',
+  async () => {
+    const pendingVideos = await videosClient.requestedVideos();
+
+    return pendingVideos.map<PendingResource>(e => ({
+      id: e.correlationId!,
+      url: e.url!,
+      requestedTimestamp: e.requestedTimestamp!,
+      currentState: e.currentState!,
+      error: e.errorMessage
+        ? {
+          errorMessage: e.errorMessage,
+          errorTimestamp: e.errorTimestamp
+        }
+        : undefined
+    }));
+  }
+);
+
+export const retryAllPendingVideos = createAsyncThunk(
+  'videos/retryAllPendingVideos',
+  async () => {
+    await videosClient.retryAllFailedVideos();
+  }
+);
+
+export const retryPendingVideo = createAsyncThunk(
+  'videos/retryPendingVideo',
+  async (id: string) => {
+    await videosClient.retryFailedVideo(id);
   }
 );
