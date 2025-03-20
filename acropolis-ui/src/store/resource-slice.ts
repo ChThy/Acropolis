@@ -1,9 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit"
 import { Page, PendingResource, Video } from "../models/resource"
-import { fetchPages, fetchPendingVideos, fetchVideos } from "./thunks";
+import { fetchPages, fetchPendingPages, fetchPendingVideos, fetchVideos } from "./thunks";
 
 interface PagesState {
   pages: Page[];
+  pendingPages: PendingResource[];
   activeFetchRequestId: string | null;
 }
 
@@ -21,7 +22,8 @@ interface ResourcesState {
 const initalState: ResourcesState = {
   pages: {
     activeFetchRequestId: null,
-    pages: []
+    pages: [],
+    pendingPages: []
   },
   videos: {
     activeFetchRequestId: null,
@@ -39,6 +41,9 @@ export const resourcesSlice = createSlice({
   extraReducers: builder => {
     builder.addCase(fetchPendingVideos.fulfilled, (state, action) => {
       state.videos.pendingVideos = action.payload
+    })
+    .addCase(fetchPendingPages.fulfilled, (state, action) => {
+      state.pages.pendingPages = action.payload;
     })
 
     builder.addCase(fetchPages.pending, (state, action) => {
