@@ -9,8 +9,6 @@ import ResourceList from './components/ResourceList';
 import Drawer from './components/drawer/Drawer';
 import { Button } from 'antd';
 import { MainLayout } from './components/layout/MainLayout';
-import { routes } from './routes.tsx';
-import { useRoutes } from 'react-router';
 
 export function App() {
   const dispatch = useAppDispatch();
@@ -20,8 +18,8 @@ export function App() {
 
   useEffect(() => {
     console.log('dispatching');
-    dispatch(fetchPages());
-    dispatch(fetchVideos());
+    // dispatch(fetchPages());
+    // dispatch(fetchVideos());
   }, []);
 
   const [isOpen, setIsOpen] = useState(false);

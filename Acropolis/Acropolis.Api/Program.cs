@@ -1,16 +1,6 @@
 using Acropolis.Api.Endpoints;
 using Acropolis.Api.Extensions;
 using Acropolis.Api.HostedServices;
-using Acropolis.Api.Models;
-using Acropolis.Application.Events;
-using Acropolis.Application.Events.PageScraper;
-using Acropolis.Application.Events.VideoDownloader;
-using Acropolis.Application.Sagas.DownloadVideo;
-using Acropolis.Application.Sagas.ScrapePage;
-using Acropolis.Infrastructure.EfCore;
-using MassTransit;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
 namespace Acropolis.Api;
@@ -44,7 +34,7 @@ public class Program
 
         app.MapOpenApi();
         app.MapScalarApiReference("");
-        
+
         app.MapDownloadEndpoints();
         app.MapVideoEndpoints();
         app.MapPagesEndpoints();

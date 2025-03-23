@@ -1,10 +1,11 @@
 import { FC, useEffect } from "react";
 import { useAppDispatch } from "../../store/hooks";
-import { fetchPendingPages, fetchPendingVideos, retryAllPendingPages, retryAllPendingVideos, retryPendingPage, retryPendingVideo } from "../../store/thunks";
+import { fetchPendingPages, fetchPendingVideos, fetchVideos, retryAllPendingPages, retryAllPendingVideos, retryPendingPage, retryPendingVideo } from "../../store/thunks";
 import { useSelector } from "react-redux";
 import { pagesCountSelector, pendingPagesSelector, pendingVideosSelector, videoCountSelector } from "../../store/selectors";
 import PendingResources from "../PendingResources";
 import { Card, Statistic } from "antd";
+import { Filter } from "sieve-ts";
 
 export const Overview: FC = () => {
   const dispatch = useAppDispatch();
@@ -14,6 +15,7 @@ export const Overview: FC = () => {
   const pendingPages = useSelector(pendingPagesSelector);
 
   useEffect(() => {
+    dispatch(fetchVideos(new Filter({ pageSize: 0 })));
     dispatch(fetchPendingVideos())
     dispatch(fetchPendingPages());
   }, []);

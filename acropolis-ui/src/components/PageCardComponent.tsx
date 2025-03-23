@@ -1,4 +1,4 @@
-import { Props } from "../helpers/component-props.helper";
+import { Props } from "../shared/helpers/component-props.helper";
 import { Page } from "../models/resource";
 
 export const PageCardComponent: React.FC<Props<{ page: Page }>> = ({ page, className, ...rest }) => {

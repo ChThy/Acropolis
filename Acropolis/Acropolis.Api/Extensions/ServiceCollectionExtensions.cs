@@ -34,7 +34,8 @@ public static class ServiceCollectionExtensions
 
         services.AddDbContextFactory<AppDbContext>(options =>
         {
-            options.UseSqlite(configuration.GetConnectionString("Database"));
+            options.UseNpgsql(configuration.GetConnectionString("Database"));
+            // options.UseSqlite(configuration.GetConnectionString("Database"));
         });
 
         services.AddTransient<ProcessService>();
@@ -84,7 +85,7 @@ public static class ServiceCollectionExtensions
                 r.ExistingDbContext<AppDbContext>();
             });
 
-            // x.AddEntityFrameworkOutbox<AppDbContext>(o =>
+            // x.AddEntityFrameworkOutbox<AppDbContextSqlite>(o =>
             // {
             //     o.UseSqlite();
             //     o.UseBusOutbox();
@@ -92,7 +93,7 @@ public static class ServiceCollectionExtensions
             //
             // x.AddConfigureEndpointsCallback((ctx, name, cfg) =>
             // {
-            //     cfg.UseEntityFrameworkOutbox<AppDbContext>(ctx);
+            //     cfg.UseEntityFrameworkOutbox<AppDbContextSqlite>(ctx);
             // });
             
             x.AddConfigureEndpointsCallback((endpoint,cfg) =>

@@ -15,6 +15,39 @@ public static class MigrationEndpoints
     {
         var group = endpoints.MapGroup("migrate").WithTags("Migrate");
 
+        group.MapPost("movedb", async (
+            [FromServices] AppDbContext dbContext,
+            [FromServices] IConfiguration configuration) =>
+        {
+            await using var sqliteDbContext = new AppDbContext(
+                new DbContextOptionsBuilder<AppDbContext>().UseSqlite(configuration.GetConnectionString("SqliteDatabase")).Options);
+
+            await dbContext.DownloadedVideos.AddRangeAsync(await sqliteDbContext.DownloadedVideos
+                .Include(e => e.MetaData)
+                .Include(e => e.Resources)
+                .ToListAsync()
+            );
+
+            await dbContext.Set<DownloadVideoState>().AddRangeAsync(await sqliteDbContext.Set<DownloadVideoState>()
+                .Include(e => e.StoredVideo)
+                .ThenInclude(e => e.MetaData)
+                .ToListAsync()
+            );
+
+            await dbContext.ScrapedPages.AddRangeAsync(await sqliteDbContext.ScrapedPages
+                .Include(e => e.MetaData)
+                .Include(e => e.Resources)
+                .ToListAsync()
+            );
+            
+            await dbContext.Set<ScrapePageState>().AddRangeAsync(await sqliteDbContext.Set<ScrapePageState>()
+                .ToListAsync()
+            );
+
+            await dbContext.SaveChangesAsync();
+            return Results.NoContent();
+        });
+
         group.MapPost("pages", async (
             [FromServices] IBus bus,
             [FromServices] AppDbContext dbContext,

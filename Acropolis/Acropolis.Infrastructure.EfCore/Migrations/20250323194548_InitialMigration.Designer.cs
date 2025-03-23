@@ -5,57 +5,57 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Acropolis.Infrastructure.EfCore.Messenger.Migrations
+namespace Acropolis.Infrastructure.EfCore.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250210201606_RestructureVideoMetaData")]
-    partial class RestructureVideoMetaData
+    [Migration("20250323194548_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .UseCollation("BINARY")
-                .HasAnnotation("ProductVersion", "9.0.0");
+                .HasAnnotation("ProductVersion", "9.0.0")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Acropolis.Application.Sagas.DownloadVideo.DownloadVideoState", b =>
                 {
                     b.Property<Guid>("CorrelationId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("CurrentState")
                         .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("TEXT")
-                        .UseCollation("BINARY");
+                        .HasColumnType("character varying(64)");
 
-                    b.Property<DateTimeOffset?>("DownloadedTimestamp")
-                        .HasColumnType("TEXT");
+                    b.Property<DateTime?>("DownloadedTimestamp")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("ErrorMessage")
-                        .HasColumnType("TEXT")
-                        .UseCollation("BINARY");
+                        .HasColumnType("text");
 
-                    b.Property<DateTimeOffset?>("ErrorTimestamp")
-                        .HasColumnType("TEXT");
+                    b.Property<DateTime?>("ErrorTimestamp")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTimeOffset>("RequestedTimestamp")
-                        .HasColumnType("TEXT");
+                    b.Property<DateTime>("RequestedTimestamp")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("RowVersion")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("integer")
                         .HasDefaultValue(0);
 
                     b.Property<string>("Url")
                         .IsRequired()
-                        .HasColumnType("TEXT")
-                        .UseCollation("BINARY");
+                        .HasColumnType("text");
 
                     b.HasKey("CorrelationId");
 
@@ -71,34 +71,31 @@ namespace Acropolis.Infrastructure.EfCore.Messenger.Migrations
             modelBuilder.Entity("Acropolis.Application.Sagas.ExternalMessageRequest.ExternalMessageRequestState", b =>
                 {
                     b.Property<Guid>("CorrelationId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Channel")
                         .IsRequired()
-                        .HasColumnType("TEXT")
-                        .UseCollation("BINARY");
+                        .HasColumnType("text");
 
                     b.Property<string>("CurrentState")
                         .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("TEXT")
-                        .UseCollation("BINARY");
+                        .HasColumnType("character varying(64)");
 
                     b.Property<string>("MessageBody")
-                        .HasColumnType("TEXT")
-                        .UseCollation("BINARY");
+                        .HasColumnType("text");
 
                     b.Property<string>("MessageProps")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
-                    b.Property<DateTimeOffset>("ReceivedOn")
-                        .HasColumnType("TEXT");
+                    b.Property<DateTime>("ReceivedOn")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("RowVersion")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("integer")
                         .HasDefaultValue(0);
 
                     b.HasKey("CorrelationId");
@@ -109,49 +106,43 @@ namespace Acropolis.Infrastructure.EfCore.Messenger.Migrations
             modelBuilder.Entity("Acropolis.Application.Sagas.ScrapePage.ScrapePageState", b =>
                 {
                     b.Property<Guid>("CorrelationId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("CurrentState")
                         .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("TEXT")
-                        .UseCollation("BINARY");
+                        .HasColumnType("character varying(64)");
 
                     b.Property<string>("Domain")
-                        .HasColumnType("TEXT")
-                        .UseCollation("BINARY");
+                        .HasColumnType("text");
 
                     b.Property<string>("ErrorMessage")
-                        .HasColumnType("TEXT")
-                        .UseCollation("BINARY");
+                        .HasColumnType("text");
 
-                    b.Property<DateTimeOffset?>("ErrorTimestamp")
-                        .HasColumnType("TEXT");
+                    b.Property<DateTime?>("ErrorTimestamp")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTimeOffset>("RequestedTimestamp")
-                        .HasColumnType("TEXT");
+                    b.Property<DateTime>("RequestedTimestamp")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("RowVersion")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("integer")
                         .HasDefaultValue(0);
 
-                    b.Property<DateTimeOffset?>("ScrapedTimestamp")
-                        .HasColumnType("TEXT");
+                    b.Property<DateTime?>("ScrapedTimestamp")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("StorageLocation")
-                        .HasColumnType("TEXT")
-                        .UseCollation("BINARY");
+                        .HasColumnType("text");
 
                     b.Property<string>("Title")
-                        .HasColumnType("TEXT")
-                        .UseCollation("BINARY");
+                        .HasColumnType("text");
 
                     b.Property<string>("Url")
                         .IsRequired()
-                        .HasColumnType("TEXT")
-                        .UseCollation("BINARY");
+                        .HasColumnType("text");
 
                     b.HasKey("CorrelationId");
 
@@ -167,13 +158,12 @@ namespace Acropolis.Infrastructure.EfCore.Messenger.Migrations
             modelBuilder.Entity("Acropolis.Domain.DownloadedVideos.DownloadedVideo", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Url")
                         .IsRequired()
                         .HasMaxLength(2048)
-                        .HasColumnType("TEXT")
-                        .UseCollation("BINARY");
+                        .HasColumnType("character varying(2048)");
 
                     b.HasKey("Id");
 
@@ -183,24 +173,23 @@ namespace Acropolis.Infrastructure.EfCore.Messenger.Migrations
             modelBuilder.Entity("Acropolis.Domain.Resource", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset>("CreatedTimestamp")
-                        .HasColumnType("TEXT");
+                    b.Property<DateTime>("CreatedTimestamp")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("DownloadedVideoId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uuid");
 
                     b.Property<Guid?>("ScrapedPageId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("StorageLocation")
                         .IsRequired()
-                        .HasColumnType("TEXT")
-                        .UseCollation("BINARY");
+                        .HasColumnType("text");
 
                     b.Property<int>("Views")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -214,13 +203,12 @@ namespace Acropolis.Infrastructure.EfCore.Messenger.Migrations
             modelBuilder.Entity("Acropolis.Domain.ScrapedPages.ScrapedPage", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Url")
                         .IsRequired()
                         .HasMaxLength(2048)
-                        .HasColumnType("TEXT")
-                        .UseCollation("BINARY");
+                        .HasColumnType("character varying(2048)");
 
                     b.HasKey("Id");
 
@@ -231,39 +219,41 @@ namespace Acropolis.Infrastructure.EfCore.Messenger.Migrations
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime?>("Consumed")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("ConsumerId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime?>("Delivered")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("ExpirationTime")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<long?>("LastSequenceNumber")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bigint");
 
                     b.Property<Guid>("LockId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("MessageId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uuid");
 
                     b.Property<int>("ReceiveCount")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("Received")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("BLOB");
+                        .HasColumnType("bytea");
 
                     b.HasKey("Id");
 
@@ -276,80 +266,77 @@ namespace Acropolis.Infrastructure.EfCore.Messenger.Migrations
                 {
                     b.Property<long>("SequenceNumber")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("SequenceNumber"));
 
                     b.Property<string>("Body")
                         .IsRequired()
-                        .HasColumnType("TEXT")
-                        .UseCollation("BINARY");
+                        .HasColumnType("text");
 
                     b.Property<string>("ContentType")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("TEXT")
-                        .UseCollation("BINARY");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<Guid?>("ConversationId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uuid");
 
                     b.Property<Guid?>("CorrelationId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("DestinationAddress")
                         .HasMaxLength(256)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<DateTime?>("EnqueueTime")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("ExpirationTime")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("FaultAddress")
                         .HasMaxLength(256)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("Headers")
-                        .HasColumnType("TEXT")
-                        .UseCollation("BINARY");
+                        .HasColumnType("text");
 
                     b.Property<Guid?>("InboxConsumerId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uuid");
 
                     b.Property<Guid?>("InboxMessageId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uuid");
 
                     b.Property<Guid?>("InitiatorId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("MessageId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("MessageType")
                         .IsRequired()
-                        .HasColumnType("TEXT")
-                        .UseCollation("BINARY");
+                        .HasColumnType("text");
 
                     b.Property<Guid?>("OutboxId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Properties")
-                        .HasColumnType("TEXT")
-                        .UseCollation("BINARY");
+                        .HasColumnType("text");
 
                     b.Property<Guid?>("RequestId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("ResponseAddress")
                         .HasMaxLength(256)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<DateTime>("SentTime")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("SourceAddress")
                         .HasMaxLength(256)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(256)");
 
                     b.HasKey("SequenceNumber");
 
@@ -370,24 +357,24 @@ namespace Acropolis.Infrastructure.EfCore.Messenger.Migrations
                 {
                     b.Property<Guid>("OutboxId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("Created")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("Delivered")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<long?>("LastSequenceNumber")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bigint");
 
                     b.Property<Guid>("LockId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("uuid");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("BLOB");
+                        .HasColumnType("bytea");
 
                     b.HasKey("OutboxId");
 
@@ -401,12 +388,11 @@ namespace Acropolis.Infrastructure.EfCore.Messenger.Migrations
                     b.OwnsOne("Acropolis.Domain.Models.StoredVideo", "StoredVideo", b1 =>
                         {
                             b1.Property<Guid>("DownloadVideoStateCorrelationId")
-                                .HasColumnType("TEXT");
+                                .HasColumnType("uuid");
 
                             b1.Property<string>("StorageLocation")
                                 .IsRequired()
-                                .HasColumnType("TEXT")
-                                .UseCollation("BINARY");
+                                .HasColumnType("text");
 
                             b1.HasKey("DownloadVideoStateCorrelationId");
 
@@ -418,25 +404,22 @@ namespace Acropolis.Infrastructure.EfCore.Messenger.Migrations
                             b1.OwnsOne("Acropolis.Domain.DownloadedVideos.VideoMetaData", "MetaData", b2 =>
                                 {
                                     b2.Property<Guid>("StoredVideoDownloadVideoStateCorrelationId")
-                                        .HasColumnType("TEXT");
+                                        .HasColumnType("uuid");
 
                                     b2.Property<string>("Author")
                                         .IsRequired()
-                                        .HasColumnType("TEXT")
-                                        .UseCollation("BINARY");
+                                        .HasColumnType("text");
 
                                     b2.Property<string>("VideoId")
                                         .IsRequired()
-                                        .HasColumnType("TEXT")
-                                        .UseCollation("BINARY");
+                                        .HasColumnType("text");
 
                                     b2.Property<string>("VideoTitle")
                                         .IsRequired()
-                                        .HasColumnType("TEXT")
-                                        .UseCollation("BINARY");
+                                        .HasColumnType("text");
 
-                                    b2.Property<DateTimeOffset>("VideoUploadTimestamp")
-                                        .HasColumnType("TEXT");
+                                    b2.Property<DateTime>("VideoUploadTimestamp")
+                                        .HasColumnType("timestamp with time zone");
 
                                     b2.HasKey("StoredVideoDownloadVideoStateCorrelationId");
 
@@ -458,25 +441,22 @@ namespace Acropolis.Infrastructure.EfCore.Messenger.Migrations
                     b.OwnsOne("Acropolis.Domain.DownloadedVideos.VideoMetaData", "MetaData", b1 =>
                         {
                             b1.Property<Guid>("DownloadedVideoId")
-                                .HasColumnType("TEXT");
+                                .HasColumnType("uuid");
 
                             b1.Property<string>("Author")
                                 .IsRequired()
-                                .HasColumnType("TEXT")
-                                .UseCollation("BINARY");
+                                .HasColumnType("text");
 
                             b1.Property<string>("VideoId")
                                 .IsRequired()
-                                .HasColumnType("TEXT")
-                                .UseCollation("BINARY");
+                                .HasColumnType("text");
 
                             b1.Property<string>("VideoTitle")
                                 .IsRequired()
-                                .HasColumnType("TEXT")
-                                .UseCollation("BINARY");
+                                .HasColumnType("text");
 
-                            b1.Property<DateTimeOffset>("VideoUploadTimestamp")
-                                .HasColumnType("TEXT");
+                            b1.Property<DateTime>("VideoUploadTimestamp")
+                                .HasColumnType("timestamp with time zone");
 
                             b1.HasKey("DownloadedVideoId");
 
@@ -508,17 +488,15 @@ namespace Acropolis.Infrastructure.EfCore.Messenger.Migrations
                     b.OwnsOne("Acropolis.Domain.ScrapedPages.PageMetaData", "MetaData", b1 =>
                         {
                             b1.Property<Guid>("ScrapedPageId")
-                                .HasColumnType("TEXT");
+                                .HasColumnType("uuid");
 
                             b1.Property<string>("Domain")
                                 .IsRequired()
-                                .HasColumnType("TEXT")
-                                .UseCollation("BINARY");
+                                .HasColumnType("text");
 
                             b1.Property<string>("PageTitle")
                                 .IsRequired()
-                                .HasColumnType("TEXT")
-                                .UseCollation("BINARY");
+                                .HasColumnType("text");
 
                             b1.HasKey("ScrapedPageId");
 

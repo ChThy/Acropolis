@@ -3,12 +3,15 @@ import { Page, PendingResource, Video } from "../models/resource";
 import { RootState } from "./store";
 import { activeFetchPagesRequestIdSelector, activeFetchVideosRequestIdSelector } from "./selectors";
 import parseUrl from "parse-url";
-import { Configuration, PagesApi, VideosApi } from "../clients/acropolis";
+import { Configuration, DownloadedVideo, PagesApi, VideosApi } from "../clients/acropolis";
+import { map } from "../shared/models/paged-result";
+import { Filter, SieveFilterService } from "sieve-ts";
 
 const baseUrl = 'http://localhost:5092';
 
 const pagesApi = new PagesApi(new Configuration({ basePath: baseUrl }));
 const videosApi = new VideosApi(new Configuration({ basePath: baseUrl }));
+const sieveService = new SieveFilterService();
 
 function rejectRequestBusy(thunkApi: any) {
   return thunkApi.rejectWithValue("Still fetching previous request.");
@@ -76,26 +79,17 @@ export const retryPendingPage = createAsyncThunk(
 
 export const fetchVideos = createAsyncThunk(
   'videos/fetch',
-  async (_, thunkApi) => {
+  async (filter: Filter, thunkApi) => {
     const activeFetchRequestId = activeFetchVideosRequestIdSelector(thunkApi.getState() as RootState);
     if (activeFetchRequestId && activeFetchRequestId !== thunkApi.requestId) {
       return rejectRequestBusy(thunkApi)
     }
 
-    const pages = await videosApi.videos();
-    return pages.data.map<Video>(e => {
-      const parsedUrl = parseUrl(e.url!);
+    const x = sieveService.getFilterValue(filter);
+    console.log(x);
 
-      return ({
-        type: 'video',
-        id: e.id!,
-        title: e.metaData?.videoTitle ?? "",
-        url: e.url ?? "",
-        source: parsedUrl.resource,
-        description: parsedUrl.pathname.replace(/[\W_]/g, " ").trim(),
-        viewed: false
-      })
-    });
+    const pages = await videosApi.videos({});
+    return map(pages.data, mapVideo);
   }
 );
 
@@ -132,3 +126,17 @@ export const retryPendingVideo = createAsyncThunk(
     await videosApi.retryFailedVideo({ id });
   }
 );
+
+function mapVideo(e: DownloadedVideo): Video {
+  const parsedUrl = parseUrl(e.url!);
+
+  return ({
+    type: 'video',
+    id: e.id!,
+    title: e.metaData?.videoTitle ?? "",
+    url: e.url ?? "",
+    source: parsedUrl.resource,
+    description: parsedUrl.pathname.replace(/[\W_]/g, " ").trim(),
+    viewed: false
+  });
+}

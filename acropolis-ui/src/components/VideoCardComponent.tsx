@@ -1,4 +1,4 @@
-import { Props } from "../helpers/component-props.helper";
+import { Props } from "../shared/helpers/component-props.helper";
 import { Video } from "../models/resource";
 
 export const VideoCardComponent: React.FC<Props<{ video: Video }>> = ({ video, className, ...rest }) => {

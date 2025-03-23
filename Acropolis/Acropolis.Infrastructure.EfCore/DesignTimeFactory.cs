@@ -8,7 +8,7 @@ internal class DesignTimeFactory : IDesignTimeDbContextFactory<AppDbContext>
     public AppDbContext CreateDbContext(string[] args)
     {
         var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-        optionsBuilder.UseSqlite();
+        optionsBuilder.UseNpgsql();
         return new AppDbContext(optionsBuilder.Options);
     }
 }

@@ -1,5 +1,5 @@
 import React, {  } from "react";
-import { Props } from "../helpers/component-props.helper";
+import { Props } from "../shared/helpers/component-props.helper";
 import { Page, ResourceModel } from "../models/resource";
 import create from "../factories/resource-component-factory";
 

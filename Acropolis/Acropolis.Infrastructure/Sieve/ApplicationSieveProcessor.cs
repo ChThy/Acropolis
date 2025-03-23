@@ -16,11 +16,14 @@ public class ApplicationSieveProcessor : SieveProcessor
     {
         mapper.Property<DownloadedVideo>(e => e.MetaData.VideoTitle)
             .CanSort()
-            .HasName("title");
+            .HasName("Title");
 
         mapper.Property<DownloadedVideo>(e => e.MetaData.Author)
             .CanSort()
-            .HasName("author");
+            .HasName("Author");
+        mapper.Property<DownloadedVideo>(e => e.MetaData.VideoUploadTimestamp)
+            .CanSort()
+            .HasName("UploadedTimestamp");
         
         return mapper;
     }

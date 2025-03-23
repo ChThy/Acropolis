@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 import PageCardComponent from "../components/PageCardComponent";
 import VideoCardComponent from "../components/VideoCardComponent";
-import { ElementProps } from "../helpers/component-props.helper";
+import { ElementProps } from "../shared/helpers/component-props.helper";
 import { Page, ResourceModel, Video } from "../models/resource";
 
 const isPage = (resource: ResourceModel): resource is Page => resource.type === 'page';
