@@ -2,6 +2,7 @@ export * from './download-video-request';
 export * from './download-video-state';
 export * from './downloaded-video';
 export * from './page-meta-data';
+export * from './paged-result-of-downloaded-video';
 export * from './problem-details';
 export * from './resource';
 export * from './scrape-page-state';

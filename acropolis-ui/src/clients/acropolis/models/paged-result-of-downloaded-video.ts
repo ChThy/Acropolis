@@ -15,40 +15,37 @@
 
 // May contain unused imports in some cases
 // @ts-ignore
-import type { PageMetaData } from './page-meta-data';
-// May contain unused imports in some cases
-// @ts-ignore
-import type { Resource } from './resource';
+import type { DownloadedVideo } from './downloaded-video';
 
 /**
  * 
  * @export
- * @interface ScrapedPage
+ * @interface PagedResultOfDownloadedVideo
  */
-export interface ScrapedPage {
+export interface PagedResultOfDownloadedVideo {
     /**
      * 
-     * @type {string}
-     * @memberof ScrapedPage
+     * @type {number}
+     * @memberof PagedResultOfDownloadedVideo
      */
-    'id': string;
+    'page': number;
     /**
      * 
-     * @type {string}
-     * @memberof ScrapedPage
+     * @type {number}
+     * @memberof PagedResultOfDownloadedVideo
      */
-    'url': string;
+    'pageSize': number;
     /**
      * 
-     * @type {PageMetaData}
-     * @memberof ScrapedPage
+     * @type {number}
+     * @memberof PagedResultOfDownloadedVideo
      */
-    'metaData': PageMetaData;
+    'total': number;
     /**
      * 
-     * @type {Array<Resource>}
-     * @memberof ScrapedPage
+     * @type {Array<DownloadedVideo>}
+     * @memberof PagedResultOfDownloadedVideo
      */
-    'resources'?: Array<Resource> | null;
+    'result': Array<DownloadedVideo>;
 }
 

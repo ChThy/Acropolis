@@ -11,6 +11,7 @@ using Acropolis.Infrastructure.EfCore;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
 
 namespace Acropolis.Api;
 
@@ -23,7 +24,7 @@ public class Program
 
         builder.Services.AddAuthorization();
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+        builder.Services.AddOpenApi();
         builder.Services.AddCors(options =>
         {
             options.AddDefaultPolicy(p =>
@@ -36,13 +37,14 @@ public class Program
 
         var app = builder.Build();
 
-        app.UseSwagger();
-        app.UseSwaggerUI();
 
         app.UseHttpsRedirection();
         app.UseCors();
         app.UseAuthorization();
 
+        app.MapOpenApi();
+        app.MapScalarApiReference("");
+        
         app.MapDownloadEndpoints();
         app.MapVideoEndpoints();
         app.MapPagesEndpoints();

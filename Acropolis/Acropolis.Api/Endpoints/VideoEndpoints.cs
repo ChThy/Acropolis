@@ -1,4 +1,5 @@
 ﻿using Acropolis.Api.Extensions;
+using Acropolis.Api.Models;
 using Acropolis.Application.Events.VideoDownloader;
 using Acropolis.Application.Sagas.DownloadVideo;
 using Acropolis.Domain.DownloadedVideos;
@@ -6,6 +7,8 @@ using Acropolis.Infrastructure.EfCore;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Sieve.Models;
+using Sieve.Services;
 
 namespace Acropolis.Api.Endpoints;
 
@@ -16,7 +19,7 @@ public static class VideoEndpoints
         var group = endpoints.MapGroup("videos").WithTags("Videos");
 
         group.MapGet("", Videos)
-            .Produces<DownloadedVideo[]>()
+            .Produces<PagedResult<DownloadedVideo>>()
             .ProducesCommonResponses()
             .WithName(nameof(Videos));
 
@@ -39,12 +42,13 @@ public static class VideoEndpoints
     }
 
     private static async Task<IResult> Videos(
+        [AsParameters] Models.Sieve sieve,
         [FromServices] AppDbContext dbContext,
+        [FromServices] ISieveProcessor sieveProcessor,
         CancellationToken cancellationToken)
     {
-        var result = await dbContext.DownloadedVideos
-            .Include(e => e.Resources)
-            .ToListAsync(cancellationToken);
+        var query = sieveProcessor.Apply(sieve.GetSieveModel(), dbContext.DownloadedVideos);
+        var result = await query.ToListAsync(cancellationToken);
 
         return Results.Ok(result);
     }

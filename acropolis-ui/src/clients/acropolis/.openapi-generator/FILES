@@ -15,6 +15,7 @@ models/download-video-state.ts
 models/downloaded-video.ts
 models/index.ts
 models/page-meta-data.ts
+models/paged-result-of-downloaded-video.ts
 models/problem-details.ts
 models/resource.ts
 models/scrape-page-state.ts
