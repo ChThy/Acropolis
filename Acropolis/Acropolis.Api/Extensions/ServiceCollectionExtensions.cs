@@ -1,5 +1,4 @@
-﻿using Acropolis.Application.DownloadedVideos;
-using Acropolis.Application.DownloadedVideos.CreateDownloadedVideo;
+﻿using Acropolis.Application.DownloadedVideos.CreateDownloadedVideo;
 using Acropolis.Application.Sagas.DownloadVideo;
 using Acropolis.Application.Sagas.ExternalMessageRequest;
 using Acropolis.Application.Sagas.ScrapePage;
@@ -11,11 +10,13 @@ using Acropolis.Infrastructure.EfCore.QueryHandlers;
 using Acropolis.Infrastructure.Extensions;
 using Acropolis.Infrastructure.PageScraper.EventHandlers;
 using Acropolis.Infrastructure.PageScraper.Extensions;
+using Acropolis.Infrastructure.Telegram;
 using Acropolis.Infrastructure.Telegram.Extensions;
 using Acropolis.Infrastructure.Telegram.Messenger;
 using Acropolis.Infrastructure.YoutubeDownloader.EventHandlers;
 using Acropolis.Infrastructure.YoutubeDownloader.Extensions;
 using Acropolis.Shared.Commands;
+using Acropolis.Shared.Extensions;
 using Acropolis.Shared.Queries;
 using MassTransit;
 using MediatR.Pipeline;
@@ -33,7 +34,8 @@ public static class ServiceCollectionExtensions
 
         services.AddDbContextFactory<AppDbContext>(options =>
         {
-            options.UseSqlite(configuration.GetConnectionString("Database"));
+            options.UseNpgsql(configuration.GetConnectionString("Database"));
+            // options.UseSqlite(configuration.GetConnectionString("Database"));
         });
 
         services.AddTransient<ProcessService>();
@@ -51,14 +53,19 @@ public static class ServiceCollectionExtensions
 
         services.AddQueryHandling(typeof(DownloadedVideosQueryHandler).Assembly);
         services.AddCommandHandling(typeof(SaveChangesCommandHandler).Assembly);
-        
+
+        var telegramStartupOptions = configuration.GetOptions<TelegramOptions>(TelegramOptions.Name);
         services.AddMassTransit(x =>
         {
             x.AddConsumers(
                 typeof(VideoDownloadedConsumer).Assembly,
                 typeof(VideoDownloadRequestedHandler).Assembly,
-                typeof(ExternalMessageReplyRequestedHandler).Assembly,
                 typeof(PageScrapeRequestedHandler).Assembly);
+
+            if (telegramStartupOptions.Enabled)
+            {
+                x.AddConsumers(typeof(ExternalMessageReplyRequestedHandler).Assembly);
+            }
 
             x.AddSagaStateMachines(typeof(DownloadVideoSaga).Assembly);
 
@@ -78,7 +85,7 @@ public static class ServiceCollectionExtensions
                 r.ExistingDbContext<AppDbContext>();
             });
 
-            // x.AddEntityFrameworkOutbox<AppDbContext>(o =>
+            // x.AddEntityFrameworkOutbox<AppDbContextSqlite>(o =>
             // {
             //     o.UseSqlite();
             //     o.UseBusOutbox();
@@ -86,7 +93,7 @@ public static class ServiceCollectionExtensions
             //
             // x.AddConfigureEndpointsCallback((ctx, name, cfg) =>
             // {
-            //     cfg.UseEntityFrameworkOutbox<AppDbContext>(ctx);
+            //     cfg.UseEntityFrameworkOutbox<AppDbContextSqlite>(ctx);
             // });
             
             x.AddConfigureEndpointsCallback((endpoint,cfg) =>
@@ -95,7 +102,8 @@ public static class ServiceCollectionExtensions
 
                 if (environment.IsProduction())
                 {
-                    cfg.UseMessageRetry(r => r.Exponential(10, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(60), TimeSpan.FromSeconds(20)));
+                    cfg.UseMessageRetry(r => r.Immediate(0));
+                    // cfg.UseMessageRetry(r => r.Exponential(10, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(60), TimeSpan.FromSeconds(20)));
                 }
                 else
                 {

@@ -13,9 +13,13 @@ public class DownloadVideoStateMap : SagaClassMap<DownloadVideoState>
         entity.Property(e => e.RowVersion)
             .HasDefaultValue(0)
             .IsRowVersion();
-        entity.OwnsOne(e => e.VideoMetaData, ob =>
+        entity.OwnsOne(e => e.StoredVideo, ob =>
         {
-            ob.Property(e => e.VideoId).IsRequired();
+            ob.Property(e => e.StorageLocation).IsRequired();
+            ob.OwnsOne(e => e.MetaData, oob =>
+            {
+                oob.Property(e => e.VideoId).IsRequired();
+            });
         });
 
         entity.HasIndex(e => new { e.CorrelationId, e.Url })

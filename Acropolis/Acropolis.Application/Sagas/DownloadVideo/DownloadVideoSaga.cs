@@ -37,7 +37,7 @@ public class DownloadVideoSaga : MassTransitStateMachine<DownloadVideoState>
                     return new UrlRequestReplyRequested(
                         saga.CorrelationId,
                         saga.Url,
-                        $"Downloaded {saga.VideoMetaData?.VideoTitle}. Location: {saga.VideoMetaData?.StorageLocation}");
+                        $"Downloaded {message.VideoMetaData.VideoTitle}. Location: {message.StorageLocation} ");
                 })
                 .TransitionTo(Downloaded),
             When(WhenVideoDownloadSkipped)

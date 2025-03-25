@@ -1,0 +1,12 @@
+{
+	"modelNameSuffix": "",
+	"modelPackage": "models",
+	"apiPackage": "api",
+	"skipApiGeneration": true,
+	"generateApiTests": false,
+	"generateModelTests": false,
+	"generateModelDocumentation": false,
+	"generateApiDocumentation": false,
+	"withSeparateModelsAndApi": true,
+	"useSingleRequestParameter": true
+}

@@ -1,8 +1,8 @@
 ﻿using Acropolis.Domain.DownloadedVideos;
 using Acropolis.Domain.ScrapedPages;
+using Acropolis.Infrastructure.EfCore.Converters;
 using MassTransit;
 using MassTransit.EntityFrameworkCoreIntegration;
-using MassTransit.Futures.Contracts;
 using Microsoft.EntityFrameworkCore;
 
 namespace Acropolis.Infrastructure.EfCore;
@@ -30,7 +30,10 @@ public class AppDbContext : SagaDbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.UseCollation("BINARY");
+        if (Database.IsSqlite()) //TODO: clean up
+        {
+            modelBuilder.UseCollation("BINARY");
+        }
 
         modelBuilder.AddInboxStateEntity();
         modelBuilder.AddOutboxMessageEntity();
@@ -42,7 +45,16 @@ public class AppDbContext : SagaDbContext
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
         base.ConfigureConventions(configurationBuilder);
-        configurationBuilder.Properties<string>()
-            .UseCollation("BINARY");
+
+        if (Database.IsSqlite()) //TODO: clean up
+        {
+            configurationBuilder.Properties<string>()
+                .UseCollation("BINARY");
+        }
+        else
+        {
+            configurationBuilder.Properties<DateTimeOffset>()
+                .HaveConversion<DateTimeOffsetToDateTimeConverter>();
+        }
     }
 }

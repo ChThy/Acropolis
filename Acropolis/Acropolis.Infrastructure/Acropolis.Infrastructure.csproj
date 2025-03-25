@@ -11,4 +11,8 @@
     <ProjectReference Include="..\Acropolis.Shared\Acropolis.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Sieve" Version="2.5.5" />
+  </ItemGroup>
+
 </Project>
