@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="MassTransit.EntityFrameworkCore" Version="8.3.4" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Acropolis.Application\Acropolis.Application.csproj" />
+      <ProjectReference Include="..\Acropolis.Domain\Acropolis.Domain.csproj" />
+    </ItemGroup>
+
+</Project>
