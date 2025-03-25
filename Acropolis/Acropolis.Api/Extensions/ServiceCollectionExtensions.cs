@@ -7,6 +7,7 @@ using Acropolis.Application.Shared;
 using Acropolis.Infrastructure.EfCore;
 using Acropolis.Infrastructure.EfCore.CommandHandlers;
 using Acropolis.Infrastructure.EfCore.QueryHandlers;
+using Acropolis.Infrastructure.EfCore.Sqlite;
 using Acropolis.Infrastructure.Extensions;
 using Acropolis.Infrastructure.PageScraper.EventHandlers;
 using Acropolis.Infrastructure.PageScraper.Extensions;
@@ -35,7 +36,11 @@ public static class ServiceCollectionExtensions
         services.AddDbContextFactory<AppDbContext>(options =>
         {
             options.UseNpgsql(configuration.GetConnectionString("Database"));
-            // options.UseSqlite(configuration.GetConnectionString("Database"));
+        });
+        
+        services.AddDbContextFactory<SqliteAppDbContext>(options =>
+        {
+            options.UseSqlite(configuration.GetConnectionString("SqliteDatabase"));
         });
 
         services.AddTransient<ProcessService>();
