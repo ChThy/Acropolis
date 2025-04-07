@@ -1,4 +1,6 @@
-﻿using Acropolis.Application.DownloadedVideos.CreateDownloadedVideo;
+﻿using System.Text.Encodings.Web;
+using System.Text.Unicode;
+using Acropolis.Application.DownloadedVideos.CreateDownloadedVideo;
 using Acropolis.Application.Sagas.DownloadVideo;
 using Acropolis.Application.Sagas.ExternalMessageRequest;
 using Acropolis.Application.Sagas.ScrapePage;
@@ -21,6 +23,7 @@ using Acropolis.Shared.Extensions;
 using Acropolis.Shared.Queries;
 using MassTransit;
 using MediatR.Pipeline;
+using Microsoft.AspNetCore.Http.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -32,6 +35,10 @@ public static class ServiceCollectionExtensions
     {
         services.TryAddSingleton(TimeProvider.System);
         services.AddHttpClient();
+        services.Configure<JsonOptions>(x =>
+        {
+            x.SerializerOptions.Encoder = JavaScriptEncoder.Create(UnicodeRanges.All);
+        });
 
         services.AddDbContextFactory<AppDbContext>(options =>
         {

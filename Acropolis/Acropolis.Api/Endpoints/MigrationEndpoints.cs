@@ -3,6 +3,7 @@ using Acropolis.Application.Events.VideoDownloader;
 using Acropolis.Application.Sagas.DownloadVideo;
 using Acropolis.Application.Sagas.ScrapePage;
 using Acropolis.Infrastructure.EfCore;
+using Acropolis.Infrastructure.Helpers;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -137,6 +138,15 @@ public static class MigrationEndpoints
             await dbContext.SaveChangesAsync();
 
             return Results.NoContent();
+        });
+
+        group.MapGet("invalid-characters", () =>
+        {
+            return Results.Ok(new
+            {
+                PathHelpers.InvalidPathCharacters,
+                PathHelpers.InvalidFileNameCharacters
+            });
         });
 
         return endpoints;
