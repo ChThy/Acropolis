@@ -74,17 +74,19 @@ public class VideoDownloadRequestedHandler(
         var videoStreamInfo = WithLowestPreferredQuality(videoOnlyStreamInfos) ?? videoOnlyStreamInfos.GetWithHighestVideoQuality();
         var audioStreamInfo = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate();
 
-
-        var videoOnlyFileName = VideoOnlyFileName(filename);
-        var audioOnlyFileName = AudioOnlyFileName(filename);
-        var videoOnlyFullPath = FullPath(directory, FileNameWithExtension(videoOnlyFileName, videoStreamInfo.Container.Name));
-        var audioOnlyFullPath = FullPath(directory, FileNameWithExtension(audioOnlyFileName, videoStreamInfo.Container.Name));
+        var tempDirectory = ConstructDirectory(youtubeOptions.ToMuxDirectory);
+        var tempFileName = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+        
+        var videoOnlyFileName = VideoOnlyFileName(tempFileName);
+        var audioOnlyFileName = AudioOnlyFileName(tempFileName);
+        var tempVideoFilePath = FullPath(tempDirectory, FileNameWithExtension(videoOnlyFileName, videoStreamInfo.Container.Name));
+        var tempAudioFilePath = FullPath(tempDirectory, FileNameWithExtension(audioOnlyFileName, videoStreamInfo.Container.Name));
 
         await using var videoStream = await youtubeClient.Videos.Streams.GetAsync(videoStreamInfo, cancellationToken);
         await using var audioStream = await youtubeClient.Videos.Streams.GetAsync(audioStreamInfo, cancellationToken);
 
-        var storedVideoPart = await fileStorage.StoreFile(videoOnlyFullPath, videoStream, cancellationToken);
-        var storedAudioPart = await fileStorage.StoreFile(audioOnlyFullPath, audioStream, cancellationToken);
+        var storedVideoPart = await fileStorage.StoreFile(tempVideoFilePath, videoStream, cancellationToken);
+        var storedAudioPart = await fileStorage.StoreFile(tempAudioFilePath, audioStream, cancellationToken);
 
         var fileDirectory = Path.GetDirectoryName(storedVideoPart);
         var videoFullPath = Path.Combine(Directory.GetCurrentDirectory(), storedVideoPart);
@@ -97,8 +99,8 @@ public class VideoDownloadRequestedHandler(
             throw new($"Failed to mux video {outputPath}");
         }
 
-        fileStorage.DeleteFile(videoOnlyFullPath);
-        fileStorage.DeleteFile(audioOnlyFullPath);
+        fileStorage.DeleteFile(tempVideoFilePath);
+        fileStorage.DeleteFile(tempAudioFilePath);
 
         return new StoredVideo(
             new VideoMetaData(
