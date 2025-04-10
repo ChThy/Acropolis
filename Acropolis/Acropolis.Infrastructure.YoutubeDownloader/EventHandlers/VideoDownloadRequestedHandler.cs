@@ -89,9 +89,12 @@ public class VideoDownloadRequestedHandler(
         var storedAudioPart = await fileStorage.StoreFile(tempAudioFilePath, audioStream, cancellationToken);
 
         var fileDirectory = Path.GetDirectoryName(storedVideoPart);
+        
         var videoFullPath = Path.Combine(Directory.GetCurrentDirectory(), storedVideoPart);
         var audioFullPath = Path.Combine(Directory.GetCurrentDirectory(), storedAudioPart);
-        var outputPath = Path.Join(Directory.GetCurrentDirectory(), directory, FileNameWithExtension(filename, videoStreamInfo.Container.Name.ToLowerInvariant()));
+        var baseFolder = fileDirectory!.Replace(youtubeOptions.ToMuxDirectory, "");
+        
+        var outputPath = Path.Join(Directory.GetCurrentDirectory(), baseFolder, FileNameWithExtension(filename, videoStreamInfo.Container.Name.ToLowerInvariant()));
 
         var muxResult = await processService.RunProcessAsync("ffmpeg", $"-i \"{videoFullPath}\" -i \"{audioFullPath}\" -c:v copy -c:a aac \"{outputPath}\"");
         if (muxResult.ExitCode != 0)
