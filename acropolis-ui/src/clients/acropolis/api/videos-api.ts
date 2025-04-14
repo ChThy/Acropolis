@@ -24,6 +24,8 @@ import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError
 // @ts-ignore
 import type { DownloadVideoState } from '../models';
 // @ts-ignore
+import type { DownloadedVideo } from '../models';
+// @ts-ignore
 import type { PagedResultOfDownloadedVideo } from '../models';
 // @ts-ignore
 import type { ProblemDetails } from '../models';
@@ -33,6 +35,88 @@ import type { ProblemDetails } from '../models';
  */
 export const VideosApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
+        /**
+         * 
+         * @param {string} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getVideo: async (id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('getVideo', 'id', id)
+            const localVarPath = `/videos/{id}`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {number} [page] 
+         * @param {number} [pageSize] 
+         * @param {string} [filters] 
+         * @param {string} [sorts] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getVideos: async (page?: number, pageSize?: number, filters?: string, sorts?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/videos`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            if (page !== undefined) {
+                localVarQueryParameter['Page'] = page;
+            }
+
+            if (pageSize !== undefined) {
+                localVarQueryParameter['PageSize'] = pageSize;
+            }
+
+            if (filters !== undefined) {
+                localVarQueryParameter['Filters'] = filters;
+            }
+
+            if (sorts !== undefined) {
+                localVarQueryParameter['Sorts'] = sorts;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
         /**
          * 
          * @param {*} [options] Override http request option.
@@ -124,55 +208,6 @@ export const VideosApiAxiosParamCreator = function (configuration?: Configuratio
                 options: localVarRequestOptions,
             };
         },
-        /**
-         * 
-         * @param {number} [page] 
-         * @param {number} [pageSize] 
-         * @param {string} [filters] 
-         * @param {string} [sorts] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        videos: async (page?: number, pageSize?: number, filters?: string, sorts?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/videos`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            if (page !== undefined) {
-                localVarQueryParameter['Page'] = page;
-            }
-
-            if (pageSize !== undefined) {
-                localVarQueryParameter['PageSize'] = pageSize;
-            }
-
-            if (filters !== undefined) {
-                localVarQueryParameter['Filters'] = filters;
-            }
-
-            if (sorts !== undefined) {
-                localVarQueryParameter['Sorts'] = sorts;
-            }
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
     }
 };
 
@@ -183,6 +218,33 @@ export const VideosApiAxiosParamCreator = function (configuration?: Configuratio
 export const VideosApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = VideosApiAxiosParamCreator(configuration)
     return {
+        /**
+         * 
+         * @param {string} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getVideo(id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DownloadedVideo>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getVideo(id, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['VideosApi.getVideo']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @param {number} [page] 
+         * @param {number} [pageSize] 
+         * @param {string} [filters] 
+         * @param {string} [sorts] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getVideos(page?: number, pageSize?: number, filters?: string, sorts?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PagedResultOfDownloadedVideo>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getVideos(page, pageSize, filters, sorts, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['VideosApi.getVideos']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
         /**
          * 
          * @param {*} [options] Override http request option.
@@ -217,21 +279,6 @@ export const VideosApiFp = function(configuration?: Configuration) {
             const localVarOperationServerBasePath = operationServerMap['VideosApi.retryFailedVideo']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
-        /**
-         * 
-         * @param {number} [page] 
-         * @param {number} [pageSize] 
-         * @param {string} [filters] 
-         * @param {string} [sorts] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async videos(page?: number, pageSize?: number, filters?: string, sorts?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PagedResultOfDownloadedVideo>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.videos(page, pageSize, filters, sorts, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['VideosApi.videos']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
     }
 };
 
@@ -242,6 +289,24 @@ export const VideosApiFp = function(configuration?: Configuration) {
 export const VideosApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = VideosApiFp(configuration)
     return {
+        /**
+         * 
+         * @param {VideosApiGetVideoRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getVideo(requestParameters: VideosApiGetVideoRequest, options?: RawAxiosRequestConfig): AxiosPromise<DownloadedVideo> {
+            return localVarFp.getVideo(requestParameters.id, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @param {VideosApiGetVideosRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getVideos(requestParameters: VideosApiGetVideosRequest = {}, options?: RawAxiosRequestConfig): AxiosPromise<PagedResultOfDownloadedVideo> {
+            return localVarFp.getVideos(requestParameters.page, requestParameters.pageSize, requestParameters.filters, requestParameters.sorts, options).then((request) => request(axios, basePath));
+        },
         /**
          * 
          * @param {*} [options] Override http request option.
@@ -267,17 +332,57 @@ export const VideosApiFactory = function (configuration?: Configuration, basePat
         retryFailedVideo(requestParameters: VideosApiRetryFailedVideoRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.retryFailedVideo(requestParameters.id, options).then((request) => request(axios, basePath));
         },
-        /**
-         * 
-         * @param {VideosApiVideosRequest} requestParameters Request parameters.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        videos(requestParameters: VideosApiVideosRequest = {}, options?: RawAxiosRequestConfig): AxiosPromise<PagedResultOfDownloadedVideo> {
-            return localVarFp.videos(requestParameters.page, requestParameters.pageSize, requestParameters.filters, requestParameters.sorts, options).then((request) => request(axios, basePath));
-        },
     };
 };
+
+/**
+ * Request parameters for getVideo operation in VideosApi.
+ * @export
+ * @interface VideosApiGetVideoRequest
+ */
+export interface VideosApiGetVideoRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof VideosApiGetVideo
+     */
+    readonly id: string
+}
+
+/**
+ * Request parameters for getVideos operation in VideosApi.
+ * @export
+ * @interface VideosApiGetVideosRequest
+ */
+export interface VideosApiGetVideosRequest {
+    /**
+     * 
+     * @type {number}
+     * @memberof VideosApiGetVideos
+     */
+    readonly page?: number
+
+    /**
+     * 
+     * @type {number}
+     * @memberof VideosApiGetVideos
+     */
+    readonly pageSize?: number
+
+    /**
+     * 
+     * @type {string}
+     * @memberof VideosApiGetVideos
+     */
+    readonly filters?: string
+
+    /**
+     * 
+     * @type {string}
+     * @memberof VideosApiGetVideos
+     */
+    readonly sorts?: string
+}
 
 /**
  * Request parameters for retryFailedVideo operation in VideosApi.
@@ -294,47 +399,34 @@ export interface VideosApiRetryFailedVideoRequest {
 }
 
 /**
- * Request parameters for videos operation in VideosApi.
- * @export
- * @interface VideosApiVideosRequest
- */
-export interface VideosApiVideosRequest {
-    /**
-     * 
-     * @type {number}
-     * @memberof VideosApiVideos
-     */
-    readonly page?: number
-
-    /**
-     * 
-     * @type {number}
-     * @memberof VideosApiVideos
-     */
-    readonly pageSize?: number
-
-    /**
-     * 
-     * @type {string}
-     * @memberof VideosApiVideos
-     */
-    readonly filters?: string
-
-    /**
-     * 
-     * @type {string}
-     * @memberof VideosApiVideos
-     */
-    readonly sorts?: string
-}
-
-/**
  * VideosApi - object-oriented interface
  * @export
  * @class VideosApi
  * @extends {BaseAPI}
  */
 export class VideosApi extends BaseAPI {
+    /**
+     * 
+     * @param {VideosApiGetVideoRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof VideosApi
+     */
+    public getVideo(requestParameters: VideosApiGetVideoRequest, options?: RawAxiosRequestConfig) {
+        return VideosApiFp(this.configuration).getVideo(requestParameters.id, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @param {VideosApiGetVideosRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof VideosApi
+     */
+    public getVideos(requestParameters: VideosApiGetVideosRequest = {}, options?: RawAxiosRequestConfig) {
+        return VideosApiFp(this.configuration).getVideos(requestParameters.page, requestParameters.pageSize, requestParameters.filters, requestParameters.sorts, options).then((request) => request(this.axios, this.basePath));
+    }
+
     /**
      * 
      * @param {*} [options] Override http request option.
@@ -364,17 +456,6 @@ export class VideosApi extends BaseAPI {
      */
     public retryFailedVideo(requestParameters: VideosApiRetryFailedVideoRequest, options?: RawAxiosRequestConfig) {
         return VideosApiFp(this.configuration).retryFailedVideo(requestParameters.id, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @param {VideosApiVideosRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof VideosApi
-     */
-    public videos(requestParameters: VideosApiVideosRequest = {}, options?: RawAxiosRequestConfig) {
-        return VideosApiFp(this.configuration).videos(requestParameters.page, requestParameters.pageSize, requestParameters.filters, requestParameters.sorts, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
