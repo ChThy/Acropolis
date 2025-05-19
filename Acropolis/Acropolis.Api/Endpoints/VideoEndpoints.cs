@@ -7,6 +7,7 @@ using Acropolis.Infrastructure.EfCore.Extensions;
 using Acropolis.Infrastructure.Extensions;
 using Acropolis.Shared.Models;
 using MassTransit;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Services;
@@ -19,10 +20,15 @@ public static class VideoEndpoints
     {
         var group = endpoints.MapGroup("videos").WithTags("Videos");
 
-        group.MapGet("", Videos)
+        group.MapGet("", GetVideos)
             .Produces<PagedResult<DownloadedVideo>>()
             .ProducesCommonResponses()
-            .WithName(nameof(Videos));
+            .WithName(nameof(GetVideos));
+
+        group.MapGet("{id:guid}", GetVideo)
+            .Produces<DownloadedVideo>()
+            .ProducesCommonResponses()
+            .WithName(nameof(GetVideo));
 
         group.MapGet("requested", RequestedVideos)
             .Produces<DownloadVideoState[]>()
@@ -39,10 +45,15 @@ public static class VideoEndpoints
             .ProducesCommonResponses()
             .WithName(nameof(RetryFailedVideo));
 
+        group.MapDelete("{id:guid}", DeleteVideo)
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesCommonResponses()
+            .WithName(nameof(DeleteVideo));
+
         return endpoints;
     }
 
-    private static async Task<IResult> Videos(
+    private static async Task<IResult> GetVideos(
         [AsParameters] Shared.Models.Sieve sieve,
         [FromServices] AppDbContext dbContext,
         [FromServices] ISieveProcessor sieveProcessor,
@@ -54,6 +65,18 @@ public static class VideoEndpoints
             cancellationToken);
 
         return Results.Ok(result);
+    }
+
+    private static async Task<IResult> GetVideo(
+        Guid id,
+        [FromServices] AppDbContext dbContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await dbContext.DownloadedVideos.FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
+
+        return result is null
+            ? TypedResults.NotFound()
+            : TypedResults.Ok(result);
     }
 
     private static async Task<IResult> RequestedVideos(
@@ -98,5 +121,22 @@ public static class VideoEndpoints
         await bus.Publish(new RetryFailedVideoDownloadRequested(failedVideo.Url, DateTimeOffset.UtcNow), cancellationToken);
 
         return Results.Accepted();
+    }
+    
+    private static async Task<IResult> DeleteVideo(
+        Guid id,
+        [FromServices] AppDbContext dbContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await dbContext.DownloadedVideos.FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
+
+        if (result is null)
+        {
+            return Results.NotFound();
+        }
+
+        dbContext.DownloadedVideos.Remove(result);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return Results.NoContent();
     }
 }
