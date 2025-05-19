@@ -45,6 +45,11 @@ public static class VideoEndpoints
             .ProducesCommonResponses()
             .WithName(nameof(RetryFailedVideo));
 
+        group.MapDelete("{id:guid}", DeleteVideo)
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesCommonResponses()
+            .WithName(nameof(DeleteVideo));
+
         return endpoints;
     }
 
@@ -116,5 +121,22 @@ public static class VideoEndpoints
         await bus.Publish(new RetryFailedVideoDownloadRequested(failedVideo.Url, DateTimeOffset.UtcNow), cancellationToken);
 
         return Results.Accepted();
+    }
+    
+    private static async Task<IResult> DeleteVideo(
+        Guid id,
+        [FromServices] AppDbContext dbContext,
+        CancellationToken cancellationToken)
+    {
+        var result = await dbContext.DownloadedVideos.FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
+
+        if (result is null)
+        {
+            return Results.NotFound();
+        }
+
+        dbContext.DownloadedVideos.Remove(result);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return Results.NoContent();
     }
 }

@@ -66,13 +66,13 @@ public class VideoDownloadRequestedHandler(
             .Where(e => e.Container == Container.Mp4)
             .ToList();
 
-        var directory = ConstructDirectory(video.Author.ChannelTitle);
         var filename = FileNameWithoutExtension(video.UploadDate, video.Title)
             .Replace("'", "")
             .Replace("-", "_");
 
         var videoStreamInfo = WithLowestPreferredQuality(videoOnlyStreamInfos) ?? videoOnlyStreamInfos.GetWithHighestVideoQuality();
-        var audioStreamInfo = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate();
+        var x = streamManifest.GetAudioOnlyStreams().ToArray();
+        var audioStreamInfo = streamManifest.GetAudioOnlyStreams().Where(e => e.IsAudioLanguageDefault == true).GetWithHighestBitrate();
 
         var tempDirectory = ConstructDirectory(youtubeOptions.ToMuxDirectory);
         var tempFileName = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
@@ -94,7 +94,13 @@ public class VideoDownloadRequestedHandler(
         var audioFullPath = Path.Combine(Directory.GetCurrentDirectory(), storedAudioPart);
         var baseFolder = fileDirectory!.Replace(youtubeOptions.ToMuxDirectory, "");
         
-        var outputPath = Path.Join(Directory.GetCurrentDirectory(), baseFolder, FileNameWithExtension(filename, videoStreamInfo.Container.Name.ToLowerInvariant()));
+        var outputDirectory = Path.Join(
+            Directory.GetCurrentDirectory(), 
+            baseFolder, 
+            video.Author.ChannelTitle.RemoveInvalidDirectoryChars());
+        CreateDirectoryIfNeeded(outputDirectory);
+        var outputPath = Path.Join(outputDirectory,
+            FileNameWithExtension(filename, videoStreamInfo.Container.Name.ToLowerInvariant()));
 
         var muxResult = await processService.RunProcessAsync("ffmpeg", $"-i \"{videoFullPath}\" -i \"{audioFullPath}\" -c:v copy -c:a aac \"{outputPath}\"");
         if (muxResult.ExitCode != 0)
@@ -141,6 +147,15 @@ public class VideoDownloadRequestedHandler(
     private static string FullPath(string directory, string filename) => Path.Join(directory, filename);
     private static string VideoOnlyFileName(string fileName) => $"VideoPart.{fileName}";
     private static string AudioOnlyFileName(string fileName) => $"AudioPart.{fileName}";
+    
+    private void CreateDirectoryIfNeeded(string directory)
+    {
+        if (!Directory.Exists(directory))
+        {
+            logger.LogDebug("Creating Directory {directory}", directory);
+            Directory.CreateDirectory(directory);
+        }
+    }
 }
 
 public static class VideoService
