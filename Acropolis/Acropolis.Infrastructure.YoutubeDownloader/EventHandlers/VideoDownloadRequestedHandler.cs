@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using Acropolis.Application.Events.VideoDownloader;
 using Acropolis.Application.Services;
-using Acropolis.Domain.DownloadedVideos;
 using Acropolis.Domain.Models;
 using Acropolis.Infrastructure.FileStorages;
 using Acropolis.Infrastructure.Helpers;
@@ -71,12 +70,18 @@ public class VideoDownloadRequestedHandler(
             .Replace("-", "_");
 
         var videoStreamInfo = WithLowestPreferredQuality(videoOnlyStreamInfos) ?? videoOnlyStreamInfos.GetWithHighestVideoQuality();
-        var x = streamManifest.GetAudioOnlyStreams().ToArray();
-        var audioStreamInfo = streamManifest.GetAudioOnlyStreams().Where(e => e.IsAudioLanguageDefault == true).GetWithHighestBitrate();
+        var audioStreams = streamManifest.GetAudioOnlyStreams().ToArray();
+        if (audioStreams.Any(e => e.AudioLanguage.HasValue && e.AudioLanguage.Value.Code.StartsWith("en", StringComparison.InvariantCultureIgnoreCase)))
+        {
+            audioStreams = audioStreams.Where(e => e.AudioLanguage.HasValue &&
+                                                   e.AudioLanguage.Value.Code.StartsWith("en", StringComparison.InvariantCultureIgnoreCase)).ToArray();
+        }
+
+        var audioStreamInfo = audioStreams.GetWithHighestBitrate();
 
         var tempDirectory = ConstructDirectory(youtubeOptions.ToMuxDirectory);
         var tempFileName = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
-        
+
         var videoOnlyFileName = VideoOnlyFileName(tempFileName);
         var audioOnlyFileName = AudioOnlyFileName(tempFileName);
         var tempVideoFilePath = FullPath(tempDirectory, FileNameWithExtension(videoOnlyFileName, videoStreamInfo.Container.Name));
@@ -89,14 +94,14 @@ public class VideoDownloadRequestedHandler(
         var storedAudioPart = await fileStorage.StoreFile(tempAudioFilePath, audioStream, cancellationToken);
 
         var fileDirectory = Path.GetDirectoryName(storedVideoPart);
-        
+
         var videoFullPath = Path.Combine(Directory.GetCurrentDirectory(), storedVideoPart);
         var audioFullPath = Path.Combine(Directory.GetCurrentDirectory(), storedAudioPart);
         var baseFolder = fileDirectory!.Replace(youtubeOptions.ToMuxDirectory, "");
-        
+
         var outputDirectory = Path.Join(
-            Directory.GetCurrentDirectory(), 
-            baseFolder, 
+            Directory.GetCurrentDirectory(),
+            baseFolder,
             video.Author.ChannelTitle.RemoveInvalidDirectoryChars());
         CreateDirectoryIfNeeded(outputDirectory);
         var outputPath = Path.Join(outputDirectory,
@@ -111,8 +116,8 @@ public class VideoDownloadRequestedHandler(
         fileStorage.DeleteFile(tempVideoFilePath);
         fileStorage.DeleteFile(tempAudioFilePath);
 
-        return new StoredVideo(
-            new VideoMetaData(
+        return new(
+            new(
                 videoId,
                 video.Title,
                 video.Author.ChannelTitle,
@@ -147,7 +152,7 @@ public class VideoDownloadRequestedHandler(
     private static string FullPath(string directory, string filename) => Path.Join(directory, filename);
     private static string VideoOnlyFileName(string fileName) => $"VideoPart.{fileName}";
     private static string AudioOnlyFileName(string fileName) => $"AudioPart.{fileName}";
-    
+
     private void CreateDirectoryIfNeeded(string directory)
     {
         if (!Directory.Exists(directory))
