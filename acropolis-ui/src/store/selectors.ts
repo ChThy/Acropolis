@@ -11,5 +11,6 @@ export const pendingPagesSelector = createSelector(resourcesSelector, resources 
 
 export const activeFetchVideosRequestIdSelector = createSelector(resourcesSelector, resources => resources.videos.activeFetchRequestId);
 export const videosSelector = createSelector(resourcesSelector, resources => resources.videos.videos);
+export const videoSelector = (id: string) => createSelector(resourcesSelector, resources => resources.videos.videos.find(e => e.id === id));
 export const videoCountSelector = createSelector(resourcesSelector, resources => resources.videos.videos.length);
 export const pendingVideosSelector = createSelector(resourcesSelector, resources => resources.videos.pendingVideos);

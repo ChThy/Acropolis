@@ -1,15 +1,18 @@
-﻿using Acropolis.Api.Extensions;
+﻿using System.Net.Mime;
+using Acropolis.Api.Extensions;
 using Acropolis.Application.Events.VideoDownloader;
 using Acropolis.Application.Sagas.DownloadVideo;
 using Acropolis.Domain.DownloadedVideos;
 using Acropolis.Infrastructure.EfCore;
 using Acropolis.Infrastructure.EfCore.Extensions;
 using Acropolis.Infrastructure.Extensions;
+using Acropolis.Infrastructure.Options;
 using Acropolis.Shared.Models;
 using MassTransit;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Sieve.Services;
 
 namespace Acropolis.Api.Endpoints;
@@ -29,6 +32,11 @@ public static class VideoEndpoints
             .Produces<DownloadedVideo>()
             .ProducesCommonResponses()
             .WithName(nameof(GetVideo));
+
+        group.MapGet("{videoId:guid}/{resourceId:guid}", DownloadVideo)
+            .Produces<PhysicalFileResult>(200, "video/mp4")
+            .ProducesCommonResponses()
+            .WithName(nameof(DownloadVideo));
 
         group.MapGet("requested", RequestedVideos)
             .Produces<DownloadVideoState[]>()
@@ -59,7 +67,9 @@ public static class VideoEndpoints
         [FromServices] ISieveProcessor sieveProcessor,
         CancellationToken cancellationToken)
     {
-        var result = await dbContext.DownloadedVideos.AsPagedResult(
+        var result = await dbContext.DownloadedVideos
+            .Include(e => e.Resources)
+            .AsPagedResult(
             sieveProcessor,
             sieve,
             cancellationToken);
@@ -72,11 +82,43 @@ public static class VideoEndpoints
         [FromServices] AppDbContext dbContext,
         CancellationToken cancellationToken)
     {
-        var result = await dbContext.DownloadedVideos.FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
+        var result = await dbContext.DownloadedVideos
+            .Include(e => e.Resources)
+            .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
 
         return result is null
             ? TypedResults.NotFound()
             : TypedResults.Ok(result);
+    }
+
+    private static async Task<IResult> DownloadVideo(
+        Guid videoId,
+        Guid resourceId, 
+        HttpContext httpContext,
+        [FromServices] AppDbContext dbContext, 
+        [FromServices] IOptionsMonitor<FileStorageOptions> optionsMonitor,
+        CancellationToken cancellationToken)
+    {
+        var result = await dbContext.DownloadedVideos
+            .Include(e => e.Resources)
+            .FirstOrDefaultAsync(e => e.Id == videoId, cancellationToken);
+        
+        var resource = result?.Resources.FirstOrDefault(e => e.Id == resourceId);
+
+        if (resource is null)
+        {
+            return Results.NotFound();
+        }
+
+        var filePath = Path.Combine(Directory.GetCurrentDirectory(), optionsMonitor.CurrentValue.BaseDirectory, resource.StorageLocation).Replace("?", "");
+
+        if (!File.Exists(filePath))
+        {
+            return Results.NotFound();
+        }
+        
+        var fileStream = File.OpenRead(filePath);
+        return Results.File(fileStream, contentType: "video/mp4", "filename.mp4", enableRangeProcessing: true);
     }
 
     private static async Task<IResult> RequestedVideos(

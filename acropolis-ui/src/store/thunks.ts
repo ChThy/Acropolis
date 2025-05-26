@@ -1,9 +1,9 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { Page, PendingResource, Video } from "../models/resource";
+import { Page, PendingResource, Resource, Video } from "../models/resource";
 import { RootState } from "./store";
 import { activeFetchPagesRequestIdSelector, activeFetchVideosRequestIdSelector } from "./selectors";
 import parseUrl from "parse-url";
-import { Configuration, DownloadedVideo, PagesApi, VideosApi } from "../clients/acropolis";
+import { Configuration, DownloadedVideo, PagesApi, Resource as ApiResource, VideosApi } from "../clients/acropolis";
 import { map } from "../shared/models/paged-result";
 import { Filter, SieveFilterService } from "sieve-ts";
 
@@ -37,7 +37,7 @@ export const fetchPages = createAsyncThunk(
         url: e.url ?? "",
         source: parsedUrl.resource,
         description: parsedUrl.pathname.replace(/[\W_]/g, " ").trim(),
-        viewed: false
+        resources: []
       })
     });
   }
@@ -78,7 +78,7 @@ export const retryPendingPage = createAsyncThunk(
 );
 
 export const fetchVideos = createAsyncThunk(
-  'videos/fetch',
+  'videos/fetchVideos',
   async (filter: Filter, thunkApi) => {
     const activeFetchRequestId = activeFetchVideosRequestIdSelector(thunkApi.getState() as RootState);
     if (activeFetchRequestId && activeFetchRequestId !== thunkApi.requestId) {
@@ -88,8 +88,16 @@ export const fetchVideos = createAsyncThunk(
     const x = sieveService.getFilterValue(filter);
     console.log(x);
 
-    const pages = await videosApi.videos({});
-    return map(pages.data, mapVideo);
+    const videos = await videosApi.getVideos({});
+    return map(videos.data, mapVideo);
+  }
+);
+
+export const fetchVideo = createAsyncThunk(
+  'videos/fetchVideo',
+  async (id: string) => {
+    const video = await videosApi.getVideo({id});
+    return mapVideo(video.data);
   }
 );
 
@@ -137,6 +145,15 @@ function mapVideo(e: DownloadedVideo): Video {
     url: e.url ?? "",
     source: parsedUrl.resource,
     description: parsedUrl.pathname.replace(/[\W_]/g, " ").trim(),
-    viewed: false
+    resources: e.resources?.map(mapResource) ?? []
   });
+}
+
+function mapResource(e: ApiResource): Resource{
+  return ({
+    id: e.id,
+    storageLocation: e.storageLocation,
+    createdTimestamp: e.createdTimestamp,
+    views: e.views
+  })
 }
