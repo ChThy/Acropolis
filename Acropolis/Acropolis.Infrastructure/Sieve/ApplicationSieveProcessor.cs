@@ -15,13 +15,17 @@ public class ApplicationSieveProcessor : SieveProcessor
     protected override SievePropertyMapper MapProperties(SievePropertyMapper mapper)
     {
         mapper.Property<DownloadedVideo>(e => e.MetaData.VideoTitle)
+            .CanFilter()
             .CanSort()
             .HasName("Title");
 
         mapper.Property<DownloadedVideo>(e => e.MetaData.Author)
+            .CanFilter()
             .CanSort()
             .HasName("Author");
+        
         mapper.Property<DownloadedVideo>(e => e.MetaData.VideoUploadTimestamp)
+            .CanFilter()
             .CanSort()
             .HasName("UploadedTimestamp");
         
