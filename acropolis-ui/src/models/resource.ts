@@ -1,10 +1,17 @@
+export interface Resource {
+  id: string;
+  storageLocation: string;
+  createdTimestamp: string;
+  views?: number
+}
+
 export interface ResourceModel {
   id: string;
   title: string | null;
   description: string;
   url: string;
   source: string;
-  viewed: boolean;
+  resources: Resource[]
   type: 'page' | 'video';
 }
 
