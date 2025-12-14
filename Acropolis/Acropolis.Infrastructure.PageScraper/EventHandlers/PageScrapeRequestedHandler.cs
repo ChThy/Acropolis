@@ -40,6 +40,7 @@ public class PageScrapeRequestedHandler(
         {
             var page = await browser.GetImage(uri.ToString());
             var location = await fileStorage.StoreFile(ConstructFileName(page.Domain, timeProvider.GetUtcNow(), page.DocumentName), page.Document);
+            await page.Document.DisposeAsync();
 
             await context.Publish(new PageScraped(uri.ToString(), timeProvider.GetUtcNow(), page.PageTitle, page.Domain, location));
         }
