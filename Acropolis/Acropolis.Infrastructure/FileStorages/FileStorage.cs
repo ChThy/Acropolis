@@ -22,6 +22,7 @@ public sealed class FileStorage(IOptionsMonitor<FileStorageOptions> optionsMonit
         await using var file = File.OpenWrite(filePath);
         await stream.CopyToAsync(file, cancellationToken);
         file.Close();
+        await stream.DisposeAsync();
 
         return filePath;
     }
