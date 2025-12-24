@@ -162,29 +162,3 @@ public class VideoDownloadRequestedHandler(
         }
     }
 }
-
-public static class VideoService
-{
-    public static void MuxVideoWithAudio(string videoPath, string audioPath, string outputPath)
-    {
-        var ffmpegPath = @"ffmpeg";
-        var arguments = $"-i {videoPath} -i {audioPath} -c:v copy -c:a aac {outputPath}";
-
-        var process = new Process
-        {
-            StartInfo = new()
-            {
-                FileName = ffmpegPath,
-                Arguments = arguments,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            }
-        };
-
-
-        process.Start();
-        process.WaitForExit();
-    }
-}
