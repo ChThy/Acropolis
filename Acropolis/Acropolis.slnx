@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/Tests/">
+    <Project Path="Acropolis.Application.Tests/Acropolis.Application.Tests.csproj" />
+  </Folder>
+  <Project Path="Acropolis.Api/Acropolis.Api.csproj" />
+  <Project Path="Acropolis.Application/Acropolis.Application.csproj" />
+  <Project Path="Acropolis.Domain/Acropolis.Domain.csproj" />
+  <Project Path="Acropolis.Infrastructure.EfCore.Sqlite/Acropolis.Infrastructure.EfCore.Sqlite.csproj" />
+  <Project Path="Acropolis.Infrastructure.EfCore/Acropolis.Infrastructure.EfCore.csproj" />
+  <Project Path="Acropolis.Infrastructure.PageScraper/Acropolis.Infrastructure.PageScraper.csproj" />
+  <Project Path="Acropolis.Infrastructure.Telegram/Acropolis.Infrastructure.Telegram.csproj" />
+  <Project Path="Acropolis.Infrastructure.YoutubeDownloader/Acropolis.Infrastructure.YoutubeDownloader.csproj" />
+  <Project Path="Acropolis.Infrastructure/Acropolis.Infrastructure.csproj" />
+  <Project Path="Acropolis.Shared/Acropolis.Shared.csproj" />
+</Solution>
